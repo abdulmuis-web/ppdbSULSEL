@@ -30,8 +30,8 @@
         				<li><a href='#contact'>Kontak</a></li>";
                     }                    
                     
-                    if(is_null($this->session->userdata('nun')))
-                        echo "<li><a href='#' data-toggle='modal' onclick=\"$('#login_nun').val('-');$('#login_nun').data('previousValue', null).valid();$('#login_nun').val('')\" data-target='#loginModal'>Login</a></li>";
+                    if(is_null($this->session->userdata('nopes')))
+                        echo "<li><a href='#' data-toggle='modal' onclick=\"$('#login_nopes').val('-');$('#login_nopes').data('previousValue', null).valid();$('#login_nopes').val('')\" data-target='#loginModal'>Login</a></li>";
                     else
                         echo "<li><a href='".base_url()."front/logout'>Logout</a></li>";
                     ?>
@@ -45,7 +45,7 @@
     <?php
 
     
-    if(!is_null($this->session->userdata('nun')))
+    if(!is_null($this->session->userdata('nopes')))
     {
         if($this->session->userdata('gambar')==''){
             $src = $this->config->item('img_path').'default_photo.png';
@@ -65,6 +65,7 @@
                     <tr><td>Kelurahan</td><td>: ".$this->session->userdata('nm_kel')."</td></tr>
                     <tr><td>Kecamatan</td><td>: ".$this->session->userdata('nm_kec')."</td></tr>
                     <tr><td>Kota/Kab.</td><td>: ".$this->session->userdata('nm_dt2')."</td></tr>
+                    <tr><td>Sekolah Asal</td><td>: ".$this->session->userdata('sklh_asal')."</td></tr>
                 </table>                
             </div>
         </div>";
@@ -83,10 +84,10 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="control-label col-md-4" for="login_nun">No. Ujian Nasional</label>
+                        <label class="control-label col-md-4" for="login_nopes">No. Peserta</label>
                         <div class="col-md-8">
                             <div class="input">
-                                <input class="form-control" id="login_nun" type="text" name="login_nun" required>
+                                <input class="form-control" id="login_nopes" type="text" name="login_nopes" required>
                             </div>
                         </div>
                     </div>
@@ -171,15 +172,15 @@
             var stat = $form.validate({
                 // Rules for form validation
                 rules : {
-                    login_nun : {
+                    login_nopes : {
                         required : true 
                     }
                 },
 
                 // Messages for form validation
                 messages : {
-                    login_nun : {
-                        required : 'Silahkan masukkan Nomor Ujian Nasional anda' 
+                    login_nopes : {
+                        required : 'Silahkan masukkan Nomor Peserta anda' 
                     },                    
                 },
 
@@ -210,7 +211,7 @@
                         {
                             if(data=='failed')
                             {
-                                content_box = "Maaf, Nomor Ujian Sekolah salah !";
+                                content_box = "Maaf, Nomor Peserta salah !";
                             }else{
                                 x = data.split(':');
                                 content_box = x[1].trim();

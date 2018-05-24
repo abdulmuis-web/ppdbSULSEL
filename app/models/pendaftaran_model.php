@@ -3,14 +3,13 @@
 
 	class pendaftaran_model extends CI_Model{
 
-		private $nun,$nama,$jk,$tpt_lahir,$tgl_lahir,
-				$no_reg_akta_lahir,$agama,$kewarganegaraan,$berkebutuhan_khusus,
-				$alamat,$rt,$rw,$dusun,$kelurahan,$kecamatan,
-				$kabupaten,$kode_pos,$tinggal_bersama,$no_telp,$email,
-				$asal_sekolah,$alamat_asal_sekolah,$latitude,$longitude,$gambar,
-				$waktu_pendaftaran,$status;
+		private $id_pendaftaran,$nama,$jk,$tpt_lahir,$tgl_lahir,				
+				$alamat,$kelurahan_id,$kecamatan_id,$dt2_id,$no_telp,
+				$asal_sekolah_id,$nm_orang_tua,$nil_pkn,$nil_bhs_indonesia,$nil_bhs_inggris,
+				$nil_matematika,$nil_ipa,$nil_ips,$tot_nil,$latitude,
+				$longitude,$gambar,$waktu_pendaftaran,$status;
 
-		const pkey = "nun";
+		const pkey = "id_pendaftaran";
 		const tbl_name = "pendaftaran";
 
 		function get_pkey(){
@@ -23,12 +22,13 @@
 
 		function login($id){
 			
-			$sql = "SELECT a.*,b.nama_kelurahan,c.nama_kecamatan,d.nama_dt2 FROM pendaftaran as a 
+			$sql = "SELECT a.*,b.nama_kelurahan,c.nama_kecamatan,d.nama_dt2,e.nm_sekolah as sekolah_asal FROM pendaftaran as a 
 					LEFT JOIN ref_kelurahan as b ON (a.kelurahan_id=b.kelurahan_id) 
 					LEFT JOIN ref_kecamatan as c ON (a.kecamatan_id=c.kecamatan_id) 
 					LEFT JOIN ref_dt2 as d ON (a.dt2_id=d.dt2_id) 
-					WHERE nun='".$id."'";
-			
+					LEFT JOIN sekolah_asal as e ON (a.sekolah_asal_id=e.kd_sekolah)
+					WHERE id_pendaftaran='".$id."'";
+
 			$query = $this->db->query($sql);
 			$row = $query->row_array();
 			return $row;
@@ -44,8 +44,8 @@
 			}
 		}
 
-		function get_nun() {
-	        return $this->nun;
+		function get_id_pendaftaran() {
+	        return $this->id_pendaftaran;
 	    }
 
 
@@ -65,73 +65,61 @@
 	        return $this->tgl_lahir;
 	    }
 
-	    function get_tpt_no_reg_akta_lahir() {
-	        return $this->tpt_no_reg_akta_lahir;
-	    }
-
-	    function get_agama() {
-	        return $this->agama;
-	    }
-
-	    function get_kewarganegaraan() {
-	        return $this->kewarganegaraan;
-	    }
-
-	    function get_berkebutuhan_khusus() {
-	        return $this->berkebutuhan_khusus;
-	    }
-
 	    function get_alamat() {
 	        return $this->alamat;
 	    }
 
-	    function get_rt() {
-	        return $this->rt;
+	    function get_kelurahan_id() {
+	        return $this->kelurahan_id;
 	    }
 
-
-	    function get_rw() {
-	        return $this->rw;
+	    function get_kecamatan_id() {
+	        return $this->kecamatan_id;
 	    }
 
-	    function get_dusun() {
-	        return $this->dusun;
-	    }
-
-	    function get_kelurahan() {
-	        return $this->kelurahan;
-	    }
-
-	    function get_kecamatan() {
-	        return $this->kecamatan;
-	    }
-
-	    function get_kabupaten() {
-	        return $this->kabupaten;
-	    }
-
-	    function get_kode_pos() {
-	        return $this->kode_pos;
-	    }
-
-	    function get_tinggal_bersama() {
-	        return $this->tinggal_bersama;
-	    }
+	    function get_dt2_id() {
+	        return $this->dt2_id;
+	    }	    
 
 	    function get_no_telp() {
 	        return $this->no_telp;
 	    }
 
-	    function get_email() {
-	        return $this->email;
+	    function get_asal_sekolah_id() {
+	        return $this->asal_sekolah_id;
 	    }
 
-	    function get_asal_sekolah() {
-	        return $this->asal_sekolah;
+	    function get_nm_orang_tua() {
+	        return $this->nm_orang_tua;
 	    }
 
-	    function get_alamat_asal_sekolah() {
-	        return $this->alamat_asal_sekolah;
+
+	    function get_nil_pkn() {
+	        return $this->nil_pkn;
+	    }
+
+	    function get_nil_bhs_indonesia() {
+	        return $this->nil_bhs_indonesia;
+	    }
+
+	    function get_nil_bhs_inggris() {
+	        return $this->nil_bhs_inggris;
+	    }
+
+	    function get_nil_matematika() {
+	        return $this->nil_matematika;
+	    }
+
+	    function get_nil_ipa() {
+	        return $this->nil_ipa;
+	    }
+
+	    function get_nil_ips() {
+	        return $this->nil_ips;
+	    }
+
+	    function get_tot_nilai() {
+	        return $this->tot_nilai;
 	    }
 
 	    function get_latitude() {
@@ -156,8 +144,8 @@
 
 
 
-		function set_nun($data) {
-	        $this->nun=$data;
+		function set_id_pendaftaran($data) {
+	        $this->id_pendaftaran=$data;
 	    }
 
 	    function set_nama($data) {
@@ -176,73 +164,61 @@
 	        $this->tgl_lahir=$data;
 	    }
 
-	    function set_tpt_no_reg_akta_lahir($data) {
-	        $this->tpt_no_reg_akta_lahir=$data;
-	    }
-
-	    function set_agama($data) {
-	        $this->agama=$data;
-	    }
-
-	    function set_kewarganegaraan($data) {
-	        $this->kewarganegaraan=$data;
-	    }
-
-	    function set_berkebutuhan_khusus($data) {
-	        $this->berkebutuhan_khusus=$data;
-	    }
-
 	    function set_alamat($data) {
 	        $this->alamat=$data;
 	    }
 
-	    function set_rt($data) {
-	        $this->rt=$data;
+	    function set_kelurahan_id($data) {
+	        $this->kelurahan_id=$data;
 	    }
 
-
-	    function set_rw($data) {
-	        $this->rw=$data;
+	    function set_kecamatan_id($data) {
+	        $this->kecamatan_id=$data;
 	    }
 
-	    function set_dusun($data) {
-	        $this->dusun=$data;
-	    }
-
-	    function set_kelurahan($data) {
-	        $this->kelurahan=$data;
-	    }
-
-	    function set_kecamatan($data) {
-	        $this->kecamatan=$data;
-	    }
-
-	    function set_kabupaten($data) {
-	        $this->kabupaten=$data;
-	    }
-
-	    function set_kode_pos($data) {
-	        $this->kode_pos=$data;
-	    }
-
-	    function set_tinggal_bersama($data) {
-	        $this->tinggal_bersama=$data;
-	    }
+	    function set_dt2_id($data) {
+	        $this->dt2_id=$data;
+	    }	    
 
 	    function set_no_telp($data) {
 	        $this->no_telp=$data;
 	    }
 
-	    function set_email($data) {
-	        $this->email=$data;
+	    function set_asal_sekolah_id($data) {
+	        $this->asal_sekolah_id=$data;
 	    }
 
-	    function set_asal_sekolah($data) {
-	        $this->asal_sekolah=$data;
+	    function set_nm_orang_tua($data) {
+	        $this->nm_orang_tua=$data;
 	    }
 
-	    function set_alamat_asal_sekolah($data) {
-	        $this->alamat_asal_sekolah=$data;
+
+	    function set_nil_pkn($data) {
+	        $this->nil_pkn=$data;
+	    }
+
+	    function set_nil_bhs_indonesia($data) {
+	        $this->nil_bhs_indonesia=$data;
+	    }
+
+	    function set_nil_bhs_inggris($data) {
+	        $this->nil_bhs_inggris=$data;
+	    }
+
+	    function set_nil_matematika($data) {
+	        $this->nil_matematika=$data;
+	    }
+
+	    function set_nil_ipa($data) {
+	        $this->nil_ipa=$data;
+	    }
+
+	    function set_nil_ips($data) {
+	        $this->nil_ips=$data;
+	    }
+
+	    function set_tot_nilai($data) {
+	        $this->tot_nilai=$data;
 	    }
 
 	    function set_latitude($data) {

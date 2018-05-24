@@ -89,6 +89,7 @@ body {
     font-size: 0.85em;
 }
 
+
 .sidebar-content #sidebar.active ul li a i {
     margin-right:  0;
     display: block;
@@ -133,6 +134,13 @@ body {
     color: #252525;
     background: #fff;
 }
+
+.sidebar-content ul#tab-menu li a.active{
+    border:1px solid #ccc!important;
+    border-bottom:none!important;
+    background:#fff!important;
+}
+
 .sidebar-content #sidebar ul li a i {
     margin-right: 10px;
 }

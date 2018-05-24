@@ -47,9 +47,8 @@
 	    	if($path!='')
 	    	{
 	    	echo "
-	        <nav class='navbar navbar-default'>
+	        <nav>
 	            <div class='container-fluid'>
-
 	                <div class='navbar-header'>
 	                	<button type='button' class='navbar-toggle' data-toggle='collapse' data-target='#bs-example-navbar-collapse-1'>
 		    				<span class='icon-bar'></span>
@@ -58,9 +57,9 @@
 		    			</button>
 	                </div>
 	                <div class='collapse navbar-collapse' id='bs-example-navbar-collapse-1'>
-	                    <ul class='nav navbar-nav navbar-center'>	                    	
+	                    <ul class='nav navbar-nav navbar-left' id='tab-menu'>
 	                        <li>
-	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this.id);\" id='tab-menu1'>
+	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this);\" id='tab-menu1'>
 	                        		<input type='hidden' id='ajax-req-dt' name='tab_id' value='0'/>
 	                        		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
 	                        		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
@@ -68,49 +67,49 @@
 	                        		Panduan</a>
 	                        </li>
 	                        <li>
-	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this.id);\" id='tab-menu2'>
+	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this);\" id='tab-menu2'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='1'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
 	                        	<i class='fa fa-book'></i> Aturan</a>
 	                        </li>
 	                        <li>
-	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this.id);\" id='tab-menu3'>
+	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this);\" id='tab-menu3'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='2'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
 	                        	<i class='fa fa-calendar'></i> Jadwal</a>
 	                        </li>
 	                        <li>
-	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this.id);\" id='tab-menu4'>
+	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this);\" id='tab-menu4'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='3'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
 	                        	<i class='fa fa-check-circle'></i> Prosedur</a>
 	                        </li>
 	                        <li>
-	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this.id);\" id='tab-menu5'>
+	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this);\" id='tab-menu5'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='4'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
 	                        	<i class='fa fa-pencil-square-o'></i> Daftar</a>
 	                        </li>
 	                        <li>
-	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this.id);\" id='tab-menu6'>
+	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this);\" id='tab-menu6'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='5'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
 	                        	<i class='fa fa-file-text-o'></i> Hasil</a>
 	                        </li>
 	                        <li>
-	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this.id);\" id='tab-menu7'>
+	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this);\" id='tab-menu7'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='6'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
 	                        	<i class='fa fa-bar-chart-o'></i> Statistik</a>
 	                        </li>
 	                        <li>
-	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this.id);\" id='tab-menu8'>
+	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this);\" id='tab-menu8'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='7'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
@@ -142,15 +141,19 @@
          });
      });
 
-     function tabMenu_navigation(id){     	     	
+     function tabMenu_navigation(obj){
      	ajax_object.reset_object();
         ajax_object.set_url($('#baseUrl').val()+'reg/content_tab_menu')
-        	.set_id_input(id)
+        	.set_id_input(obj.id)
         	.set_input_ajax('ajax-req-dt')
         	.set_data_ajax()
         	.set_loading('#data-view-loader')
         	.set_content('#data-view')
         	.request_ajax();
+
+        $('#tab-menu > li a').removeClass('active');
+
+        $(obj).addClass('active');
        
      }
 
