@@ -1,0 +1,9 @@
+RewriteEngine On
+
+SetEnv MY_ENV "development"
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-l
+
+RewriteRule ^(.*)$ /ppdb/index.php/$1 [L]
