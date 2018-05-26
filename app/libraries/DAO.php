@@ -30,7 +30,7 @@
 			$this->_params = $sql_params;
 		}
 
-		function execute($exec_type=1,$_sql='',$_params=array())
+		function execute($exec_type=0,$_sql='',$_params=array())
 		{
 			$type = $exec_type;
 			
@@ -39,7 +39,7 @@
 			}else{
 				$sql = (empty($_sql)?$this->_sql:$_sql);
 			}
-			
+
 			$params = (count($_params)==0?$this->_params:$_params);
 			
 			try{				
@@ -47,6 +47,7 @@
 					$result=$this->_db->query($sql,$params);
 				else
 				{					
+
 					$result = $this->_db->query($sql);
 
 				}				
@@ -57,7 +58,7 @@
 			return $result;
 		}		
 
-		function insert($model,$exec_type = 1)
+		function insert($model,$exec_type = 0)
 		{
 			if(is_object($model))
 				$data = $model->get_property_collection();
@@ -67,7 +68,7 @@
 				die('First argument must be an Array or Object');
 
 
-			$this->_sql = "INSERT INTO ".$this->_tablename." (";			
+			$sql = "INSERT INTO ".$model->get_tbl_name()." (";			
 
 			$fields = "";
 			$values = "";
@@ -104,12 +105,18 @@
 				
 				$s = true;
 			}
-			$this->_sql .= $fields.") VALUES (".$values.")";			
+			$sql .= $fields.") VALUES (".$values.")";
+
+			if($exec_type=='0'){
+				$this->_sql_without_params = $sql;
+			}else{
+				$this->_sql = $sql;
+			}
 	
 			return $this->execute($exec_type);
 		}
 
-		function update($model,array $cond,$exec_type=1)
+		function update($model,array $cond,$exec_type=0)
 		{
 			if(is_object($model))
 				$data = $model->get_property_collection();
@@ -118,14 +125,14 @@
 			else
 				die('First argument must be an Array or Object');
 
-			$this->_sql = "UPDATE ".$this->_tablename." SET";
+			$sql = "UPDATE ".$model->get_tbl_name()." SET";
 			$s = false;
-			
+
 			foreach($data as $field => $value)
 			{	
-				$this->_sql.= ($s?",":"")." ".$field."=";
+				$sql.= ($s?",":"")." ".$field."=";
 				if($exec_type==1){
-					$this->_sql.= ":".$field;
+					$sql.= ":".$field;
 					$this->_params[$field] = $value;
 				}else{
 					
@@ -139,11 +146,11 @@
 
 					if($type=='string')
 					{
-						$this->_sql .= ($value==''?null:"'".$value."'");
+						$sql .= ($value==''?null:"'".$value."'");
 					}
 					else
 					{						
-						$this->_sql .= ($value['val']==''?null:$value['val']);
+						$sql .= ($value['val']==''?null:$value['val']);
 					}
 					
 				}
@@ -151,24 +158,30 @@
 				$s = true;
 			}
 			
-			$this->_sql .= " WHERE ";
+			$sql .= " WHERE ";
 			$s = false;
 			foreach($cond as $field=>$value){
-				$this->_sql .= ($s?" AND ":"").$field."=";
+				$sql .= ($s?" AND ":"").$field."=";
 
 				if($exec_type==1){
-					$this->_sql .= ":".$field;
+					$sql .= ":".$field;
 					$this->_params[$field] = $value;
 				}else{
-					$this->_sql .= "'".$value."'";
+					$sql .= "'".$value."'";
 				}
 				
 			}
 			
+			if($exec_type=='0'){
+				$this->_sql_without_params = $sql;
+			}else{
+				$this->_sql = $sql;
+			}
+
 			return $this->execute($exec_type);
 		}		
 
-		function delete(array $cond_dt,$exec_type=1)
+		function delete(array $cond_dt,$exec_type=0)
 		{
 			$sql = "";
 			$cond = "";
@@ -233,7 +246,9 @@
 
 
 		function debug(){
-			echo "<pre>".$this->_sql."</pre><br />";
+			
+			$sql = ($this->_sql!=''?$this->_sql:$this->_sql_without_params);
+			echo "<pre>".$sql."</pre><br />";
 			echo "<pre>";
 			print_r($this->_params);
 			echo "</pre>";

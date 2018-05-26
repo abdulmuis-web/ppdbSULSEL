@@ -37,7 +37,12 @@
      </script>
      <!-- Bootstrap Js CDN -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+    <!-- JQuery Plugins -->
+    <script src="<?=$this->config->item('js_path');?>plugins/jquery-validate/jquery.validate.min.js"></script>
+    <script src="<?=$this->config->item('js_path');?>plugins/masked-input/jquery.inputmask.bundle.min.js"></script>
 
+    <!-- My Scripts -->
     <script type="text/javascript" src="<?=$this->config->item('js_path');?>my_scripts/global_function.js"></script>
   </body>
 </html>

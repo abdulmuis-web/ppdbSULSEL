@@ -7,7 +7,7 @@
 				$alamat,$kelurahan_id,$kecamatan_id,$dt2_id,$no_telp,
 				$asal_sekolah_id,$nm_orang_tua,$nil_pkn,$nil_bhs_indonesia,$nil_bhs_inggris,
 				$nil_matematika,$nil_ipa,$nil_ips,$tot_nil,$latitude,
-				$longitude,$gambar,$waktu_pendaftaran,$status;
+				$longitude,$gambar,$waktu_pendaftaran,$status,$no_pendaftaran;
 
 		const pkey = "id_pendaftaran";
 		const tbl_name = "pendaftaran";
@@ -46,6 +46,10 @@
 
 		function get_id_pendaftaran() {
 	        return $this->id_pendaftaran;
+	    }
+
+	    function get_no_pendaftaran() {
+	        return $this->no_pendaftaran;
 	    }
 
 
@@ -239,6 +243,10 @@
 
 	    function set_status($data) {
 	        $this->status=$data;
+	    }
+
+	    function set_no_pendaftaran($data) {
+	        $this->no_pendaftaran=$data;
 	    }
 
 	    function get_field_list(){

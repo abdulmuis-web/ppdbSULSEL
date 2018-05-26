@@ -77,5 +77,10 @@
 			$query = $this->db->query("SELECT * FROM ".$this->get_tbl_name()." ORDER BY ".$this->get_pkey()." ASC");
 			return $query->result_array();
 		}
+
+		function get_by_id($id){
+			$query = $this->db->query("SELECT * FROM ".$this->get_tbl_name()." WHERE ".$this->get_pkey()."='".$id."'");
+			return $query->row_array();
+		}
 	}
 ?>

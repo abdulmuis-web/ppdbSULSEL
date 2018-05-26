@@ -17,7 +17,7 @@ function show_time()
     dn = 'AM';
   } 
   if(hours<=9)
-	hours = '0'+hours;
+  hours = '0'+hours;
   if(minutes <= 9)
     minutes = '0' + minutes;
   if(seconds <= 9)
@@ -202,52 +202,67 @@ function only_number(e,object)
 function thousand_format(object)
 {
    number = replaceall(object.value,',','');   
-	 result = number_format(number,0,'.',',');
-	 object.value = result;
+   result = number_format(number,0,'.',',');
+   object.value = result;
 }
 
 function unangka2(objek)
 {
-	var i = objek.length;
-	var temp = '';
-	for (var j=0;j<=i;j++)
-	{
-		var pos = objek.charAt(j);
-		if (pos == '.')
-		{
-			temp = temp + objek.substr(j+1,1);
-			j++;
-		}
-		else
-		{	
-			temp = temp + objek.substr(j,1);
-		}
-	}
-	
-	return temp;
+  var i = objek.length;
+  var temp = '';
+  for (var j=0;j<=i;j++)
+  {
+    var pos = objek.charAt(j);
+    if (pos == '.')
+    {
+      temp = temp + objek.substr(j+1,1);
+      j++;
+    }
+    else
+    { 
+      temp = temp + objek.substr(j,1);
+    }
+  }
+  
+  return temp;
 }
 
 function unangka(objek)
 {
-	var i = objek.length;
-	var temp = '';
-	for (var j=0;j<=i;j++)
-	{
-		var pos = objek.charAt(j);
-		if (pos == '.')
-		{
-			temp = temp + objek.substr(j+1,1);
-			j++;
-		}
-		else{	
-			if (pos == ',')
-			{
-				temp = temp + '.';
-			}
-			else temp = temp + objek.substr(j,1);
-		}
-	}
-	return temp;
+  var i = objek.length;
+  var temp = '';
+  for (var j=0;j<=i;j++)
+  {
+    var pos = objek.charAt(j);
+    if (pos == '.')
+    {
+      temp = temp + objek.substr(j+1,1);
+      j++;
+    }
+    else{ 
+      if (pos == ',')
+      {
+        temp = temp + '.';
+      }
+      else temp = temp + objek.substr(j,1);
+    }
+  }
+  return temp;
 }
 
+
+function decimal_round(value, decimals) {
+  return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+}
+
+function zeroPadDigits(number, digits) {
+    return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
+}
+
+function gnv(val,default_val)
+{
+  default_val = (typeof(default_val)!='undefined'?default_val:'0');
+
+    return (val==''?default_val:val);
+}
 

@@ -117,7 +117,7 @@
 							   'sklh_asal_id'=>$row['sekolah_asal_id'],
 							   'sklh_asal'=>$row['sekolah_asal'],
 							   'gambar'=>$row['gambar'],
-							   'waktu_login'=>date('d-m-Y H:i:s')
+							   'waktu_login'=>date('d-m-Y H:i:s'),							   
 							  );
 
 				$this->session->set_userdata($dt_session);

@@ -124,7 +124,7 @@
 	        <div id="data-view-loader" align="center" style="display:none">
 	        	<img src="<?=$this->config->item('img_path');?>ajax-loaders/ajax-loader-7.gif"/><br />
 	        </div>
-	        <div id="data-view">	        	
+	        <div id="data-view">
 	        	<?php $this->load->view($active_controller.'/guidance');?>
 		    </div>
 			

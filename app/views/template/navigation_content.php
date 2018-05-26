@@ -1,6 +1,4 @@
-    <style type="text/css">
-        .error{color:red;}
-    </style>
+    
     <!-- NAVIGATION -->
     
     <input type="hidden" id="baseUrl" value="<?=base_url();?>"/>
@@ -163,8 +161,8 @@
     <!-- END BREADCRUMBS -->
     <?php } ?>
 
-    <script src="<?=$this->config->item('js_path');?>plugins/jquery-validate/jquery.validate.min.js"></script>
     <script type="text/javascript">
+    
         var $form=$('#login-form'),$loginLoader = $('#login-loader'),$loginNotify = $('#login-notify');
 
         $(function() {

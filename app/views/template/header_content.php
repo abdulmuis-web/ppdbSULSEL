@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="<?=$this->config->item('css_path');?>font-awesome.min.css">
     <link rel="stylesheet" href="<?=$this->config->item('css_path');?>animate.css-master/animate.min.css">
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    
     <title>PPDB Online | Provinsi Sulawesi Selatan</title>
   </head>
   <body>

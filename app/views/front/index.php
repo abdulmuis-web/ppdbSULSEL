@@ -28,13 +28,13 @@
                     $cw = 12/count($rows1);
                     $alp = "A";
 
-                    $params = [$_SYS_PARAMS[0]];
+                    $params = array($_SYS_PARAMS[0]);
 
                     foreach($tipe_sekolah_rows as $row1){
 
                         $params[1] = $row1['ref_tipe_sklh_id'];
                         $persyaratan_pendaftaran_dao->set_sql_params($params);
-                        $query2 = $persyaratan_pendaftaran_dao->Execute();
+                        $query2 = $persyaratan_pendaftaran_dao->Execute(1);
                         $rows2 = $query2->result_array();
 
                         echo "
@@ -65,7 +65,7 @@
             <diiv class="row">
             <?php
                 $rows1 = $tipe_sekolah_rows;
-                $params = [$_SYS_PARAMS[0]];
+                $params = array($_SYS_PARAMS[0]);
 
                 $img_path = $this->config->item('img_path');                
 
