@@ -1,0 +1,41 @@
+html{font-family:arial;font-size:0.8em;}
+h1,h2,h3,h4,h5,h6,p{margin:0!important;padding:0!important;}
+body{margin:0;padding:0;}
+
+.center-box{border:2px solid #000;width:50%;margin:10cm auto;padding:20px;text-align:center;font-weight:bold;}
+
+.header{position:absolute;top:0cm;left:0cm;}
+
+
+
+/* === Grid === */
+.fluid { width: 100%; *zoom: 1; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; -ms-box-sizing: border-box; }
+.fluid:before, .fluid:after { display: table; content: ""; }
+.fluid:after { clear: both; }
+.fluid .rtl-inputs [class*="grid"] { float: right; }
+.fluid [class*="grid"] { 
+	display: block; 
+	width: 100%; 
+	position: relative; 
+	-webkit-box-sizing: border-box; 
+	-moz-box-sizing: border-box; 
+	-ms-box-sizing: border-box; 
+	box-sizing: 
+	border-box; 
+	float: left; 
+	margin-left: 2.127659574%; *margin-left: 2.0744680846382977%; }
+.fluid [class*="grid"]:first-child { margin-left: 0; }
+
+.fluid .grid12 { width: 99.99999998999999%; *width: 99.94680850063828%; }
+.fluid .grid11 { width: 91.489361693%; *width: 91.4361702036383%; }
+.fluid .grid10 { width: 82.97872339599999%; *width: 82.92553190663828%; }
+.fluid .grid9 { width: 74.468085099%; *width: 74.4148936096383%; }
+.fluid .grid8 { width: 65.95744680199999%; *width: 65.90425531263828%; }
+.fluid .grid7 { width: 57.446808505%; *width: 57.3936170156383%; }
+.fluid .grid6 { width: 48.93617020799999%; *width: 48.88297871863829%; }
+.fluid .grid5 { width: 40.425531911%; *width: 40.3723404216383%; }
+.fluid .grid4 { width: 31.914893614%; *width: 31.8617021246383%; }
+.fluid .grid3 { width: 23.404255317%; *width: 23.3510638276383%; }
+.fluid .grid2 { width: 14.89361702%; *width: 14.8404255306383%; }
+.fluid .grid1 { width: 6.382978723%; *width: 6.329787233638298%; }
+.fluid .gridCustom{width: 2.382978723%; *width: 2.329787233638298%;}

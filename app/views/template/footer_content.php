@@ -41,6 +41,8 @@
     <!-- JQuery Plugins -->
     <script src="<?=$this->config->item('js_path');?>plugins/jquery-validate/jquery.validate.min.js"></script>
     <script src="<?=$this->config->item('js_path');?>plugins/masked-input/jquery.inputmask.bundle.min.js"></script>
+    <script src="<?=$this->config->item('js_path');?>plugins/masked-input/jquery.maskedinput.min.js"></script>
+    
 
     <!-- My Scripts -->
     <script type="text/javascript" src="<?=$this->config->item('js_path');?>my_scripts/global_function.js"></script>

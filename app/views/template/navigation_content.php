@@ -11,7 +11,7 @@
     				<span class="icon-bar"></span>
      				<span class="icon-bar"></span>
     			</button>
-                <a href="#" class="navbar-brand">PPDB 2018 SMA/SMK</a>
+                <div class="navbar-brand" style="margin:0!important;padding:10px 0"><img src="<?=$this->config->item('img_path');?>logo_ppdb.png" width="160px"/></div>
     		</div>
     		<div class="navbar-collapse collapse">
     			<ul class="nav navbar-nav navbar-right">
@@ -43,12 +43,12 @@
     <?php
 
     
-    if(!is_null($this->session->userdata('nopes')))
+    if(!is_null($this->session->userdata('nopes')) && $active_controller=='front')
     {
         if($this->session->userdata('gambar')==''){
             $src = $this->config->item('img_path').'default_photo.png';
         }else{
-            $src = $this->config->item('upload_path').'pendaftar/'.$this->session->userdata('gambar');
+            $src = $this->config->item('upload_path').'registration/'.$this->session->userdata('gambar');
         }
         echo "
         <div class='login-info row'>
@@ -60,8 +60,6 @@
                 <table border=0>
                     <tr><td>Nama</td><td>: ".$this->session->userdata('nama')."</td></tr>
                     <tr><td>Alamat</td><td>: ".$this->session->userdata('alamat')."</td></tr>
-                    <tr><td>Kelurahan</td><td>: ".$this->session->userdata('nm_kel')."</td></tr>
-                    <tr><td>Kecamatan</td><td>: ".$this->session->userdata('nm_kec')."</td></tr>
                     <tr><td>Kota/Kab.</td><td>: ".$this->session->userdata('nm_dt2')."</td></tr>
                     <tr><td>Sekolah Asal</td><td>: ".$this->session->userdata('sklh_asal')."</td></tr>
                 </table>                
@@ -108,8 +106,8 @@
             </div>
         </div>
     </div>
-
     <!-- HEADER -->
+    
     <div id="header" class="header">
         <div class="container">
             <div class="row">
@@ -118,9 +116,9 @@
                         <h1>Selamat Datang di PPDB Online</h1>
                         <h3>Dinas Pendidikan Provinsi Sulawesi Selatan</h3><br />
                         <p>
-                            Lorem Ipsum is simply dummy text of the printing typesetting industry. Lorem Ipsum has been the industry's 
-                            standard dummy text ever since the 1500s, when an unknown printer took a gallery of type and scrambled it to make a 
-                            type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting.                        
+                            System Penerimaan Peserta Didik Baru Secara Online merupakan <b>SUB SYSTEM dari E-PANRITA</b> 
+                            yang <i>ter-integrasi</i> dengan <b>BIG DATA PENDIDIKAN</b> yang mencakup Data AKADEMIK dan NON AKADEMIK
+                            sejak awal Pendaftaran hingga Akhir Pendidikan.</br></br> <h3><b>PPDB E-PANRITA</b></h3>
                         </p> 
                     </div>                   
                 </div>
@@ -153,7 +151,7 @@
                 if(!$item['active']){
                     echo "<li><a href='".$item['url']."'>".$item['text']."</a></li>";
                 }else{
-                    echo "<li><span class='badge badge-primary'>".$item['text']."</span></li>";
+                    echo "<li><span class='badge badge-primary' id='active_item_breadcrumb'>".$item['text']."</span></li>";
                 }
             }
         ?>

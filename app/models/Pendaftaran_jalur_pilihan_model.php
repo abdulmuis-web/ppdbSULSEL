@@ -3,7 +3,7 @@
 
 	class pendaftaran_jalur_pilihan_model extends CI_Model{
 
-		private $japil_id,$id_pendaftaran,$jalur_id,$tipe_sekolah_id,$zona_id;
+		private $japil_id,$id_pendaftaran,$jalur_id,$tipe_sekolah_id;
 
 		const pkey = "japil_id";
 		const tbl_name = "pendaftaran_jalur_pilihan";
@@ -41,10 +41,6 @@
 	        return $this->tipe_sekolah_id;
 	    }
 
-	    function get_zona_id() {
-	        return $this->zona_id;
-	    }
-
 		
 		function set_japil_id($data) {
 	        $this->japil_id=$data;
@@ -61,11 +57,7 @@
 	    function set_tipe_sekolah_id($data) {
 	        $this->tipe_sekolah_id=$data;
 	    }
-
-	    function set_zona_id($data) {
-	        $this->zona_id=$data;
-	    }
-
+	    
 	    function get_field_list(){
 			return get_object_vars($this);
 		}

@@ -39,7 +39,7 @@
 
                         echo "
                         <div class='col-lg-".$cw." col-md-".$cw." wow flipInY' data-wow-delay='.8s'>
-                            <div class='packages' style='height:300px'>
+                            <div class='packages' style='min-height:42  0px'>
                                 <h4>".$alp.". ".$row1['nama_tipe_sekolah']." (".$row1['akronim'].")</h4><br />
                                 <ol type='1' align='left'>";
                                     foreach($rows2 as $row2){
@@ -69,9 +69,15 @@
 
                 $img_path = $this->config->item('img_path');                
 
+                $params = array($_SYS_PARAMS[0]);
+
                 foreach($rows1 as $row1){
 
                     $params[1] = $row1['ref_tipe_sklh_id'];
+
+                    $jalur_pendaftaran_dao->set_sql_params($params);
+                    $query2 = $jalur_pendaftaran_dao->Execute(1);
+                    $rows2 = $query2->result_array();
 
                     echo "
                     <div class='col-lg-6 col-md-6 wow flipInY' data-wow-delay='.8s'>
@@ -84,7 +90,7 @@
                             <div class='path-list'>
                                 <h4>Jalur Pendaftaran :</h4>
                                 <ul>";
-                                    foreach($jalur_pendaftaran_rows as $row2){
+                                    foreach($rows2 as $row2){
 
                                         if($row2['status_jadwal']=='0' || $row2['status_jadwal']==null || $row2['status_jadwal']==''){
                                             $jadwal = "<font color='orange'>Belum buka</font>";

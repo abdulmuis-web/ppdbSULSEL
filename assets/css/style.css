@@ -21,6 +21,17 @@ a.txt-btn:hover{
 .box{
 	background:#fff!important;
 	box-shadow: 0 2px 2px #eaeaea;
+	padding:15px!important;
+}
+
+h4.form-inline-title{
+	font-size:1em;
+	background:#d1141e;
+	display:inline;
+	padding:5px;
+	color:#fff;
+	border-radius:10px 0 0 10px;
+	box-shadow:2px 3px 0 #303030;
 }
 
 body{
@@ -493,7 +504,7 @@ ul.breadcrumb li a:hover {
 
 /*INPUT*/ 
 input[type=checkbox]:not(old),
-input[type=radio   ]:not(old){
+input[type=radio]:not(old){
   width     : 2em;
   margin    : 0;
   padding   : 0;
@@ -539,7 +550,7 @@ input[type=checkbox]:not(old):checked + label > span:before{
   content     : '✓';
   display     : block;
   width       : 1em;
-  color       : rgb(153,204,102);
+  color       : rgb(83, 118, 237);
   font-size   : 1.2em;
   line-height : 1em;
   text-align  : center;

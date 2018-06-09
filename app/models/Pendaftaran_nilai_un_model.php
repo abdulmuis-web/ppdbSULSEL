@@ -3,8 +3,9 @@
 
 	class pendaftaran_nilai_un_model extends CI_Model{
 
-		private $nil_id,$id_pendaftaran,$nil_pkn,$nil_bhs_indonesia,$nil_bhs_inggris,
-				$nil_matematika,$nil_ipa,$nil_ips,$tot_nilai;
+		private $nil_id,$id_pendaftaran,$nil_bhs_indonesia,$nil_bhs_inggris,$nil_matematika,
+				$nil_ipa,$tot_nilai,$status_nil_bhs_indonesia,$status_nil_bhs_inggris,$stat_nil_matematika,
+				$status_nil_ipa;
 
 		const pkey = "nil_id";
 		const tbl_name = "pendaftaran_nilai_un";
@@ -34,10 +35,7 @@
 	    function get_id_pendaftaran() {
 	        return $this->id_pendaftaran;
 	    }
-
-	    function get_nil_pkn() {
-	        return $this->nil_pkn;
-	    }
+	    
 
 	    function get_nil_bhs_indonesia() {
 	        return $this->nil_bhs_indonesia;
@@ -53,14 +51,26 @@
 
 	    function get_nil_ipa() {
 	        return $this->nil_ipa;
-	    }
-
-	    function get_nil_ips() {
-	        return $this->nil_ips;
-	    }
+	    }	    
 
 	    function get_tot_nilai() {
 	        return $this->tot_nilai;
+	    }
+
+	    function get_status_nil_bhs_indonesia() {
+	        return $this->status_nil_bhs_indonesia;
+	    }
+
+	    function get_status_nil_bhs_inggris() {
+	        return $this->status_nil_bhs_inggris;
+	    }
+
+	    function get_status_nil_matematika() {
+	        return $this->status_nil_matematika;
+	    }
+
+	    function get_status_ipa() {
+	        return $this->status_ipa;
 	    }
 
 
@@ -74,9 +84,6 @@
 	        $this->id_pendaftaran=$data;
 	    }
 
-	    function set_nil_pkn($data) {
-	        $this->nil_pkn=$data;
-	    }
 
 	    function set_nil_bhs_indonesia($data) {
 	        $this->nil_bhs_indonesia=$data;
@@ -92,15 +99,28 @@
 
 	    function set_nil_ipa($data) {
 	        $this->nil_ipa=$data;
-	    }
-
-	    function set_nil_ips($data) {
-	        $this->nil_ips=$data;
-	    }
+	    }	    
 
 	    function set_tot_nilai($data) {
 	        $this->tot_nilai=$data;
 	    }
+
+	    function set_status_nil_bhs_indonesia($data) {
+	        $this->status_nil_bhs_indonesia=$data;
+	    }
+
+	    function set_status_nil_bhs_inggris($data) {
+	        $this->status_nil_bhs_inggris=$data;
+	    }
+
+	    function set_status_nil_matematika($data) {
+	        $this->status_nil_matematika=$data;
+	    }
+
+	    function set_status_nil_ipa($data) {
+	        $this->status_nil_ipa=$data;
+	    }
+
 
 
 	    function get_field_list(){

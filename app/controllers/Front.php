@@ -30,25 +30,31 @@
 
             $dao->set_sql_with_params("SELECT * FROM persyaratan_pendaftaran WHERE thn_pelajaran = ? AND tipe_sklh_id = ?");
             $data['persyaratan_pendaftaran_dao'] = $dao;
+            
 
+            $this->global_model->reinitialize_dao();
 
-            $dao->set_sql_without_params("SELECT a.*,b.nama_ktg_jalur,c.tgl_buka,c.tgl_tutup,c.status as status_jadwal 
-            							  FROM ref_jalur_pendaftaran as a LEFT JOIN ref_ktg_jalur_pendaftaran as b 
-            							  ON (a.ktg_jalur_id=b.ktg_jalur_id) 
-            							  LEFT JOIN jadwal_jalur_pendaftaran as c ON (a.ref_jalur_id=c.jalur_id) 
-            							  ORDER BY a.ref_jalur_id,a.ktg_jalur_id ASC");
+            $dao = $this->global_model->get_dao();
 
-            $query = $dao->execute(0);
-            $data['jalur_pendaftaran_rows'] = $query->result_array();
+            $sql = "SELECT b.nama_jalur,c.nama_ktg_jalur,d.tgl_buka,d.tgl_tutup,d.status as status_jadwal FROM pengaturan_kuota_jalur as a 
+					LEFT JOIN ref_jalur_pendaftaran as b ON (a.jalur_id=b.ref_jalur_id)
+					LEFT JOIN ref_ktg_jalur_pendaftaran as c ON (a.ktg_jalur_id=c.ktg_jalur_id)
+					INNER JOIN jadwal_jalur_pendaftaran as d ON (a.jalur_id=d.jalur_id AND a.tipe_sekolah_id=d.tipe_sklh_id)
+					WHERE a.thn_pelajaran=? AND a.tipe_sekolah_id=?
+					ORDER BY a.jalur_id,a.ktg_jalur_id ASC";
+
+			$dao->set_sql_with_params($sql);
+            $data['jalur_pendaftaran_dao'] = $dao;
 
 			$this->public_template->render('front/index.php',$data);
+			
 		}
 
 		function login(){			
 			$this->load->helper('mix_helper');
 
 			$nopes = $this->security->xss_clean($this->input->post('login_nopes'));
-			
+				
 			$row = $this->pendaftaran_model->login($nopes);
 
 			$result = '';
@@ -81,7 +87,7 @@
 		    	
 		    	$sql = "INSERT INTO user_sessions 
 		    			(session_id,user_id,user_type,user_agent,ip,login_time,session_content) 
-		    			VALUES('".$session_id."','".$nopes."','4','".$user_agent."','".$ip."','".$login_time."','".$session_content."')";
+		    			VALUES('".$session_id."','".$nopes."','registrant','".$user_agent."','".$ip."','".$login_time."','".$session_content."')";
 		    	$result = $dao->execute(0,$sql);
 
 		    	if(!$result){
@@ -95,7 +101,7 @@
 
 		    	$sql = "INSERT INTO user_logins 
 		    			(session_id,user_id,user_type,ip,last_access,user_agent,login_time) 
-		    			VALUES('".$session_id."','".$nopes."','4','".$ip."','".$last_access."','".$user_agent."','".$login_time."')";
+		    			VALUES('".$session_id."','".$nopes."','registrant','".$ip."','".$last_access."','".$user_agent."','".$login_time."')";
 		    	$result = $dao->execute(0,$sql);
 
 		    	if(!$result){
@@ -103,8 +109,8 @@
 		    		goto a;
 		    	}
 
-
-				$dt_session = array('nopes'=>$nopes,
+				$dt_session = array(
+								'nopes'=>$nopes,
 							   'nama'=>$row['nama'],
 							   'alamat'=>$row['alamat'],
 							   'jk'=>$row['jk'],							   
@@ -114,13 +120,14 @@
 							   'nm_kel'=>$row['nama_kelurahan'],
 							   'nm_kec'=>$row['nama_kecamatan'],
 							   'nm_dt2'=>$row['nama_dt2'],
-							   'sklh_asal_id'=>$row['sekolah_asal_id'],
+							   'id_sklh_asal'=>$row['sekolah_asal_id'],
 							   'sklh_asal'=>$row['sekolah_asal'],
 							   'gambar'=>$row['gambar'],
-							   'waktu_login'=>date('d-m-Y H:i:s'),							   
+							   'waktu_login'=>$login_time,
 							  );
 
-				$this->session->set_userdata($dt_session);
+				$this->session->set_userdata($dt_session);				
+
 
 				$result = 'success';
 			}else{

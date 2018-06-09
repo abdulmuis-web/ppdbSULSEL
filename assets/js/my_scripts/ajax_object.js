@@ -552,10 +552,15 @@
                 data:this.form_.serialize(),
                 beforeSend:function(){
                     
-                    if(that.loading[0]!='')
+                    if(that.loading[i]!='')
                     {                        
-                        $(that.loading[0]).show();
+                        $(that.loading[i]).show();
                     }
+                    // if(that.content_[i]!='')
+                    // {                                                    
+                    //     $(that.content_[i]).hide();
+                        
+                    // }
                 },
                 complete:function(){
                     
@@ -582,7 +587,8 @@
                         for(j=0;j<=i;j++)
                         {
                             if(that.content_[j]!='')
-                            {                                
+                            {
+                                $(that.content_[j]).show();
                                 //show data                                
                                 $(that.content_[j]).html(x_data[j]);
 

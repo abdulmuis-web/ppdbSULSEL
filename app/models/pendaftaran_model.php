@@ -5,8 +5,8 @@
 
 		private $id_pendaftaran,$nama,$jk,$tpt_lahir,$tgl_lahir,				
 				$alamat,$kelurahan_id,$kecamatan_id,$dt2_id,$no_telp,
-				$asal_sekolah_id,$nm_orang_tua,$nil_pkn,$nil_bhs_indonesia,$nil_bhs_inggris,
-				$nil_matematika,$nil_ipa,$nil_ips,$tot_nil,$latitude,
+				$sekolah_asal_id,$sekolah_asal,$nm_orang_tua,$mode_un,$nil_bhs_indonesia,
+				$nil_bhs_inggris,$nil_matematika,$nil_ipa,$tot_nil,$latitude,
 				$longitude,$gambar,$waktu_pendaftaran,$status,$no_pendaftaran;
 
 		const pkey = "id_pendaftaran";
@@ -22,11 +22,10 @@
 
 		function login($id){
 			
-			$sql = "SELECT a.*,b.nama_kelurahan,c.nama_kecamatan,d.nama_dt2,e.nm_sekolah as sekolah_asal FROM pendaftaran as a 
+			$sql = "SELECT a.*,b.nama_kelurahan,c.nama_kecamatan,d.nama_dt2 FROM pendaftaran as a 
 					LEFT JOIN ref_kelurahan as b ON (a.kelurahan_id=b.kelurahan_id) 
 					LEFT JOIN ref_kecamatan as c ON (a.kecamatan_id=c.kecamatan_id) 
-					LEFT JOIN ref_dt2 as d ON (a.dt2_id=d.dt2_id) 
-					LEFT JOIN sekolah_asal as e ON (a.sekolah_asal_id=e.kd_sekolah)
+					LEFT JOIN ref_dt2 as d ON (a.dt2_id=d.dt2_id)					
 					WHERE id_pendaftaran='".$id."'";
 
 			$query = $this->db->query($sql);
@@ -43,6 +42,15 @@
 				}
 			}
 		}
+		
+
+	    function get_mode_un() {
+	        return $this->mode_un;
+	    }
+
+	    function get_sekolah_asal() {
+	        return $this->sekolah_asal;
+	    }
 
 		function get_id_pendaftaran() {
 	        return $this->id_pendaftaran;
@@ -89,18 +97,13 @@
 	        return $this->no_telp;
 	    }
 
-	    function get_asal_sekolah_id() {
-	        return $this->asal_sekolah_id;
+	    function get_sekolah_asal_id() {
+	        return $this->sekolah_asal_id;
 	    }
 
 	    function get_nm_orang_tua() {
 	        return $this->nm_orang_tua;
-	    }
-
-
-	    function get_nil_pkn() {
-	        return $this->nil_pkn;
-	    }
+	    }	    
 
 	    function get_nil_bhs_indonesia() {
 	        return $this->nil_bhs_indonesia;
@@ -116,10 +119,6 @@
 
 	    function get_nil_ipa() {
 	        return $this->nil_ipa;
-	    }
-
-	    function get_nil_ips() {
-	        return $this->nil_ips;
 	    }
 
 	    function get_tot_nilai() {
@@ -188,18 +187,13 @@
 	        $this->no_telp=$data;
 	    }
 
-	    function set_asal_sekolah_id($data) {
-	        $this->asal_sekolah_id=$data;
+	    function set_sekolah_asal_id($data) {
+	        $this->sekolah_asal_id=$data;
 	    }
 
 	    function set_nm_orang_tua($data) {
 	        $this->nm_orang_tua=$data;
-	    }
-
-
-	    function set_nil_pkn($data) {
-	        $this->nil_pkn=$data;
-	    }
+	    }	  
 
 	    function set_nil_bhs_indonesia($data) {
 	        $this->nil_bhs_indonesia=$data;
@@ -215,11 +209,7 @@
 
 	    function set_nil_ipa($data) {
 	        $this->nil_ipa=$data;
-	    }
-
-	    function set_nil_ips($data) {
-	        $this->nil_ips=$data;
-	    }
+	    }	   
 
 	    function set_tot_nilai($data) {
 	        $this->tot_nilai=$data;
@@ -248,6 +238,17 @@
 	    function set_no_pendaftaran($data) {
 	        $this->no_pendaftaran=$data;
 	    }
+
+	    function set_sekolah_asal($data) {
+	        $this->sekolah_asal=$data;
+	    }	   
+
+	    function set_mode_un($data) {
+	        $this->mode_un=$data;
+	    }
+
+
+	    
 
 	    function get_field_list(){
 			return get_object_vars($this);

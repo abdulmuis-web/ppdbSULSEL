@@ -396,7 +396,14 @@
               unlink($path.'/'.$name);
           }
         }
-    }    
+    }
+
+    function generatePassword($size=8){
+        $p = openssl_random_pseudo_bytes(ceil($size*0.67), $crypto_strong);
+        $p = str_replace('=', '', base64_encode($p));
+        $p = strtr($p, '+/', '^*');
+        return substr($p, 0, $size);      
+    }
 
   
   //end of file mix_helper.php

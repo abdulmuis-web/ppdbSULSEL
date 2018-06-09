@@ -14,6 +14,7 @@
 			$data['navigation_content'] = $this->_ci->load->view('template/navigation_content',$data,true);
 			$data['footer_content'] = $this->_ci->load->view('template/footer_content',$data,true);
 			$data['main_content'] = $this->_ci->load->view($view,$data,true);
+			
 			$this->_ci->load->view('template',$data);
 		}
 	}

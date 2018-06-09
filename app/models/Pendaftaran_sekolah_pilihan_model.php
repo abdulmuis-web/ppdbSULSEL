@@ -3,7 +3,7 @@
 
 	class pendaftaran_sekolah_pilihan_model extends CI_Model{
 
-		private $sepil_id,$id_pendaftaran,$sekolah_id,$jarak_sekolah;
+		private $sepil_id,$id_pendaftaran,$jalur_id,$sekolah_id,$pilihan_ke,$jarak_sekolah,$status;
 
 		const pkey = "sepil_id";
 		const tbl_name = "pendaftaran_sekolah_pilihan";
@@ -25,6 +25,14 @@
 			}
 		}
 
+		function get_jalur_id(){
+			return $this->jalur_id;
+		}
+
+		function get_status() {
+	        return $this->status;
+	    }
+
 		function get_sepil_id() {
 	        return $this->sepil_id;
 	    }
@@ -35,6 +43,11 @@
 
 	    function get_sekolah_id() {
 	        return $this->sekolah_id;
+	    }
+
+
+	    function get_pilihan_ke(){
+	    	return $this->pilihan_ke;
 	    }
 
 	    function get_jarak_sekolah() {
@@ -57,6 +70,18 @@
 
 	    function set_jarak_sekolah($data) {
 	        $this->jarak_sekolah=$data;
+	    }	   
+
+	    function set_pilihan_ke($data) {
+	        $this->pilihan_ke=$data;
+	    }
+
+	    function set_status($data) {
+	        $this->status=$data;
+	    }
+
+	    function set_jalur_id($data) {
+	        $this->jalur_id=$data;
 	    }
 
 	    function get_field_list(){

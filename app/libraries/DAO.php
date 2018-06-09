@@ -42,17 +42,18 @@
 
 			$params = (count($_params)==0?$this->_params:$_params);
 			
-			try{				
-				if($type==1)
+			try{
+				
+				if($type==1){
+				    
 					$result=$this->_db->query($sql,$params);
+				}
 				else
 				{					
-
 					$result = $this->_db->query($sql);
-
 				}				
 
-			}catch(Exception $e){
+			}catch(Exception $e){				
 				return false;
 			}
 			return $result;
@@ -169,7 +170,7 @@
 				}else{
 					$sql .= "'".$value."'";
 				}
-				
+				$s = true;
 			}
 			
 			if($exec_type=='0'){
@@ -181,28 +182,37 @@
 			return $this->execute($exec_type);
 		}		
 
-		function delete(array $cond_dt,$exec_type=0)
+		function delete($model,array $cond,$exec_type=0)
 		{
-			$sql = "";
-			$cond = "";
+			if(is_object($model))
+				$data = $model->get_property_collection();
+			else if(is_array($model))
+				$data = $model;
+			else
+				die('First argument must be an Array or Object');			
 
-			$this->_sql ="DELETE FROM ".$this->_tablename;
+			$sql = "DELETE FROM ".$model->get_tbl_name()." ";
 			
+			$sql .= " WHERE ";
 			$s = false;
-			$cond = " WHERE ";
-			foreach($cond_dt as $field=>$value){
+			foreach($cond as $field=>$value){
+				$sql .= ($s?" AND ":"").$field."=";
 
-				if($exec_type==1)
-				{
-					$cond .= ($s?" AND ":"").$field."=:".$field;
+				if($exec_type==1){
+					$sql .= ":".$field;
 					$this->_params[$field] = $value;
+				}else{
+					$sql .= "'".$value."'";
 				}
-				else
-					$cond = ($s?" AND ":"").$field."='".$field."'";
+				$s = true;
 			}
 
-			$this->_sql .= $cond;			
-
+			if($exec_type=='0'){
+				$this->_sql_without_params = $sql;
+			}else{
+				$this->_sql = $sql;
+			}
+			
 			return $this->execute($exec_type);
 		}
 		
@@ -223,11 +233,11 @@
 					$s = true;
 				}
 
-				$sql .= " FROM ".$this->_tablename." WHERE ".$pk."=:id";
+				$sql .= " FROM ".$model->get_tbl_name()." WHERE ".$pk."=?";
 								
 				$this->set_sql_with_params($sql);
 				$this->set_sql_params(array($id_value));				
-				$query = $this->execute();
+				$query = $this->execute(1);
 
 				$data = $query->row_array();
 

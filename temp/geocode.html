@@ -1,0 +1,33 @@
+
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5JpiQ6IrR6d8J7lBdSvN0hS9E28j31Uo&libraries=geometry&language=en" async defer></script>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+<script type="text/javascript">
+
+function geocode_location(){
+	var geocoder = new google.maps.Geocoder();
+	var address = "Jl. Minasa upa+Rappocini+Kota Makassar+Sulawesi Selatan";
+
+	geocoder.geocode( { 'address': address}, function(results, status) {
+
+	  if (status == google.maps.GeocoderStatus.OK) {
+	    var latitude = results[0].geometry.location.lat();
+	    var longitude = results[0].geometry.location.lng();
+	    alert(latitude+','+longitude);
+	    return
+	  } 
+	});
+	alert('false');
+}
+geocode_location();
+
+function initMap(){
+        srcLocation = new google.maps.LatLng(-5.134820, 119.418823);
+        dstLocation = new google.maps.LatLng(-5.181384, 119.456741);
+        var distance = google.maps.geometry.spherical.computeDistanceBetween(srcLocation, dstLocation)
+        console.log(distance/1000); // Distance in Kms.
+    }
+
+    initMap();
+</script>

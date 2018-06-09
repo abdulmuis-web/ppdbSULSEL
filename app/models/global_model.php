@@ -14,6 +14,10 @@
   		$this->dao = new DAO($tbl_name,$this->db);
   	}
 
+  	function reinitialize_dao($tbl_name=''){
+  		$this->dao = new DAO($tbl_name,$this->db);	
+  	}
+
   	function get_dao(){
   		return $this->dao;
   	}

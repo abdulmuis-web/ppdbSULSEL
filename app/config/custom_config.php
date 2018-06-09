@@ -5,6 +5,7 @@
 	$base_url .= "://".$_SERVER['HTTP_HOST'];
 	$base_url .= preg_replace('@/+$@','',dirname($_SERVER['SCRIPT_NAME'])).'/';
 
+	$config['backoffice_assets_path'] = $base_url.'assets/backoffice/';
 	$config['assets_path'] = $base_url.'assets/';
 	$config['css_path'] = $base_url.'assets/css/';
 	$config['js_path'] = $base_url.'assets/js/';

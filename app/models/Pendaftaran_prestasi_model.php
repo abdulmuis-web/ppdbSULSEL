@@ -4,7 +4,7 @@
 	class pendaftaran_prestasi_model extends CI_Model{
 
 		private $prestasi_id,$id_pendaftaran,$tkt_kejuaraan_id,$bdg_kejuaraan_id,$nm_kejuaraan,
-				$penyelenggara,$thn_kejuaraan,$peringkat;
+				$no_sertifikat,$penyelenggara,$thn_kejuaraan,$peringkat,$status;
 
 		const pkey = "prestasi_id";
 		const tbl_name = "pendaftaran_prestasi";
@@ -26,6 +26,14 @@
 			}
 		}
 
+		function get_no_sertifikat() {
+	        return $this->no_sertifikat;
+	    }
+
+	    function get_status() {
+	        return $this->status;
+	    }
+
 		function get_prestasi_id() {
 	        return $this->prestasi_id;
 	    }
@@ -38,8 +46,8 @@
 	        return $this->tkt_kejuaraan_id;
 	    }
 
-	    function get_bdg_kejuararan_id() {
-	        return $this->bdg_kejuararan_id;
+	    function get_bdg_kejuaraan_id() {
+	        return $this->bdg_kejuaraan_id;
 	    }
 
 	    function get_nm_kejuaraan() {
@@ -60,6 +68,14 @@
 
 
 		
+		function set_no_sertifikat($data) {
+	        $this->no_sertifikat=$data;
+	    }
+
+	    function set_status($data) {
+	        $this->status=$data;
+	    }
+
 		function set_prestasi_id($data) {
 	        $this->prestasi_id=$data;
 	    }
@@ -72,8 +88,8 @@
 	        $this->tkt_kejuaraan_id=$data;
 	    }
 
-	    function set_bdg_kejuararan_id($data) {
-	        $this->bdg_kejuararan_id=$data;
+	    function set_bdg_kejuaraan_id($data) {
+	        $this->bdg_kejuaraan_id=$data;
 	    }
 
 	    function set_nm_kejuaraan($data) {
