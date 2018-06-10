@@ -93,8 +93,6 @@
 		<!-- SPARKLINES -->
 		<script src="<?=$this->config->item("js_path");?>plugins/sparkline/jquery.sparkline.min.js"></script>
 
-		
-
 		<!-- JQUERY SELECT2 INPUT -->
 		<script src="<?=$this->config->item("js_path");?>plugins/select2/select2.min.js"></script>
 
@@ -113,14 +111,19 @@
 
 		<![endif]-->
 
-
 		<!-- MAIN APP JS FILE -->
 		<script src="<?=$this->config->item("js_path");?>app.min.js"></script>
 
 
-		
-
-				
+		<?php
+		if(isset($containsTable)){
+		?>
+		<script src="<?=$this->config->item("js_path");?>plugins/datatables/jquery.dataTables.min.js"></script>
+		<script src="<?=$this->config->item("js_path");?>plugins/datatables/dataTables.colVis.min.js"></script>
+		<script src="<?=$this->config->item("js_path");?>plugins/datatables/dataTables.tableTools.min.js"></script>
+		<script src="<?=$this->config->item("js_path");?>plugins/datatables/dataTables.bootstrap.min.js"></script>
+		<script src="<?=$this->config->item("js_path");?>plugins/datatable-responsive/datatables.responsive.min.js"></script>
+		<?php } ?>
 
 		<script>
 			$(document).ready(function() {
@@ -185,9 +188,24 @@
 
 				}
 
-				
-
-				
+				<?php
+				if(isset($containsTable)){
+				?>
+				oTable = $('#data-table-jq').dataTable({
+		            "oLanguage": {
+		            "sSearch": "Search :"
+		            },
+		            "aoColumnDefs": [
+		                {
+		                    'bSortable': false,
+		                    'aTargets': [0]
+		                } //disables sorting for column one
+		            ],
+		            'iDisplayLength': 10,
+		            "sPaginationType": "full_numbers"
+		        });
+				/* END TABLETOOLS */
+				<?php } ?>
 			});
 
 		</script>

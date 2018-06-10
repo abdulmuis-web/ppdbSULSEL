@@ -15,12 +15,8 @@
 				<div class="form-group">
 					<label class="control-label col-md-3" for="input_fullname">Nama <font color="red">*</font></label>
 					<div class="col-md-8">
-						<div class="row">
-							<div class="col-sm-12">
-								<div class="input">
-									<input class="form-control" id="input_fullname" type="text" name="input_fullname" value="<?=$curr_data['fullname'];?>" required/>
-								</div>
-							</div>
+						<div class="input">
+							<input class="form-control" id="input_fullname" type="text" name="input_fullname" value="<?=$curr_data['fullname'];?>" required/>
 						</div>
 					</div>
 				</div>
@@ -28,23 +24,19 @@
 				<div class="form-group">
 					<label class="control-label col-md-3" for="input_type_fk">Jenis User<?=($admin_type_id!='3'?" <font color='red'>*</font>":"");?></label>
 					<div class="col-md-8">
-						<div class="row">
-							<div class="col-sm-12">
-								<div class="input state-disabled">
-									<?php
-									echo "
-									<select name='input_type_fk' id='input_type_fk' onchange=\"control_school_input(this.value)\" class='form-control' required>";
-										if($admin_type_id!='3'){
-											echo "<option value=''></option>";
-										}
-										foreach($user_type_rows as $row){
-											$selected = ($row['type_id']==$curr_data['type_fk']?'selected':'');
-											echo "<option value='".$row['type_id']."' ".$selected.">".$row['name']."</option>";
-										}
-									echo "</select>";
-									?>
-								</div>
-							</div>
+						<div class="input state-disabled">
+							<?php
+							echo "
+							<select name='input_type_fk' id='input_type_fk' onchange=\"control_school_input(this.value)\" class='form-control' required>";
+								if($admin_type_id!='3'){
+									echo "<option value=''></option>";
+								}
+								foreach($user_type_rows as $row){
+									$selected = ($row['type_id']==$curr_data['type_fk']?'selected':'');
+									echo "<option value='".$row['type_id']."' ".$selected.">".$row['name']."</option>";
+								}
+							echo "</select>";
+							?>
 						</div>
 					</div>
 				</div>
@@ -53,22 +45,18 @@
 					<div class="form-group">
 						<label class="control-label col-md-3" for="input_dt2_id">Kab./Kota<?=($admin_type_id!='3'?" <font color='red'>*</font>":"");?></label>
 						<div class="col-md-8">
-							<div class="row">
-								<div class="col-sm-12">
-									<div class="input state-disabled">
-										<select name="input_dt2_id" id="input_dt2_id" onchange="get_schools(this.value)" class="form-control" <?=$attr_inputDT2Id;?>>
-											<?php
-											if($admin_type_id!='3'){
-												echo "<option value=''></option>";
-											}
-											foreach($dt2_opts as $opt){
-												$selected = ($opt['dt2_id']==$dt2_id?'selected':'');
-												echo "<option value='".$opt['dt2_id']."' ".$selected.">".$opt['nama_dt2']."</option>";
-											}
-											?>
-										</select>
-									</div>
-								</div>
+							<div class="input state-disabled">
+								<select name="input_dt2_id" id="input_dt2_id" onchange="get_schools(this.value)" class="form-control" <?=$attr_inputDT2Id;?>>
+									<?php
+									if($admin_type_id!='3'){
+										echo "<option value=''></option>";
+									}
+									foreach($dt2_opts as $opt){
+										$selected = ($opt['dt2_id']==$dt2_id?'selected':'');
+										echo "<option value='".$opt['dt2_id']."' ".$selected.">".$opt['nama_dt2']."</option>";
+									}
+									?>
+								</select>
 							</div>
 						</div>
 					</div>
@@ -76,26 +64,22 @@
 					<div class="form-group">
 						<label class="control-label col-md-3" for="input_sekolah_id">Sekolah<?=($admin_type_id!='3'?" <font color='red'>*</font>":"");?></label>
 						<div class="col-md-8">
-							<div class="row">
-								<div class="col-sm-12">
-									<div class="input state-disabled">
-										<div id="loader_input_sekolah_id" style='display:none'>
-											<img src="<?=$this->config->item('img_path');?>ajax-loaders/ajax-loader-1.gif"/>
-										</div>
-										<div id="content_input_sekolah_id">
-											<select name="input_sekolah_id" id="input_sekolah_id" class="form-control"  <?=$attr_inputSekolahId;?>>
-												<?php
-													if($admin_type_id!='3'){
-														echo "<option value=''>".($act=='add'?"-- Pilih Kab./Kota lebih dulu --":"")."</option>";
-													}
-													foreach($sekolah_opts as $opt){
-														$selected = ($opt['sekolah_id']==$curr_data['sekolah_id']?'selected':'');
-														echo "<option value='".$opt['sekolah_id']."' ".$selected.">".$opt['nama_sekolah']."</option>";
-													}
-												?>
-											</select>
-										</div>
-									</div>
+							<div class="input state-disabled">
+								<div id="loader_input_sekolah_id" style='display:none'>
+									<img src="<?=$this->config->item('img_path');?>ajax-loaders/ajax-loader-1.gif"/>
+								</div>
+								<div id="content_input_sekolah_id">
+									<select name="input_sekolah_id" id="input_sekolah_id" class="form-control"  <?=$attr_inputSekolahId;?>>
+										<?php
+											if($admin_type_id!='3'){
+												echo "<option value=''>".($act=='add'?"-- Pilih Kab./Kota lebih dulu --":"")."</option>";
+											}
+											foreach($sekolah_opts as $opt){
+												$selected = ($opt['sekolah_id']==$curr_data['sekolah_id']?'selected':'');
+												echo "<option value='".$opt['sekolah_id']."' ".$selected.">".$opt['nama_sekolah']."</option>";
+											}
+										?>
+									</select>
 								</div>
 							</div>
 						</div>
@@ -105,26 +89,20 @@
 				<div class="form-group">
 					<label class="control-label col-md-3" for="input_email">Email</label>
 					<div class="col-md-8">
-						<div class="row">
-							<div class="col-sm-12">
-								<div class="input">
-									<input class="form-control" id="input_email" type="email" name="input_email" value="<?=$curr_data['email'];?>">
-								</div>
-							</div>
+						
+						<div class="input">
+							<input class="form-control" id="input_email" type="email" name="input_email" value="<?=$curr_data['email'];?>">
 						</div>
+							
 					</div>
 				</div>
 
 				<div class="form-group">
 					<label class="control-label col-md-3" for="input_phone_number">No. Telepon</label>
 					<div class="col-md-8">
-						<div class="row">
-							<div class="col-sm-12">
-								<div class="input">
-										<input class="form-control" id="input_phone_number" type="text" name="input_phone_number" value="<?=$curr_data['phone_number'];?>">
-								</div>
-							</div>
-						</div>
+						<div class="input">
+								<input class="form-control" id="input_phone_number" type="text" name="input_phone_number" value="<?=$curr_data['phone_number'];?>">
+						</div>								
 					</div>
 				</div>
 
@@ -135,11 +113,7 @@
 						<div class='form-group'>
 							<label class='control-label col-md-3'>&nbsp;</label>
 							<div class='col-md-8'>
-								<div class='row'>
-									<div class='col-sm-12'>
-										<input type='checkbox' name='check_username' id='check_username' onclick=\"control_authorization_input('username',$(this).prop('checked'))\"/> Ganti Username
-									</div>
-								</div>
+								<input type='checkbox' name='check_username' id='check_username' onclick=\"control_authorization_input('username',$(this).prop('checked'))\"/> Ganti Username								
 							</div>
 						</div>
 						";
@@ -147,14 +121,10 @@
 				?>
 				<div class="form-group">
 					<label class="control-label col-md-3" for="input_username">Username <font color="red">*</font></label>
-					<div class="col-md-8">
-						<div class="row">
-							<div class="col-sm-12">
-								<div class="input">
-										<input class="form-control" id="input_username" type="text" name="input_username" <?=($act=='edit'?'disabled':'required');?>/>
-								</div>
-							</div>
-						</div>
+					<div class="col-md-8">						
+						<div class="input">
+								<input class="form-control" id="input_username" type="text" name="input_username" <?=($act=='edit'?'disabled':'required');?>/>
+						</div>							
 					</div>
 				</div>
 				<?php
@@ -164,11 +134,7 @@
 						<div class='form-group'>
 							<label class='control-label col-md-3'>&nbsp;</label>
 							<div class='col-md-8'>
-								<div class='row'>
-									<div class='col-sm-12'>
-										<input type='checkbox' name='check_password' id='check_password' onclick=\"control_authorization_input('password',$(this).prop('checked'))\"/> Ganti Password
-									</div>
-								</div>
+								<input type='checkbox' name='check_password' id='check_password' onclick=\"control_authorization_input('password',$(this).prop('checked'))\"/> Ganti Password								
 							</div>
 						</div>
 						";
@@ -176,27 +142,19 @@
 				?>
 				<div class="form-group">
 					<label class="control-label col-md-3" for="input_password">Password <font color="red">*</font></label>
-					<div class="col-md-8">
-						<div class="row">
-							<div class="col-sm-12">
-								<div class="input">
-										<input class="form-control" id="input_password" type="password" name="input_password"  <?=($act=='edit'?'disabled':'required');?>>
-								</div>
-							</div>
-						</div>
+					<div class="col-md-8">						
+						<div class="input">
+								<input class="form-control" id="input_password" type="password" name="input_password"  <?=($act=='edit'?'disabled':'required');?>>
+						</div>							
 					</div>
 				</div>
 
 				<div class="form-group">
 					<label class="control-label col-md-3" for="input_konf_password">Konf. Password <font color="red">*</font></label>
 					<div class="col-md-8">
-						<div class="row">
-							<div class="col-sm-12">
-								<div class="input">
-										<input class="form-control" id="input_konf_password" type="password" name="input_konf_password"  <?=($act=='edit'?'disabled':'required');?>>
-								</div>
-							</div>
-						</div>
+						<div class="input">
+								<input class="form-control" id="input_konf_password" type="password" name="input_konf_password"  <?=($act=='edit'?'disabled':'required');?>>
+						</div>							
 					</div>
 				</div>
                 
@@ -206,15 +164,11 @@
                 	echo "
 					<div class='form-group'>
 						<label class='control-label col-md-3'>Status</label>
-						<div class='col-md-8'>
-							<div class='row'>
-								<div class='col-sm-12'>
-									<div class='input'>
-										<input type='radio' class='minimal' name='input_status' id='input_status1' value='1' ".($curr_data['status']=='1'?'checked':'')."/>&nbsp;Aktif&nbsp;&nbsp;
-										<input type='radio' class='minimal' name='input_status' id='input_status2' value='0' ".($curr_data['status']=='0'?'checked':'')."/>&nbsp;Non Aktif
-									</div>
-								</div>
-							</div>
+						<div class='col-md-8'>							
+							<div class='input'>
+								<input type='radio' class='minimal' name='input_status' id='input_status1' value='1' ".($act=='add'?'checked':($curr_data['status']=='1'?'checked':''))."/>&nbsp;Aktif&nbsp;&nbsp;
+								<input type='radio' class='minimal' name='input_status' id='input_status2' value='0' ".($curr_data['status']=='0'?'checked':'')."/>&nbsp;Non Aktif
+							</div>								
 						</div>
 					</div>";
                 }
@@ -319,9 +273,9 @@
 		}
 	}
 
-	function get_schools(dt2){
+	function get_schools(dt2_id){
 		ajax_object.reset_object();
-		var data_ajax = new Array('dt2='+dt2);
+		var data_ajax = new Array('dt2_id='+dt2_id);
         ajax_object.set_url($('#baseUrl').val()+'config/get_schools').set_data_ajax(data_ajax).set_loading('#loader_input_sekolah_id').set_content('#content_input_sekolah_id').request_ajax();
 	}
 </script>

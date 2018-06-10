@@ -99,7 +99,7 @@
 									echo "</select>";
 									
 								?>
-								
+								<span class="help-block">Pilih Kab./Kota sesuai Kartu Keluarga</span>
 							</div>
 						</div>
 					</div>
@@ -286,14 +286,11 @@
 										echo "
 										<td>																						
 											<select name='input_dt2_sekolah_tujuan".$i."' id='input_dt2_sekolah_tujuan".$i."' onchange=\"get_destSchools($(this).val(),'".($path!='5'?$peserta_row['dt2_id']:'')."','".$stage."','".$kuota_jalur_row['lintas_dt2']."','".$i."');\" class='form-control' required>";
-												echo "<option value=''></option>";
+												echo "<option value=''>".($kuota_jalur_row['lintas_dt2']=='1'?"-- Pilih Kab./Kota Domisili lebih dulu --":"")."</option>";
 												foreach($pengaturan_dt2_sekolah_rows as $row)
 												{
-													$selected = ($row['dt2_sekolah_id']==$peserta_row['dt2_id']?'selected':'');
-
 													$keterangan = ($kuota_jalur_row['lintas_dt2']=='1'?" (".ucwords($row['status']).")":"");
-
-													echo "<option value='".$row['dt2_sekolah_id']."' ".$selected.">".$row['nama_dt2'].$keterangan."</option>";
+													echo "<option value='".$row['dt2_sekolah_id']."'>".$row['nama_dt2'].$keterangan."</option>";
 												}
 											echo "</select>											
 										</td>";
@@ -305,10 +302,7 @@
 										</div>
 										<div id='cont_input_sekolah_tujuan".$i."'>
 											<select name='input_sekolah_tujuan".$i."' id='input_sekolah_tujuan".$i."' onchange=\"get_destFields($(this).val(),'".$i."')\" class='form-control' ".($i==1?'required':'').">
-												<option value=''>".($path=='5'?'- Pilih Kab./Kota lebih dulu':'')."</option>";
-												foreach($sekolah_rows as $row){
-													echo "<option value='".$row['sekolah_id']."_".$row['nama_sekolah']."'>".$row['nama_sekolah']."</option>";
-												}
+												<option value=''>".($path=='3'?'-- Pilih Kab./Kota Domisili lebih dulu --':'-- Pilih Kab./Kota Sekolah lebih dulu --')."</option>";
 											echo "</select>
 										</div>
 										<input type='hidden' name='input_komptensi_tujuan' value='0_0'/>
@@ -359,7 +353,6 @@
 				if($kuota_jalur_row['lintas_dt2']=='0'){
 					echo "</div>";
 				}
-
 			}else{
 				echo "<input type='hidden' name='input_jenis_ujian_smp' value''/>";
 			}

@@ -19,7 +19,8 @@
 	$output .= "<table class='table table-bordered'>
 				<thead><tr><td width='4%' align='center'><b>#</b></td>";
 
-	$output .= "<td width='50%' align='center'><b>Kota/Kab.</b></td>";
+	if($lintas_dt2!='0')
+		$output .= "<td width='50%' align='center'><b>Kota/Kab.</b></td>";
 
 	if($tipe_sekolah=='1')
 		$output .= "<td align='center'><b>SMA Tujuan</b></td>";
@@ -34,22 +35,24 @@
 
 		$output .= "<tr><td align='center'>".$i."</td>";
 	
-		$output .= "<td><select name='input_dt2_sekolah_tujuan".$i."' id='input_dt2_sekolah_tujuan".$i."' onchange=\"get_destSchools($(this).val(),'".$tipe_sekolah."','".$i."');\" class='form-control' required>";
-		$output .= "<option value=''></option>";
-		foreach($pengaturan_dt2_sekolah_rows as $row){
-			$selected = ($row['dt2_sekolah_id']==$dt2_id?'selected':'');
-			$keterangan = ($lintas_dt2=='Y'?" (".ucwords($row['status']).")":"");
+		if($lintas_dt2!='0'){
+			$output .= "<td><select name='input_dt2_sekolah_tujuan".$i."' id='input_dt2_sekolah_tujuan".$i."' 
+			onchange=\"get_destSchools($(this).val(),'".$dt2_id."','".$tipe_sekolah."','".$lintas_dt2."','".$i."');\" class='form-control' required>";
 
-			$output .= "<option value='".$row['dt2_sekolah_id']."' ".$selected.">".$row['nama_dt2'].$keterangan."</option>";
+			$output .= "<option value=''></option>";
+			foreach($pengaturan_dt2_sekolah_rows as $row){
+				$selected = ($row['dt2_sekolah_id']==$dt2_id?'selected':'');
+				$keterangan = ($lintas_dt2=='1'?" (".ucwords($row['status']).")":"");
+
+				$output .= "<option value='".$row['dt2_sekolah_id']."' ".$selected.">".$row['nama_dt2'].$keterangan."</option>";
+			}
+			$output .= "</select></td>";
 		}
-		$output .= "</select></td>";
-		
 		
 		$output .= "<td><div id='dest-school-loader".$i."' style='display:none'><img src='".$this->config->item('img_path')."ajax-loaders/ajax-loader-1.gif'/></div>
-					<div id='input_sekolah_tujuan".$i."'>
+					<div id='cont_input_sekolah_tujuan".$i."'>
 					<select name='input_sekolah_tujuan".$i."' class='form-control' ".($i==1?'required':'').">";
 
-		
 		$output .= "<option value=''></option>";
 
 		foreach($sekolah_rows as $row){
@@ -64,7 +67,7 @@
 		}else{
 
 			$output .= "<td><div id='dest-field-loader".$i."' style='display:none'><img src='".$this->config->item('img_path')."ajax-loaders/ajax-loader-1.gif'/></div>
-						<div id='input_kompetensi_tujuan".$i."'>
+						<div id='cont_input_kompetensi_tujuan".$i."'>
 						<select name='input_kompetensi_tujuan".$i."' class='form-control' ".($i==1?'required':'')."><option value=''>- Pilih SMK lebih dulu -</option></select></div></td>";
 		}
 

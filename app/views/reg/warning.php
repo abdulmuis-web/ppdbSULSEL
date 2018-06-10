@@ -1,3 +1,3 @@
 <div class="alert alert-warning">
-  <strong>Perhatian!</strong> Silahkan login terlebih dahulu!
+  <strong>Perhatian!</strong> <?=$warning;?>
 </div>

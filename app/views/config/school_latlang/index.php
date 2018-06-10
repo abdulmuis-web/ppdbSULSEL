@@ -1,3 +1,54 @@
+<style type="text/css">
+	#map{
+		height:500px!important;
+		width:100%;
+		border;1px solid #cccccc;
+	}
+	.controls {
+        margin-top: 10px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 300px;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      .pac-container {
+        font-family: Roboto;
+      }
+
+      #type-selector {
+        color: #fff;
+        background-color: #4d90fe;
+        padding: 5px 11px 0px 11px;
+      }
+
+      #type-selector label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+      #target {
+        width: 345px;
+      }
+</style>
 <!-- MAIN PANEL -->
 <div id="main" role="main">
 
@@ -66,7 +117,9 @@
 									<input type="hidden" id="school_latitude" value="<?=$this->session->userdata('latitude');?>"/>
 									<input type="hidden" id="school_longitude" value="<?=$this->session->userdata('longitude');?>"/>
 									<input type="hidden" id="school_name" value="<?=$this->session->userdata('nama_sekolah');?>"/>
-									<div id="map" style="height:500px!important;width:100%;border;1px solid #cccccc;"></div><br />
+									
+									<input id="pac-input" class="controls" type="text" placeholder="Search Box">
+									<div id="map"></div><br />
 
 									<div class="row">
 										<div class="col-md-12">
@@ -134,7 +187,7 @@
 <!-- END MAIN PANEL -->
 
 
-<script src="https://maps.googleapis.com/maps/api/js?key=<?=$api_key;?>&libraries=geometry" defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=<?=$api_key;?>&libraries=geometry,places" defer></script>
 
 <script type="text/javascript">	
 	var school_latLang_form_id = '<?=$form_id;?>';
@@ -165,12 +218,12 @@
     $(function(){
 		'user strick';		
 
+
 		var map,marker;
 		var mapDiv = document.getElementById('map');
 		var status = 'notset';
-		var latitude = -4.651534, longitude = 120.023773, slatitude = $('#school_latitude').val(), slongitude = $('#school_longitude').val();
+		var latitude = -5.147665, longitude = 119.432732, slatitude = $('#school_latitude').val(), slongitude = $('#school_longitude').val();
 
-		
 		if(parseFloat(slatitude)!=0 && parseFloat(slongitude)!=0)
 		{
 			latitude = slatitude;
@@ -184,10 +237,19 @@
 
 			map = new google.maps.Map(mapDiv,{
 				center:schoolLatLang,
-				zoom:(status=='set'?15:12),
-				zoomControl:true,
-				streetViewControl:true,
-				scrollwheel:true
+				zoom:(status=='set'?15:12),				
+				mapTypeId:'roadmap',
+				gestureHandling: 'cooperative'
+			});
+
+			//create the search box and link it to the UI element
+			var input = document.getElementById('pac-input');
+	        var searchBox = new google.maps.places.SearchBox(input);
+	        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+			//Bias the SearchBox results towards current map's viewport
+			map.addListener('bounds_changed',function(){
+				searchBox.setBounds(map.getBounds());
 			});
 
 			marker = new google.maps.Marker({
@@ -197,34 +259,44 @@
 				draggable:true,
 			});
 
-			if(status=='notset'){
 
-				var infoWindow = new google.maps.InfoWindow({map: map});
+			 // Listen for the event fired when the user selects a prediction and retrieve
+        	// more details for that place.
+			searchBox.addListener('places_changed',function(){
+				var places = searchBox.getPlaces();
 
-				if (navigator.geolocation) {
-		          navigator.geolocation.getCurrentPosition(function(position) {
-		            var schoolLatLang = {
-		              lat: position.coords.latitude,
-		              lng: position.coords.longitude
-		            };		            
+				if(places.length == 0){
+					return;
+				}				
+		       
 
-		            infoWindow.setPosition(schoolLatLang);
-            		infoWindow.setContent('Found your location.');
+		        // For each place, get the icon, name and location.
+		        var bounds = new google.maps.LatLngBounds();
 
-		            map.setCenter(schoolLatLang);
-		            marker.setPosition(schoolLatLang);
-		            marker.setMap(map);
+		        var i = 0;
 
-		            $('#input_koordinat').val(position.coords.latitude+', '+position.coords.longitude);
+		        places.forEach(function(place){
+		        	if(!place.geometry){
+		        		console.log("Returned place contains no geometry");
+		        		return;
+		        	}		        	
 
-		          }, function() {
-		            handleLocationError(true, infoWindow, map.getCenter());
-		          });
-		        } else {
-		          // Browser doesn't support Geolocation
-		          handleLocationError(false, infoWindow, map.getCenter());
-		        }
-		    }
+		        	map.setCenter(place.geometry.location);
+		        	marker.setPosition(place.geometry.location);
+		        	marker.setMap(map)
+		        	
+		        	$('#input_koordinat').val(place.geometry.location.lat()+', '+place.geometry.location.lng());
+
+		        	if(place.geometry.viewport){
+		        		//only geocodes have viewport
+		        		bounds.union(place.geometry.viewport);
+		        	}else{
+		        		bounds.extend(place.geometry.location);
+		        	}
+
+		        });
+		        map.fitBounds(bounds);
+			});
 
 			marker.addListener('drag',function(){
 				$('#input_koordinat').val(marker.getPosition().lat()+', '+marker.getPosition().lng());

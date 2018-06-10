@@ -32,7 +32,8 @@
 		</div>
 		
 		<!-- widget grid -->
-		<section id="widget-grid" class="">			
+		<section id="widget-grid" class="">
+			<input type="hidden" id="base_url" value="<?=base_url();?>"/>
 			<!-- row -->
 			<div class="row">
 				<!-- NEW WIDGET START -->
@@ -60,8 +61,7 @@
 							<!-- end widget edit box -->
 
 							<!-- widget content -->
-							<div class="widget-body no-padding" id="list_of_data">
-								<input type="hidden" id="base_url" value="<?=base_url();?>"/>
+							<div class="widget-body no-padding" id="list_of_data">								
 								<?php
 									echo $list_of_data;
 								?>
@@ -103,32 +103,8 @@
 </div>
 <!-- END MODAL -->
 
-<script src="<?=$this->config->item("js_path");?>plugins/datatables/jquery.dataTables.min.js"></script>
-<script src="<?=$this->config->item("js_path");?>plugins/datatables/dataTables.colVis.min.js"></script>
-<script src="<?=$this->config->item("js_path");?>plugins/datatables/dataTables.tableTools.min.js"></script>
-<script src="<?=$this->config->item("js_path");?>plugins/datatables/dataTables.bootstrap.min.js"></script>
-<script src="<?=$this->config->item("js_path");?>plugins/datatable-responsive/datatables.responsive.min.js"></script>
-<script type="text/javascript">	
-	
-	$(document).ready(function() {
-		pageSetUp();	
-		
-		oTable = $('#data-table-jq').dataTable({
-            "oLanguage": {
-            "sSearch": "Search :"
-            },
-            "aoColumnDefs": [
-                {
-                    'bSortable': false,
-                    'aTargets': [0]
-                } //disables sorting for column one
-            ],
-            'iDisplayLength': 10,
-            "sPaginationType": "full_numbers"
-        });
-		/* END TABLETOOLS */
-	
-	})
+
+<script type="text/javascript">
 
 	var base_url = $('#base_url').val();
 	function load_form(id){

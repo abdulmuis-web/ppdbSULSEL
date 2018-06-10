@@ -179,16 +179,14 @@
 						if($status_peserta=='0')
 						{
 							
-							if($kuota_jalur_row['lintas_dt2']!='2')
+							$pengaturan_dt2_sekolah_rows = array();
+							
+							if($kuota_jalur_row['lintas_dt2']=='2')
 							{
-								$sql = "SELECT a.dt2_sekolah_id,b.nama_dt2,a.status FROM pengaturan_dt2_sekolah as a INNER JOIN ref_dt2 as b ON (a.dt2_sekolah_id=b.dt2_id) 
-										WHERE a.dt2_id='".$peserta_row['dt2_id']."' ".($kuota_jalur_row['lintas_dt2']=='0'?"AND dt2_sekolah_id='".$peserta_row['dt2_id']."'":"");
-							}else{
 								$sql = "SELECT dt2_id as dt2_sekolah_id,nama_dt2 FROM ref_dt2";
+								$pengaturan_dt2_sekolah_rows = $dao->execute(0,$sql)->result_array();
 							}
-
-							$pengaturan_dt2_sekolah_rows = $dao->execute(0,$sql)->result_array();
-
+							
 							$sql = "SELECT * FROM ref_kecamatan WHERE dt2_id='".$peserta_row['dt2_kd']."'";
 							$kecamatan_rows = $dao->execute(0,$sql)->result_array();							
 
@@ -456,6 +454,7 @@
 
 		}
 
+		//back to here
 		function get_data_linked_toRegency(){
 			$regency = $this->input->post('regency');
 			$x_regency = explode('_',$regency);			
@@ -474,7 +473,15 @@
 				$sql = "SELECT * FROM ref_kecamatan WHERE dt2_id='".$x_regency[1]."'";
 				$kecamatan_rows = $dao->execute(0,$sql)->result_array();
 				
-				$sql = "SELECT dt2_id as dt2_sekolah_id,nama_dt2 FROM ref_dt2";
+
+				if($accross_regency!='2')
+				{
+					$sql = "SELECT a.dt2_sekolah_id,b.nama_dt2,a.status FROM pengaturan_dt2_sekolah as a INNER JOIN ref_dt2 as b ON (a.dt2_sekolah_id=b.dt2_id) 
+							WHERE a.dt2_id='".$x_regency[0]."' ".($accross_regency=='0'?"AND dt2_sekolah_id='".$x_regency[0]."'":"");
+				}else{
+					$sql = "SELECT dt2_id as dt2_sekolah_id,nama_dt2 FROM ref_dt2";
+				}
+								
 				$pengaturan_dt2_sekolah_rows = $dao->execute(0,$sql)->result_array();
 
 				$sql = "SELECT sekolah_id,nama_sekolah FROM sekolah WHERE dt2_id='".$x_regency[0]."' AND tipe_sekolah_id='".$school_type."'";
@@ -525,15 +532,10 @@
 					die('ERROR:No. Peserta sudah digunakan!');
 			}
 
-			if($jalur_pendaftaran!='5')
-			{
-				$nm_dt2 = $this->input->post('input_dt2');
-				$dt2_id = $this->input->post('input_dt2_id');
-			}else{
-				$x_dt2 = explode('_',$this->input->post('input_dt2'));
-				$dt2_id = $x_dt2[0];
-				$nm_dt2 = $x_dt2[2];
-			}
+			
+			$x_dt2 = explode('_',$this->input->post('input_dt2'));
+			$dt2_id = $x_dt2[0];
+			$nm_dt2 = $x_dt2[2];			
 
 			$x_kecamatan = explode('_',$this->security->xss_clean($this->input->post('input_kecamatan')));
 			$kecamatan_id = $x_kecamatan[0];

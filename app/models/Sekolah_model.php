@@ -5,7 +5,7 @@
 
 		private $sekolah_id,$provinsi_id,$dt2_id,$kd_sekolah,$kecamatan_id,
 				$tipe_sekolah_id,$nama_sekolah,$alamat,$telepon,$email,
-				$latitude,$longitude,$gambar_sekolah;
+				$latitude,$longitude;
 
 		const pkey = "sekolah_id";
 		const tbl_name = "sekolah";

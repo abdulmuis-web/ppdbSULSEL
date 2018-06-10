@@ -95,12 +95,27 @@
 		}
 
 
+		function get_schools(){
+			$dt2_id = $this->input->post('dt2_id');
+
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+			$cond = "WHERE dt2_id='".$dt2_id."'";
+			$cond .= (!is_null($this->input->post('tipe_sekolah_id'))?" AND tipe_sekolah_id='".$this->input->post('tipe_sekolah_id')."'":"");
+			$sql = "SELECT sekolah_id,nama_sekolah FROM sekolah ".$cond;
+
+			$rows = $dao->execute(0,$sql)->result_array();
+			$this->load->view($this->active_controller.'/management_user/school_opts.php',array('rows'=>$rows));
+		}
+
+
 		//MANAGEMENT USER FUNCTION PACKET
 		function management_user(){
 			if(is_null($this->session->userdata('admin_id'))){
 				redirect('backoffice/login_page');
 			}
 			$data['active_url'] = str_replace('::','/',__METHOD__);
+			$data['containsTable'] = true;
 			$data['list_of_data'] = $this->load->view($this->active_controller.'/management_user/list_of_data',array('rows'=>$this->get_user_data()),true);
 			$this->backoffice_template->render($this->active_controller.'/management_user/index',$data);
 		}
@@ -199,15 +214,7 @@
 		    $data['dt2_id'] = $dt2_id;
 
 			$this->load->view($this->active_controller.'/management_user/form_content',$data);
-		}
-
-		function get_schools(){
-			$dt2 = $this->input->post('dt2');
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
-			$rows = $dao->execute(0,"SELECT sekolah_id,nama_sekolah FROM sekolah WHERE dt2_id='".$dt2."'")->result_array();
-			$this->load->view($this->active_controller.'/management_user/school_opts.php',array('rows'=>$rows));
-		}
+		}		
 
 		function submit_user_data(){
 			$this->load->model(array('admins_model'));
@@ -309,14 +316,294 @@
 
 		//END OF MANAGEMENT USER FUNCTION PACKET
 
-		//MANAGEMENT SCHOOL FUNCTION PAKET
-		function management_school(){
+		//SCHOOL FUNCTION PAKET
+		function school(){
 			if(is_null($this->session->userdata('admin_id'))){
 				redirect('backoffice/login_page');
 			}
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
 			$data['active_url'] = str_replace('::','/',__METHOD__);
-			$data['list_of_data'] = $this->load->view($this->active_controller.'/management_user/list_of_data',array('rows'=>$this->get_user_data()),true);
-			$this->backoffice_template->render($this->active_controller.'/management_school/index',$data);
+			$data['dt2_rows'] = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
+			$data['form_id'] = "search-school-form";
+			$data['active_controller'] = $this->active_controller;
+			$data['containsTable'] = true;
+			$this->backoffice_template->render($this->active_controller.'/school/index',$data);
 		}
+
+		function search_school_data(){
+			$search_dt2 = $this->input->post('search_dt2');
+			$data['list_of_data'] = $this->load->view($this->active_controller.'/school/list_of_data',
+														array('rows'=>$this->get_school_data($search_dt2),'search_dt2'=>$search_dt2),true);
+			$this->load->view($this->active_controller.'/school/data_view',$data);
+		}
+
+		function get_school_data($dt2){
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+			
+			$cond = "";
+			if(!empty($dt2))
+				$cond = "WHERE a.dt2_id='".$dt2."'";
+
+			$sql = "SELECT a.*,b.nama_dt2,c.akronim as jenjang FROM sekolah as a 
+					LEFT JOIN ref_dt2 as b ON (a.dt2_id=b.dt2_id) 
+					LEFT JOIN ref_tipe_sekolah as c ON (a.tipe_sekolah_id=c.ref_tipe_sklh_id)
+					".$cond;
+			
+			$rows = $dao->execute(0,$sql)->result_array();
+			return $rows;
+		}
+
+		function load_school_form(){
+			$this->load->model(array('sekolah_model'));
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+			
+			$act = $this->input->post('act');
+			$search_dt2 = $this->input->post('search_dt2');
+
+			$id_name = 'sekolah_id';
+
+		    $m = $this->sekolah_model;
+		    $id_value = ($act=='edit'?$this->input->post('id'):'');
+		    $curr_data = $dao->get_data_by_id($act,$m,$id_value);
+
+		    $dt2_opts = array();
+		    $sekolah_opts = array();		    
+
+		    $new_schoolId = $this->global_model->get_incrementID('sekolah_id','sekolah');
+
+		    $data['sekolah_id'] = ($act=='add'?$new_schoolId:$id_value);
+		    $data['jenjang_rows'] = $dao->execute(0,"SELECT * FROM ref_tipe_sekolah")->result_array();
+		    $data['dt2_rows'] = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
+		    $data['curr_data'] = $curr_data;
+		    $data['active_controller'] = $this->active_controller;
+		    $data['form_id'] = 'school-form';
+		    $data['id_value'] = $id_value;
+		    $data['act'] = $act;
+		    $data['search_dt2'] = $search_dt2;
+
+			$this->load->view($this->active_controller.'/school/form_content',$data);
+		}
+
+		function submit_school_data(){
+			$this->load->model(array('sekolah_model'));
+
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+
+			$act = $this->input->post('act');
+			$search_dt2 = $this->input->post('search_dt2');
+
+			$tipe_sekolah_id = $this->security->xss_clean($this->input->post('input_tipe_sekolah_id'));
+			$nama_sekolah = $this->security->xss_clean($this->input->post('input_nama_sekolah'));
+			$dt2_id = $this->security->xss_clean($this->input->post('input_dt2_id'));
+			$alamat = $this->security->xss_clean($this->input->post('input_alamat'));
+			$telepon = $this->security->xss_clean($this->input->post('input_telepon'));
+			$email = $this->security->xss_clean($this->input->post('input_email'));				
+
+			$m = $this->sekolah_model;
+
+			$m->set_tipe_sekolah_id($tipe_sekolah_id);
+			$m->set_nama_sekolah($nama_sekolah);
+			$m->set_dt2_id($dt2_id);
+			$m->set_alamat($alamat);
+			$m->set_telepon($telepon);
+			$m->set_email($email);
+
+			if($act=='add')
+			{
+				$sekolah_id = $this->security->xss_clean($this->input->post('input_sekolah_id'));
+				
+				$m->set_sekolah_id($sekolah_id);
+
+				$result = $dao->insert($m);
+				$label = 'menyimpan';
+			}
+			else
+			{
+				$id = $this->input->post('id');
+				$result = $dao->update($m,array('sekolah_id'=>$id));
+				$label = 'merubah';
+			}
+
+			if(!$result)
+			{
+				die('ERROR: gagal '.$label.' data');
+			}
+
+			$this->load->view($this->active_controller.'/school/list_of_data',array('rows'=>$this->get_school_data($search_dt2),
+																					'search_dt2'=>$search_dt2));
+
+		}
+
+		function delete_school_data(){
+			$this->load->model(array('sekolah_model'));
+
+			$id = $this->input->post('id');
+			$search_dt2 = $this->input->post('search_dt2');
+
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+
+			$m = $this->sekolah_model;
+			$result = $dao->delete($m,array('sekolah_id'=>$id));
+			if(!$result){
+				die('ERROR: gagal menghapus data');
+			}
+
+			$this->load->view($this->active_controller.'/school/list_of_data',array('rows'=>$this->get_school_data($search_dt2),
+																					'search_dt2'=>$search_dt2));
+		}
+
+		//END OF SCHOOL FUNCTION PACKET
+
+
+
+		//FIELD FUNCTION PAKET
+		function field(){
+			if(is_null($this->session->userdata('admin_id'))){
+				redirect('backoffice/login_page');
+			}
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+			$data['active_url'] = str_replace('::','/',__METHOD__);
+			$data['dt2_rows'] = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
+			$data['form_id'] = "search-school-form";
+			$data['active_controller'] = $this->active_controller;
+			$data['containsTable'] = true;
+			$this->backoffice_template->render($this->active_controller.'/field/index',$data);
+		}
+
+		function search_field_data(){
+			$search_dt2 = $this->input->post('search_dt2');
+			$data['list_of_data'] = $this->load->view($this->active_controller.'/field/list_of_data',
+														array('rows'=>$this->get_field_data($search_dt2),'search_dt2'=>$search_dt2),true);
+			$this->load->view($this->active_controller.'/field/data_view',$data);
+		}
+
+		function get_field_data($dt2){
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+			
+			$cond = "";
+			if(!empty($dt2))
+				$cond = "WHERE dt2_id='".$dt2."'";
+
+			$sql = "SELECT a.*,b.nama_sekolah FROM kompetensi_smk as a 
+					INNER JOIN (SELECT sekolah_id,nama_sekolah FROM sekolah ".$cond.") as b ON (a.sekolah_id=b.sekolah_id)";
+			
+			$rows = $dao->execute(0,$sql)->result_array();
+			return $rows;
+		}
+
+		function load_field_form(){
+			$this->load->model(array('kompetensi_smk_model'));
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+			
+			$act = $this->input->post('act');
+			$search_dt2 = $this->input->post('search_dt2');
+
+			$id_name = 'kompetensi_id';
+
+		    $m = $this->kompetensi_smk_model;
+		    $id_value = ($act=='edit'?$this->input->post('id'):'');
+		    $curr_data = $dao->get_data_by_id($act,$m,$id_value);
+
+		    $dt2_opts = array();
+		    $sekolah_opts = array();		    
+
+		    $new_fieldId = $this->global_model->get_incrementID('kompetensi_id','kompetensi_smk');
+
+		    $sekolah_opts = array();
+		    $dt2_id = '';
+		    if($act=='edit'){
+		    	$row = $dao->execute(0,"SELECT dt2_id FROM sekolah WHERE sekolah_id='".$curr_data['sekolah_id']."'")->row_array();
+	    		$sql = "SELECT sekolah_id,nama_sekolah FROM sekolah 
+	    				WHERE dt2_id='".$row['dt2_id']."'";
+	    		$sekolah_opts = $dao->execute(0,$sql)->result_array();
+	    		$dt2_id = $row['dt2_id'];
+		    }
+
+		    $data['kompetensi_id'] = ($act=='add'?$new_fieldId:$id_value);
+		    $data['dt2_opts'] = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
+		    $data['sekolah_opts'] = $sekolah_opts;
+		    $data['dt2_id'] = $dt2_id;
+		    $data['curr_data'] = $curr_data;
+		    $data['active_controller'] = $this->active_controller;
+		    $data['form_id'] = 'field-form';
+		    $data['id_value'] = $id_value;
+		    $data['act'] = $act;
+		    $data['search_dt2'] = $search_dt2;
+
+			$this->load->view($this->active_controller.'/field/form_content',$data);
+		}
+
+		function submit_field_data(){
+			$this->load->model(array('kompetensi_smk_model'));
+
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+
+			$act = $this->input->post('act');
+			$search_dt2 = $this->input->post('search_dt2');
+
+			$nama_kompetensi = $this->security->xss_clean($this->input->post('input_nama_kompetensi'));
+			$sekolah_id = $this->security->xss_clean($this->input->post('input_sekolah_id'));
+
+			$m = $this->kompetensi_smk_model;
+
+			$m->set_nama_kompetensi($nama_kompetensi);
+			$m->set_sekolah_id($sekolah_id);
+
+			if($act=='add')
+			{
+				$kompetensi_id = $this->security->xss_clean($this->input->post('input_kompetensi_id'));
+				
+				$m->set_kompetensi_id($kompetensi_id);
+
+				$result = $dao->insert($m);				
+				$label = 'menyimpan';
+			}
+			else
+			{
+				$id = $this->input->post('id');
+				$result = $dao->update($m,array('kompetensi_id'=>$id));
+				$label = 'merubah';
+			}
+
+			if(!$result)
+			{
+				die('ERROR: gagal '.$label.' data');
+			}
+
+			$this->load->view($this->active_controller.'/field/list_of_data',array('rows'=>$this->get_field_data($search_dt2),
+																					'search_dt2'=>$search_dt2));
+
+		}
+
+		function delete_field_data(){
+			$this->load->model(array('kompetensi_smk_model'));
+
+			$id = $this->input->post('id');
+			$search_dt2 = $this->input->post('search_dt2');
+
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+
+			$m = $this->kompetensi_smk_model;
+			$result = $dao->delete($m,array('kompetensi_id'=>$id));
+			if(!$result){
+				die('ERROR: gagal menghapus data');
+			}
+
+			$this->load->view($this->active_controller.'/field/list_of_data',array('rows'=>$this->get_field_data($search_dt2),
+																					'search_dt2'=>$search_dt2));
+		}
+
+		//END OF FIELD FUNCTION PACKET
+
 	}
 ?>

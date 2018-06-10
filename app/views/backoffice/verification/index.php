@@ -1,5 +1,5 @@
 <!-- MAIN PANEL -->
-<div id="main" role="main" style="min-height:700px!important;">
+<div id="main" role="main">
 
 	<!-- RIBBON -->
 	<div id="ribbon">
