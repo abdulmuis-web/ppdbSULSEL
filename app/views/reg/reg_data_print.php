@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Data Registrasi PPDB 2018</title>
+		<title>PPDB Online Prov. <?=$this->_SYS_PARAMS[2]." Tahun ".date('Y');?> | Data Registrasi</title>
 		<link rel="stylesheet" type="text/css" href="<?=$this->config->item('css_path');?>report-style.css"/>		
 		<style type="text/css">@import "<?=$this->config->item('css_path');?>report-table-style.css";</style>
 	</head>
@@ -29,7 +29,7 @@
 								<tr><td>Sekolah Asal</td><td>".$sekolah_asal."</td></tr>
 								<tr><td>Alamat</td><td>".$alamat."</td></tr>
 								<tr><td>Kecamatan</td><td>".$kecamatan."</td></tr>						
-								<tr><td>Kota/Kab.</td><td>".$nm_dt2."</td></tr>
+								<tr><td>Kab./Kota</td><td>".$nm_dt2."</td></tr>
 								<tr><td>Jalur Pendaftaran</td><td>".$jalur_pendaftaran['nama_jalur']."</td></tr>
 								<tr><td>Jenjang Sekolah Pilihan</td><td>".$tipe_sekolah['nama_tipe_sekolah']." (".$tipe_sekolah['akronim'].")</td></tr>
 								<tr><td valign='top'>Sekolah Pilihan</td>
@@ -40,10 +40,14 @@
 											}
 										echo "</ol>
 									</td>
-								</tr>";							
+								</tr>
+								<tr><td>Tgl. Pendaftaran</td><td>".indo_date_format($tgl_pendaftaran,'longDate')."</td></tr>
+								";
 							?>
 						</tbody>
 					</table>
+					<small>No. Seri : <?=$no_seri;?></small>
+
 				</div>
 			</div>
 		</div>

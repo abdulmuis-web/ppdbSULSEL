@@ -1,52 +1,14 @@
 <!-- PAGE FOOTER -->
-		<div class="page-footer">
-			<div class="row">
+		<div class="page-footer" <?=($no_menu?"style='padding-left:15px!important'":"");?>>
+			<div class="row">				
+
 				<div class="col-xs-12 col-sm-6">
-					<span class="txt-color-white">PPDB Online <span class="hidden-xs"> - Dinas Pendidikan Prov. Sul-Sel</span> © 2018</span>
+					<span class="txt-color-white">PPDB Online <span class="hidden-xs"> - Dinas Pendidikan Provinsi <?=$this->_SYS_PARAMS[2];?></span> © 2018</span>
 				</div>
 
 				<div class="col-xs-6 col-sm-6 text-right hidden-xs">
 					<div class="txt-color-white inline-block">
-						<i class="txt-color-blueLight hidden-mobile">Last account activity <i class="fa fa-clock-o"></i> <strong>52 mins ago &nbsp;</strong> </i>
-						<div class="btn-group dropup">
-							<button class="btn btn-xs dropdown-toggle bg-color-blue txt-color-white" data-toggle="dropdown">
-								<i class="fa fa-link"></i> <span class="caret"></span>
-							</button>
-							<ul class="dropdown-menu pull-right text-left">
-								<li>
-									<div class="padding-5">
-										<p class="txt-color-darken font-sm no-margin">Download Progress</p>
-										<div class="progress progress-micro no-margin">
-											<div class="progress-bar progress-bar-success" style="width: 50%;"></div>
-										</div>
-									</div>
-								</li>
-								<li class="divider"></li>
-								<li>
-									<div class="padding-5">
-										<p class="txt-color-darken font-sm no-margin">Server Load</p>
-										<div class="progress progress-micro no-margin">
-											<div class="progress-bar progress-bar-success" style="width: 20%;"></div>
-										</div>
-									</div>
-								</li>
-								<li class="divider"></li>
-								<li>
-									<div class="padding-5">
-										<p class="txt-color-darken font-sm no-margin">Memory Load <span class="text-danger">*critical*</span></p>
-										<div class="progress progress-micro no-margin">
-											<div class="progress-bar progress-bar-danger" style="width: 70%;"></div>
-										</div>
-									</div>
-								</li>
-								<li class="divider"></li>
-								<li>
-									<div class="padding-5">
-										<button class="btn btn-block btn-default">refresh</button>
-									</div>
-								</li>
-							</ul>
-						</div>
+						<i class="txt-color-blueLight hidden-mobile">Last account activity <i class="fa fa-clock-o"></i> <strong>0 mins ago &nbsp;</strong> </i>
 					</div>
 				</div>
 			</div>
@@ -82,16 +44,7 @@
 		<script src="<?=$this->config->item("js_path");?>bootstrap.min.js"></script>
 
 		<!-- CUSTOM NOTIFICATION -->
-		<script src="<?=$this->config->item("js_path");?>notification/SmartNotification.min.js"></script>
-
-		<!-- JARVIS WIDGETS -->
-		<script src="<?=$this->config->item("js_path");?>smartwidgets/jarvis.widget.min.js"></script>
-
-		<!-- EASY PIE CHARTS -->
-		<script src="<?=$this->config->item("js_path");?>plugins/easy-pie-chart/jquery.easy-pie-chart.min.js"></script>
-
-		<!-- SPARKLINES -->
-		<script src="<?=$this->config->item("js_path");?>plugins/sparkline/jquery.sparkline.min.js"></script>
+		<script src="<?=$this->config->item("js_path");?>notification/SmartNotification.min.js"></script>		
 
 		<!-- JQUERY SELECT2 INPUT -->
 		<script src="<?=$this->config->item("js_path");?>plugins/select2/select2.min.js"></script>

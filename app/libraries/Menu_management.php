@@ -36,7 +36,7 @@
 		                	'title'=>$val['title'],
 		                	'url'=>($val['url']==''?'#':$val['url']),
 		                	'icon'=>$val['image'],
-		                	'url_target'=>$val['target'],
+		                	'url_target'=>$val['url_target'],
 		                	'li_class'=>$val['li_class'],
 		                	);
 

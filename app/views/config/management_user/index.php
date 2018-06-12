@@ -44,10 +44,15 @@
 							<span class="widget-icon"> <i class="fa fa-table"></i> </span>
 							<h2>Daftar User | </h2>
 							<h2>
-								<a class="btn btn-default btn-xs" onclick="load_form(this.id)" id="add-button" data-toggle="modal" data-target="#remoteModal">
-								<input type="hidden" name="act" value="add" id="ajax-req-dt"/>
-								<i class='fa fa-plus'></i> Tambah 
-								</a>
+								<?php
+								if($add_access)
+									echo "<a class='btn btn-default btn-xs' onclick=\"load_form(this.id)\" id='add-button' data-toggle='modal' data-target='#remoteModal'>";
+								else
+									echo "<a class='btn btn-default btn-xs' onclick=\"alert('anda tidak diijinkan untuk menambah data!');\" id='add-button'/>";
+								echo "<input type='hidden' name='act' value='add' id='ajax-req-dt'/>
+								 <i class='fa fa-plus'></i> Tambah 
+								</a>";
+								?>
 							</h2>
 						</header>
 

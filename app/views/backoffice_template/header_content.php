@@ -4,10 +4,9 @@
 		<meta charset="utf-8">
 		<!--<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">-->
 
-		<title>Admin Panel PPDB Online Prov. Sulsel 2018 | Log in</title>
+		<title>PPDB Online Prov. <?=$this->_SYS_PARAMS[2]." Tahun ".date('Y');?></title>
 		<meta name="description" content="">
 		<meta name="author" content="">
-			
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 		<!-- Basic Styles -->
@@ -18,9 +17,7 @@
 		<link rel="stylesheet" type="text/css" media="screen" href="<?=$this->config->item('css_path');?>smartadmin-production-plugins.min.css">
 		<link rel="stylesheet" type="text/css" media="screen" href="<?=$this->config->item('css_path');?>smartadmin-production.min.css">
 		<link rel="stylesheet" type="text/css" media="screen" href="<?=$this->config->item('css_path');?>smartadmin-skins.min.css">
-
-		<!-- SmartAdmin RTL Support  -->
-		<link rel="stylesheet" type="text/css" media="screen" href="<?=$this->config->item('css_path');?>smartadmin-rtl.min.css">
+		
 
 		<!-- We recommend you use "your_style.css" to override SmartAdmin
 		     specific styles this will also ensure you retrain your customization with each SmartAdmin update.
@@ -137,7 +134,7 @@
 		* 'fixed-page-footer' - Fixes footer
 		* 'container'         - boxed layout mode (non-responsive: will not work with fixed-navigation & fixed-ribbon)
 	-->
-	<body class="">
+	<body class="<?=$body_class;?>">
 
 		<!-- PRELOAD OBJECT -->
 	    <div id="preloadAnimation" class="preload-wrapper">
@@ -156,7 +153,7 @@
 			<div id="logo-group">
 
 				<!-- PLACE YOUR LOGO HERE -->
-				<span id="logo"> <img src="<?=$this->config->item('img_path');?>logo_backoffice.png" alt="SmartAdmin"> </span>
+				<span id="logo"> <img src="<?=$this->config->item('img_path');?>logo_ppdb_backoffice.png" alt="SmartAdmin"> </span>
 				<!-- END LOGO PLACEHOLDER -->
 
 				
@@ -177,19 +174,12 @@
 				<ul id="mobile-profile-img" class="header-dropdown-list hidden-xs padding-5">
 					<li class="">
 						<a href="#" class="dropdown-toggle no-margin userdropdown" data-toggle="dropdown"> 
-							<img src="<?=$this->config->item('img_path');?>avatars/sunny.png" alt="John Doe" class="online" />  
+							<img src="<?=$this->config->item('img_path');?>avatars/male.png" alt="John Doe" class="online" />  
 						</a>
-						<ul class="dropdown-menu pull-right">
-							<li>
-								<a href="javascript:void(0);" class="padding-10 padding-top-0 padding-bottom-0"><i class="fa fa-cog"></i> Setting</a>
-							</li>
+						<ul class="dropdown-menu pull-right">							
 							<li class="divider"></li>
 							<li>
 								<a href="profile.html" class="padding-10 padding-top-0 padding-bottom-0"> <i class="fa fa-user"></i> <u>P</u>rofile</a>
-							</li>
-							<li class="divider"></li>
-							<li>
-								<a href="javascript:void(0);" class="padding-10 padding-top-0 padding-bottom-0" data-action="toggleShortcut"><i class="fa fa-arrow-down"></i> <u>S</u>hortcut</a>
 							</li>
 							<li class="divider"></li>
 							<li>

@@ -8,11 +8,11 @@
 		</div>
 
 		<form action="<?=base_url();?>reg/submit_reg" id="reg-form" method="POST" class="form-horizontal">
-			<input type="hidden" name="input_tipe_sekolah" value="<?=$stage;?>"/>
-			<input type="hidden" name="input_jalur_pendaftaran" value="<?=$path;?>"/>
-			<input type="hidden" name="input_tipe_ujian_smp" value="<?=$peserta_row['tipe_ujian_smp'];?>"/>
-			<input type="hidden" name="input_jml_sekolah" value="<?=$kuota_jalur_row['jml_sekolah'];?>"/>
-			<input type="hidden" name="input_dt2_id" value="<?=$peserta_row['dt2_id'];?>"/>			
+			<input type="hidden" id="input_tipe_sekolah" name="input_tipe_sekolah" value="<?=$stage;?>"/>
+			<input type="hidden" id="input_jalur_pendaftaran" name="input_jalur_pendaftaran" value="<?=$path;?>"/>
+			<input type="hidden" id="input_tipe_ujian_smp" name="input_tipe_ujian_smp" value="<?=$peserta_row['tipe_ujian_smp'];?>"/>
+			<input type="hidden" id="input_jml_sekolah" name="input_jml_sekolah" value="<?=$kuota_jalur_row['jml_sekolah'];?>"/>
+			<input type="hidden" id="input_dt2_id" name="input_dt2_id" value="<?=$peserta_row['dt2_id'];?>"/>			
 
 			<div class="row">
 				<div class="col-md-6">
@@ -112,12 +112,7 @@
 							</div>
 							<div class="input" id="cont_input_kecamatan">
 								<select name="input_kecamatan" id="input_kecamatan" class="form-control" required>
-									<option value=""><?=($path=='5'?"- Pilih Kab./Kota lebih dulu -":"");?></option>
-									<?php
-										foreach($kecamatan_rows as $row){
-											echo "<option value='".$row['kecamatan_id']."_".$row['nama_kecamatan']."'>".$row['nama_kecamatan']."</option>";
-										}
-									?>
+									<option value="">-- Pilih Kab./Kota lebih dulu --</option>									
 								</select>
 								<span class="help-block">Pilih Kecamatan sesuai Kartu Keluarga</span>
 							</div>
@@ -284,15 +279,17 @@
 									if($kuota_jalur_row['lintas_dt2']!='0')
 									{
 										echo "
-										<td>																						
-											<select name='input_dt2_sekolah_tujuan".$i."' id='input_dt2_sekolah_tujuan".$i."' onchange=\"get_destSchools($(this).val(),'".($path!='5'?$peserta_row['dt2_id']:'')."','".$stage."','".$kuota_jalur_row['lintas_dt2']."','".$i."');\" class='form-control' required>";
+										<td>
+										<div id='cont_input_dt2_sekolah_tujuan".$i."'>
+											<select name='input_dt2_sekolah_tujuan".$i."' id='input_dt2_sekolah_tujuan".$i."' onchange=\"get_destSchools($(this).val(),'".($path!='5'?$peserta_row['dt2_id']:'')."','".$stage."','".$kuota_jalur_row['lintas_dt2']."','".$i."');\" class='form-control' ".($i==1?'required':'').">";
 												echo "<option value=''>".($kuota_jalur_row['lintas_dt2']=='1'?"-- Pilih Kab./Kota Domisili lebih dulu --":"")."</option>";
 												foreach($pengaturan_dt2_sekolah_rows as $row)
 												{
 													$keterangan = ($kuota_jalur_row['lintas_dt2']=='1'?" (".ucwords($row['status']).")":"");
 													echo "<option value='".$row['dt2_sekolah_id']."'>".$row['nama_dt2'].$keterangan."</option>";
 												}
-											echo "</select>											
+											echo "</select>
+										</div>
 										</td>";
 									}
 
@@ -391,21 +388,21 @@
 														<tbody id='detail_achievement".$i."-tbody'>
 															<tr id='row-1'>
 															<td>
-																<select name='input_bidang".$i."_".$j."' class='form-control' required>															
+																<div><select name='input_bidang".$i."_".$j."' class='form-control' required>															
 																".$bidang_kejuaraan_opts."
-																</select>															
+																</select></div>
 															</td>
 															<td>
-																<input type='text' name='input_nm_kejuaraan".$i."_".$j."' class='form-control' required/>
+																<div><input type='text' name='input_nm_kejuaraan".$i."_".$j."' class='form-control' required/></div>
 															</td>
 															<td>
-																<input type='text' name='input_penyelenggara".$i."_".$j."' class='form-control' required/>
+																<div><input type='text' name='input_penyelenggara".$i."_".$j."' class='form-control' required/></diV>
 															</td>
 															<td>
-																<input type='text' name='input_no_sertifikat".$i."_".$j."' class='form-control numeric' required/>
+																<div><input type='text' name='input_no_sertifikat".$i."_".$j."' class='form-control numeric' required/></div>
 															</td>
 															<td>
-																<input type='text' name='input_peringkat_thn_kejuaraan".$i."_".$j."' id='input_peringkat_thn_kejuaraan".$i."' class='form-control' required/>
+																<div><input type='text' name='input_peringkat_thn_kejuaraan".$i."_".$j."' id='input_peringkat_thn_kejuaraan".$i."' class='form-control' required/></div>
 															</td>
 															<td></td>
 															</tr>
@@ -509,6 +506,11 @@
    		return true;
    	}
 
+   	function validate_choosen(){
+   		var stage = $('#input_tipe_sekolah').val();
+   		var n = $('#input_jml_sekolah').val();
+   	}
+
     $(function() {
 
     	jQuery.extend(jQuery.validator.messages, {
@@ -534,6 +536,7 @@
 
             if(stat.checkForm())
             {
+
             	if(validate_checkboxes('input_tingkat_kejuaraan',path))
             	{
 	            	if($('#input_persetujuan').prop('checked')==true)
@@ -583,7 +586,7 @@
                 return false;
             }
         });
-    });
+    });	
 
 	function init_jquery_plugin(){
 		

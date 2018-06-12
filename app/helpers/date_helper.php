@@ -219,4 +219,27 @@
     return date("Y-m-d", strtotime('-1 second',strtotime('+1 month',strtotime($month.'/01/'.$year.' 00:00:00'))));
   }
 
+  function check_status_dateRange($date1,$date2){
+      $cd = date('Y-m-d');
+      $x_cd = explode('-',$cd);
+      $x_date1 = explode('-',$date1);
+      $x_date2 = explode('-',$date2);
+
+      $curr_jd = GregorianToJD($x_cd[1],$x_cd[2],$x_cd[0]);
+      $date1_jd = GregorianToJD($x_date1[1],$x_date1[2],$x_date1[0]);
+      $date2_jd = GregorianToJD($x_date2[1],$x_date2[2],$x_date2[0]);
+      
+      $diff1 = $date1_jd-$curr_jd;
+      $diff2 = $date2_jd-$curr_jd;      
+
+      $result = '';
+      if($diff1>0)
+        $result = 'pre';
+      else if($diff1<=0 and $diff2>=0)
+        $result = 'on';
+      else if($diff2<0)
+        $result = 'finish';
+
+      return $result;
+  }
 ?>

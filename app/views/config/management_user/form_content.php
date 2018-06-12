@@ -229,7 +229,7 @@
                            .set_loading('#preloadAnimation')
                            .enable_pnotify()
                            .set_form($user_form)
-                           .submit_ajax('menyimpan data');
+                           .submit_ajax('');
             $('#close-modal-form').click();
             return false;
         }

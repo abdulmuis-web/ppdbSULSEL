@@ -3,7 +3,7 @@
 
 	class log_status_pendaftaran_model extends CI_Model{
 
-		private $log_status_id,$id_pendaftaran,$thn_pelajaran,$jalur_id,$status,$created_time;				
+		private $log_status_id,$id_pendaftaran,$thn_pelajaran,$jalur_id,$status,$created_time,$user,$sekolah_id;
 
 		const pkey = "log_status_id";
 		const tbl_name = "log_status_pendaftaran";
@@ -50,6 +50,16 @@
 	        return $this->created_time;
 	    }
 
+	    function get_user() {
+	        return $this->user;
+	    }
+
+	    function get_sekolah_id() {
+	        return $this->sekolah_id;
+	    }
+
+
+
 	    
 	    function set_log_status_id($data) {
 	        $this->log_status_id=$data;
@@ -75,6 +85,13 @@
 	        $this->created_time=$data;
 	    }
 
+	    function set_user($data) {
+	        $this->user=$data;
+	    }
+
+	    function set_sekolah_id($data) {
+	        $this->sekolah_id=$data;
+	    }
 
 
 	    function get_field_list(){

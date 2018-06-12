@@ -64,56 +64,56 @@
 	                        		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
 	                        		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
 	                        		<i class='fa fa-info-circle'></i> 
-	                        		Panduan</a>
+	                        		<b>Panduan</b></a>
 	                        </li -->
 	                        <li>
 	                        	<a href='javascript:;' class='active' onclick=\"tabMenu_navigation(this,'Aturan');\" id='tab-menu2'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='1'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
-	                        	<i class='fa fa-book'></i> Aturan</a>
+	                        	<i class='fa fa-book'></i> <b>Aturan</b></a>
 	                        </li>
 	                        <li>
 	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this,'Jadwal');\" id='tab-menu3'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='2'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
-	                        	<i class='fa fa-calendar'></i> Jadwal</a>
+	                        	<i class='fa fa-calendar'></i> <b>Jadwal</b></a>
 	                        </li>
 	                        <li>
 	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this,'Prosedur');\" id='tab-menu4'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='3'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
-	                        	<i class='fa fa-check-circle'></i> Prosedur</a>
+	                        	<i class='fa fa-check-circle'></i> <b>Prosedur</b></a>
 	                        </li>
 	                        <li>
 	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this,'Daftar');\" id='tab-menu5'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='4'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
-	                        	<i class='fa fa-pencil-square-o'></i> Daftar</a>
+	                        	<i class='fa fa-pencil-square-o'></i> <b>Daftar</b></a>
 	                        </li>
 	                        <li>
 	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this,'Hasil');\" id='tab-menu6'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='5'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
-	                        	<i class='fa fa-file-text-o'></i> Hasil</a>
+	                        	<i class='fa fa-file-text-o'></i> <b>Hasil</b></a>
 	                        </li>
 	                        <li>
 	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this,'Statistik');\" id='tab-menu7'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='6'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
-	                        	<i class='fa fa-bar-chart-o'></i> Statistik</a>
+	                        	<i class='fa fa-bar-chart-o'></i> <b>Statistik</b></a>
 	                        </li>
 	                        <li>
 	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this,'Kuota');\" id='tab-menu8'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='7'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
-	                        	<i class='fa fa-users'></i> Kuota</a>
+	                        	<i class='fa fa-users'></i> <b>Kuota</b></a>
 	                        </li>
 	                    </ul>
 	                </div>

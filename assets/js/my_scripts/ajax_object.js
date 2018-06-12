@@ -215,6 +215,8 @@
         /**
             @result : nilai dari inputan ajax dengan format nama=nilai
         */
+
+
         set_data_ajax:function(data){
             var data_ajax=new Array('');
 
@@ -259,7 +261,32 @@
             this.data_ajax=data_ajax;
             return this;
         },
-        
+            
+        set_data_ajax2:function(data){
+            data_ajax = [];
+            if(typeof(data)=='object'){
+                
+                for(i=0;i<data.length;i++)
+                {
+                    x = false;
+                    dt='';
+                    ex='';
+                    _data = data[i];
+                    for(j=0;j<_data.length;j++){
+                        if(x==true)
+                            dt+='&';
+                        ex = _data[j].split('=');
+
+                        dt+=(ex.length==2?ex[0]+'='+ex[1]:ex[0]+'='+ex[0]);
+                        x=true;
+                    }
+                    data_ajax[i] = dt;
+                }
+            }
+            this.data_ajax = data_ajax;
+            return this;
+        },
+
         setup_jquery_plugin:function(i){
 
             //data-table
@@ -492,8 +519,9 @@
                 success:function(data){
                     var content_box,title_box,color_box,icon_box;
                                         
-
-                    if(data!='failed')
+                    error=/ERROR/;
+                                
+                    if(!data.match(error) && data!='failed')
                     {                        
 
                         x_data = data.split('|$*{()}*$|');
@@ -516,7 +544,14 @@
                     }
                     else
                     {
-                        content_box = act_lbl;
+                        if(data.match(error))
+                        {
+                            x = data.split(':');
+                            content_box = x[1].trim();
+                        }else{
+                            content_box = act_lbl;
+                        }
+                        
                         title_box = 'Gagal';
                         color_box = 'C46A69';
                         icon_box = "fa-times";
@@ -579,7 +614,7 @@
                     
                     error=/ERROR/;
                                 
-                    if(!data.match(error))
+                    if(!data.match(error) && data!='failed')
                     {
                         
                         x_data = data.split('|$*{()}*$|');
@@ -603,9 +638,13 @@
                     }
                     else
                     {
-                        
-                        x = data.split(':');
-                        content_box = x[1].trim();
+                        if(data.match(error))
+                        {
+                            x = data.split(':');
+                            content_box = x[1].trim();
+                        }else{
+                            content_box = act_lbl;
+                        }
                         title_box = 'Gagal';
                         color_box = 'C46A69';
                         icon_box = "fa-times";

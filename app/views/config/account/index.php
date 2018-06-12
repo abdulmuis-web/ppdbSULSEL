@@ -62,6 +62,7 @@
 							<div class="widget-body">
 
 								<form class="form-horizontal" id="<?=$form_id;?>" action="<?=base_url().$active_controller;?>/update_account" method="POST">									
+									<input type="hidden" id="update_access" value="<?=($update_access?'1':'0');?>"/>
 									<fieldset>
 										<div class="form-group">
 											<label class="col-md-2 control-label">Username Baru</label>
@@ -147,21 +148,25 @@
                     error.addClass('error');
                     error.insertAfter(element.parent());
                 }
-    	});
+    	});   	
 
     $account_form.submit(function(){
-        if(account_form_stat.checkForm())
-        {        	
-        	ajax_object.reset_object();
-            ajax_object.set_content('')                           
-                           .set_loading('#preloadAnimation')
-                           .enable_pnotify()
-                           .set_form($account_form)
-                           .submit_ajax('merubah data');
-            $account_form[0].reset();
-            return false;
-        }
-
+    	if($('#update_access').val()=='1')
+    	{
+	        if(account_form_stat.checkForm())
+	        {        	
+	        	ajax_object.reset_object();
+	            ajax_object.set_content('')                           
+	                           .set_loading('#preloadAnimation')
+	                           .enable_pnotify()
+	                           .set_form($account_form)
+	                           .submit_ajax('merubah data');
+	            $account_form[0].reset();	            
+	        }
+	    }else{
+	    	alert('Anda tidak diijinkan merubah data');	    	
+	    }
+	    return false;
     });
 
 

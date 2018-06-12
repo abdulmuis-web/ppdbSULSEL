@@ -501,6 +501,14 @@
 			$this->load->view($this->active_controller.'/data_linked_toRegency',$data);
 		}
 
+		function generate_seri_numb($reg_time,$stage,$path){
+			$x_reg_time = explode(' ',$reg_time);
+			$x_date = explode('-',$x_reg_time[0]);
+			$x_time = explode(':',$x_reg_time[1]);
+
+			$shuffled = str_shuffle($x_date[2].$x_date[1].$x_date[0].$x_time[2].$x_time[1].$x_time[0].$stage.$path);
+			return $shuffled;
+		}
 
 		function submit_reg(){
 
@@ -560,6 +568,8 @@
 
 
 			$no_registrasi = $this->generate_regnumb($dt2_id,$tipe_sekolah,$jalur_pendaftaran);
+			$wkt_pendaftaran = date('Y-m-d H:i:s');
+			$no_seri = $this->generate_seri_numb($wkt_pendaftaran,$tipe_sekolah,$jalur_pendaftaran);
 
 			//update pendaftaran
 			$m = $this->pendaftaran_model;
@@ -571,9 +581,10 @@
 			$m->set_nil_ipa($nil_ipa);			
 			$m->set_tot_nilai($tot_nilai);
 			$m->set_mode_un($mode_un);
-			$m->set_waktu_pendaftaran(date('Y-m-d H:i:s'));
+			$m->set_waktu_pendaftaran($wkt_pendaftaran);
 			$m->set_status('1');
 			$m->set_no_pendaftaran($no_registrasi);
+			$m->set_no_seri($no_seri);
 
 			if($jalur_pendaftaran!='5'){
 				$result = $dao->update($m,array('id_pendaftaran'=>$no_peserta));
@@ -592,7 +603,6 @@
 				$this->db->trans_rollback();				
 				die('failed');
 			}
-
 
 			//insert pendaftaran_jalur_pilihan
 			$m = $this->pendaftaran_jalur_pilihan_model;
@@ -783,9 +793,11 @@
 			$m = $this->log_status_pendaftaran_model;
 			$m->set_id_pendaftaran($no_peserta);
 			$m->set_thn_pelajaran($this->_SYS_PARAMS[0]);
-			$m->set_status('1');
+			$m->set_status('0');
 			$m->set_jalur_id($jalur_pendaftaran);
-			$m->set_created_time(date('Y-m-d H:i:s'));
+			$m->set_created_time($wkt_pendaftaran);
+			$m->set_user($this->session->userdata('nopes'));
+
 			$result = $dao->insert($m);
 			if(!$result){
 				$this->db->trans_rollback();
@@ -811,6 +823,11 @@
 			$data['jalur_pendaftaran'] = $this->ref_jalur_pendaftaran_model->get_by_id($jalur_pendaftaran);
 			$data['tipe_sekolah'] = $this->ref_tipe_sekolah_model->get_by_id($tipe_sekolah);			
 			$data['no_registrasi'] = $no_registrasi;
+
+			$x_wkt_pendaftaran = explode(' ',$wkt_pendaftaran);
+
+			$data['tgl_pendaftaran'] = $x_wkt_pendaftaran[0];
+			$data['jam_pendaftaran'] = substr($x_wkt_pendaftaran[1],0,strlen($x_wkt_pendaftaran[1])-3);
 			$data['encoded_nopes'] = $encoded_nopes;
 
 			$this->load->view($this->active_controller.'/'.$this->tabs_view[8],$data);
@@ -897,7 +914,8 @@
 
 			$sql = "SELECT a.id_pendaftaran,a.nama,a.jk,a.sekolah_asal,
 					a.alamat,b.nama_kecamatan,c.nama_dt2,d.nama_jalur,
-					d.nama_tipe_sekolah,d.akronim,a.no_pendaftaran ,d.tipe_sekolah_id
+					d.nama_tipe_sekolah,d.akronim,a.no_pendaftaran ,d.tipe_sekolah_id,
+					DATE_FORMAT(a.waktu_pendaftaran,'%Y-%m-%d') as tgl_pendaftaran,a.no_seri
 					FROM pendaftaran as a 
 					LEFT JOIN ref_kecamatan as b ON (a.kecamatan_id=b.kecamatan_id) 
 					LEFT JOIN ref_dt2 as c ON (a.dt2_id=c.dt2_id) 
@@ -952,12 +970,15 @@
 			$data['jalur_pendaftaran']['nama_jalur'] = $registrasi_row['nama_jalur'];
 			$data['tipe_sekolah'] = array('nama_tipe_sekolah'=>$registrasi_row['nama_tipe_sekolah'],'akronim'=>$registrasi_row['akronim']);
 			$data['no_registrasi'] = $registrasi_row['no_pendaftaran'];
+			$data['tgl_pendaftaran'] = $registrasi_row['tgl_pendaftaran'];
+			$data['no_seri'] = $registrasi_row['no_seri'];
 			$data['encoded_nopes'] = $encoded_nopes;
 
 			return $data;
 		}
 
 		function reg_data_pdf($encoded_nopes){			
+			$this->load->helper('date_helper');
 			
 			$decoded_nopes = base64_decode(urldecode($encoded_nopes));
 			
@@ -971,6 +992,7 @@
 		}
 
 		function reg_data_print($encoded_nopes){
+			$this->load->helper('date_helper');
 
 			$decoded_nopes = base64_decode(urldecode($encoded_nopes));
 			

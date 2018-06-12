@@ -30,12 +30,24 @@
 				<td>".$email."</td>
 				<td>".($status=='0'?"<font color='red'>non active</font>":"<font color='green'>active</font>")."</td>
 				<td>".(!is_null($last_modified)?$last_modified." oleh : <b>".$modified_by."</b>":"")."</td>
-				<td align='center'>
-	                <a href='#' title='Edit' class='btn btn-xs btn-default' id='edit_".$no."' onclick=\"load_form(this.id)\" data-toggle='modal' data-target='#remoteModal'>
+				<td align='center'>";
+
+					if($update_access)
+	                	echo "<a href='#' title='Edit' class='btn btn-xs btn-default' id='edit_".$no."' onclick=\"load_form(this.id)\" data-toggle='modal' data-target='#remoteModal'>";
+	                else
+	                	echo "<a href='#' title='Edit' class='btn btn-xs btn-default' id='edit_".$no."' onclick=\"alert('anda tidak diijinkan untuk merubah data!')\">";
+	                
+	                echo "
 	                <input type='hidden' id='ajax-req-dt' name='id' value='".$row['admin_id']."'/>
 	                <input type='hidden' id='ajax-req-dt' name='act' value='edit'/>
-	            	<i class='fa fa-edit'></i></a>&nbsp
-	            	<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"if(confirm('Anda yakin?')){delete_record(this.id)}\" id='delete_".$no."'>
+	            	<i class='fa fa-edit'></i></a>&nbsp";
+
+	            	if($delete_access)
+	            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"if(confirm('Anda yakin?')){delete_record(this.id)}\" id='delete_".$no."'>";
+	            	else
+	            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"alert('anda tidak diijinkan untuk menghapus data!')\">";
+
+	            	echo "
 	            	<input type='hidden' id='ajax-req-dt' name='id' value='".$row['admin_id']."'/>
 	            	<i class='fa fa-trash-o'></i></a>&nbsp
 	            </td>

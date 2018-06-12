@@ -18,7 +18,7 @@
 						<tr><td>Sekolah Asal</td><td>".$sekolah_asal."</td></tr>
 						<tr><td>Alamat</td><td>".$alamat."</td></tr>
 						<tr><td>Kecamatan</td><td>".$kecamatan."</td></tr>						
-						<tr><td>Kota/Kab.</td><td>".$nm_dt2."</td></tr>
+						<tr><td>Kab./Kota</td><td>".$nm_dt2."</td></tr>
 						<tr><td>Jalur Pendaftaran</td><td>".$jalur_pendaftaran['nama_jalur']."</td></tr>
 						<tr><td>Jenjang Sekolah Pilihan</td><td>".$tipe_sekolah['nama_tipe_sekolah']." (".$tipe_sekolah['akronim'].")</td></tr>
 						<tr><td>".strtoupper($tipe_sekolah['akronim'])." Pilihan</td>
@@ -29,7 +29,8 @@
 									}
 								echo "</ol>
 							</td>
-						</tr>";
+						</tr>
+						<tr><td>Tgl. Pendaftaran</td><td>".indo_date_format($tgl_pendaftaran,'longDate')."</td></tr>";
 						?>
 					</tbody>
 					<tfoot>

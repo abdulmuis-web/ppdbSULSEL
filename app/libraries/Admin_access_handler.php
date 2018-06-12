@@ -79,6 +79,7 @@
 					$dt_session = array(
 								'admin_id'=>$admin_id,
 							    'username'=>$row['username'],
+							    'fullname'=>$row['fullname'],
 							    'admin_type'=>$row['type_name'],
 							    'admin_type_id'=>$row['type_fk'],
 							    'login_time'=>$login_time,
@@ -88,13 +89,16 @@
 
 					if($row['type_fk']=='3' or $row['type_fk']=='4'){
 						
-						$row2 = $this->_dao->execute(0,"SELECT tipe_sekolah_id,latitude,longitude,nama_sekolah FROM sekolah WHERE sekolah_id='".$row['sekolah_id']."'")->row_array();
+						$row2 = $this->_dao->execute(0,"SELECT a.tipe_sekolah_id,a.latitude,a.longitude,a.nama_sekolah,b.nama_dt2 
+														FROM sekolah as a LEFT JOIN ref_dt2 as b ON (a.dt2_id=b.dt2_id) 
+														WHERE sekolah_id='".$row['sekolah_id']."'")->row_array();
 
 						$dt_session['sekolah_id'] = $row['sekolah_id'];
 						$dt_session['nama_sekolah'] = $row2['nama_sekolah'];
 						$dt_session['tipe_sekolah'] = $row2['tipe_sekolah_id'];
 						$dt_session['latitude'] = $row2['latitude'];
 						$dt_session['longitude'] = $row2['longitude'];
+						$dt_session['dt2'] = $row2['nama_dt2'];
 
 					}
 
@@ -128,27 +132,28 @@
 
 		function check_access()
 		{
-			if(is_null($this->session->userdata('admin_id')))
+			if(is_null($this->_ci->session->userdata('admin_id')))
 			{
-				redirect('backoffice');
+				redirect('backoffice/login_page');
 			}
 			
+
 			//Execute the SQL Statement (Get Username)
 			$sql = "SELECT user_id,last_access from user_logins WHERE session_id='".$this->_ci->session->userdata('session_id')."'";			
 			$row = $this->_dao->execute(0,$sql)->row_array();
-			
-			if(!isset($row['user_id']))
+						
+			if(is_null($row['user_id']))
 			{
 				echo "
-					<script type='text/javascript'>
-						alert('Ada pengguna lain yang menggunakan login anda atau session anda telah expired, silahkan login kembali');						
-					</script>";
-				redirect('backoffice');
-				
+				<script type='text/javascript'>
+					alert('Ada pengguna lain yang menggunakan login anda atau session anda telah expired, silahkan login kembali');
+					document.location.href='".site_url('backoffice/login_page')."';
+				</script>";				
 			}
 			
-			$user_id = $data['user_id'];
-			$last_access = $data['last_access'];
+
+			$user_id = $row['user_id'];
+			$last_access = $row['last_access'];
 
 			/*=====================================================
 			AUTO LOG-OFF 15 MINUTES
@@ -162,17 +167,17 @@
 			$limit  = 60*30;
 			
 			if($diff>$limit)
-			{				
+			{
 	      		echo "
 					<script type='text/javascript'>
 						alert('Maaf status anda idle (tidak beraktifitas selama lebih dari 30 menit) dan session Anda telah expired, silahkan login kembali');
+						document.location.href='".site_url('backoffice/login_page')."';
 					</script>";
-				redirect('backoffice');	      		
 			}
 			else
 			{
 			    $sql="UPDATE user_logins SET last_access='".$usersec."' WHERE user_id='".$user_id."'";
-			    $result = $this->_dao->Execute(0,$sql);			    
+			    $result = $this->_dao->execute(0,$sql);			    
 			}
 		}
 
@@ -184,37 +189,23 @@
 			if($restriction != 'all')
 			{
 				$_restriction=strtolower($restriction."_priv");
-
-				$sql = "SELECT ".$_restriction." AS check_access FROM admin_privileges WHERE type_fk='".$type_fk."' AND nav_fk='".$type_fk."'";
-				$stmt = $this->_db->prepare($sql);
-				$stmt->Execute(array('type_fk'=>$type_fk,'nav_id'=>$nav_id));
-				$check_access = $stmt->fetchColumn();
-				
+				$sql = "SELECT ".$_restriction." AS check_access FROM admin_privileges WHERE type_fk='".$type_fk."' AND nav_fk='".$nav_id."'";;
+				$row = $this->_dao->execute(0,$sql)->row_array();
+				$check_access = $row['check_access'];
 				$access_granted=($check_access==1?true:false);
 			}
 			else
 			{
 				$access_granted=true;
 			}
-			
-
 			return $access_granted;
 		}
 
-		function get_menu_number($value)
-		{	
-			try{
-				$sql = "SELECT nav_id,folder_number FROM navigations WHERE(url=:val)";
-				$stmt = $this->_db->prepare($sql);
-				
-				$stmt->Execute(array('val'=>$value));
-				$data = $stmt->fetch();
-				$result = array($data['NAV_ID'],$data['FOLDER_NUMBER']);
-				
-			}catch(Exception $e){
-				$result = array();
-			}
-			return $result;
+		function get_nav_id($value)
+		{				
+			$sql = "SELECT nav_id FROM admin_navigations WHERE(url='".$value."')";
+			$row = $this->_dao->execute(0,$sql)->row_array();
+			return $row['nav_id'];
 		}
 	}
 ?>

@@ -13,20 +13,24 @@
 		}
 
 		function account(){
-			if(is_null($this->session->userdata('admin_id'))){
-				redirect('backoffice/login_page');
+			$this->aah->check_access();			
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/account');
+			$read_access = $this->aah->check_privilege('read',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			
+			if($read_access){
+				$data['form_id'] = 'account_form';	
+				$data['active_url'] = str_replace('::','/',__METHOD__);
+				$data['active_controller'] = $this->active_controller;
+				$data['update_access'] = $update_access;				
+				$this->backoffice_template->render($this->active_controller.'/account/index',$data);	
+			}else{
+				$this->error_403();
 			}
-
-			$data['form_id'] = 'account_form';	
-			$data['active_url'] = str_replace('::','/',__METHOD__);
-			$data['active_controller'] = $this->active_controller;
-			$this->backoffice_template->render($this->active_controller.'/account/index',$data);	
 		}
 
 		function school_latlang(){
-			if(is_null($this->session->userdata('admin_id'))){
-				redirect('backoffice/login_page');
-			}
+			$this->aah->check_access();
 
 			$this->global_model->reinitialize_dao();
 			$dao = $this->global_model->get_dao();
@@ -40,6 +44,7 @@
 		}
 
 		function set_school_latlang(){
+			$this->aah->check_access();
 
 			$this->load->model(array('sekolah_model'));
 
@@ -67,31 +72,41 @@
 		}
 
 		function update_account(){
-			$this->load->model(array('admins_model'));
+			$this->aah->check_access();
 
-			$username = $this->security->xss_clean($this->input->post('input_username'));
-			$password = md5($this->security->xss_clean($this->input->post('input_password')));			
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/account');
+			$update_access = $this->aah->check_privilege('update',$nav_id);
 
-			$m = $this->admins_model;
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
+			if($update_access)
+			{
+				$this->load->model(array('admins_model'));
 
-			if(!empty($username))
-				$m->set_username($username);
+				$username = $this->security->xss_clean($this->input->post('input_username'));
+				$password = md5($this->security->xss_clean($this->input->post('input_password')));			
 
-			$m->set_password($password);
-			$result = $dao->update($m,array('admin_id'=>$this->session->userdata('admin_id')));
-			if(!$result){
-				die('failed');
+				$m = $this->admins_model;
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+
+				if(!empty($username))
+					$m->set_username($username);
+
+				$m->set_password($password);			
+
+				$result = $dao->update($m,array('admin_id'=>$this->session->userdata('admin_id')));
+				if(!$result){
+					die('failed');
+				}
+
+				if(!empty($username)){
+					$dt_session['username'] = $username;
+					$this->session->set_userdata($dt_session);
+				}
+
+				echo 'success';
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk merubah data!';
 			}
-
-			if(!empty($username)){
-				$dt_session['username'] = $username;
-				$this->session->set_userdata($dt_session);
-			}
-
-			echo 'success';
-
 		}
 
 
@@ -111,13 +126,29 @@
 
 		//MANAGEMENT USER FUNCTION PACKET
 		function management_user(){
-			if(is_null($this->session->userdata('admin_id'))){
-				redirect('backoffice/login_page');
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/management_user');
+			$read_access = $this->aah->check_privilege('read',$nav_id);
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			if($read_access){
+				$data['active_url'] = str_replace('::','/',__METHOD__);
+				$data['containsTable'] = true;
+				
+				$data['add_access'] = $add_access;
+				
+				$data2['update_access'] = $update_access;
+				$data2['delete_access'] = $delete_access;
+				$data2['rows'] = $this->get_user_data();
+
+				$data['list_of_data'] = $this->load->view($this->active_controller.'/management_user/list_of_data',$data2,true);
+				$this->backoffice_template->render($this->active_controller.'/management_user/index',$data);
+			}else{
+				$this->error_403();
 			}
-			$data['active_url'] = str_replace('::','/',__METHOD__);
-			$data['containsTable'] = true;
-			$data['list_of_data'] = $this->load->view($this->active_controller.'/management_user/list_of_data',array('rows'=>$this->get_user_data()),true);
-			$this->backoffice_template->render($this->active_controller.'/management_user/index',$data);
 		}
 
 		function get_user_data(){
@@ -142,6 +173,8 @@
 		}
 
 		function load_user_form(){
+			$this->aah->check_access();
+
 			$this->load->model(array('admins_model'));
 			$this->global_model->reinitialize_dao();
 			$dao = $this->global_model->get_dao();
@@ -217,393 +250,831 @@
 		}		
 
 		function submit_user_data(){
-			$this->load->model(array('admins_model'));
+			$this->aah->check_access();
 
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
-
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/management_user');
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
 			$act = $this->input->post('act');
-			$id = $this->input->post('id');
-			$fullname = $this->security->xss_clean($this->input->post('input_fullname'));
-			$type_fk = $this->security->xss_clean($this->input->post('input_type_fk'));
-			$email = $this->security->xss_clean($this->input->post('input_email'));
-			$phone_number = $this->security->xss_clean($this->input->post('input_phone_number'));			
-			
-			$username = '';
-			if($act=='add' or ($act=='edit' and !is_null($this->input->post('check_username')))){
-				//check username
-				$username = $this->security->xss_clean($this->input->post('input_username'));
-				$row = $dao->execute(0,"SELECT COUNT(1) n_row FROM admins WHERE username='".$username."'")->row_array();
-				if($row['n_row']>0)
-				{
-					die('ERROR: username sudah terpakai');
+
+			if(($act=='add' and $add_access) or ($act=='edit' and $update_access))
+			{
+
+				$this->load->model(array('admins_model'));
+
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+
+				
+				$id = $this->input->post('id');
+				$fullname = $this->security->xss_clean($this->input->post('input_fullname'));
+				$type_fk = $this->security->xss_clean($this->input->post('input_type_fk'));
+				$email = $this->security->xss_clean($this->input->post('input_email'));
+				$phone_number = $this->security->xss_clean($this->input->post('input_phone_number'));			
+				
+				$username = '';
+				if($act=='add' or ($act=='edit' and !is_null($this->input->post('check_username')))){
+					//check username
+					$username = $this->security->xss_clean($this->input->post('input_username'));
+					$row = $dao->execute(0,"SELECT COUNT(1) n_row FROM admins WHERE username='".$username."'")->row_array();
+					if($row['n_row']>0)
+					{
+						die('ERROR: username sudah terpakai');
+					}
 				}
+
+				$password = '';
+				if($act=='add' or ($act=='edit' and !is_null($this->input->post('check_password')))){
+					$password = md5($this->security->xss_clean($this->input->post('input_password')));
+				}
+
+				$status = ($this->session->userdata('admin_type_id')!='3'?$this->input->post('input_status'):'1');
+							
+				$submit_user = $this->session->userdata('username');
+				$submit_time = date('Y-m-d H:i:s');
+				$modifiable = '1';
+
+				$m = $this->admins_model;
+
+				$m->set_fullname($fullname);
+				$m->set_type_fk($type_fk);
+				$m->set_email($email);
+				$m->set_phone_number($phone_number);
+
+				if(!empty($username))
+					$m->set_username($username);
+
+				if(!empty($password))
+					$m->set_password($password);
+
+				$m->set_status($status);
+
+				if($type_fk=='3' or $type_fk=='4'){
+					$sekolah_id = $this->security->xss_clean($this->input->post('input_sekolah_id'));
+					$m->set_sekolah_id($sekolah_id);
+				}
+
+				if($act=='add')
+				{
+					$m->set_created_by($submit_user);
+					$m->set_created_time($submit_time);
+					$m->set_modifiable($modifiable);
+
+					$result = $dao->insert($m);
+					$label = 'menyimpan';
+				}
+				else
+				{
+					$m->set_modified_by($submit_user);
+					$m->set_modified_time($submit_time);				
+
+					$result = $dao->update($m,array('admin_id'=>$id));
+					$label = 'merubah';
+				}
+
+				if(!$result)
+				{
+					die('ERROR: gagal '.$label.' data');
+				}
+
+				$data2['update_access'] = $update_access;
+				$data2['delete_access'] = $delete_access;
+				$data2['rows'] = $this->get_user_data();
+
+				$this->load->view($this->active_controller.'/management_user/list_of_data',$data2);
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk '.($act=='add'?'menambah':'merubah').' data!';
 			}
-
-			$password = '';
-			if($act=='add' or ($act=='edit' and !is_null($this->input->post('check_password')))){
-				$password = md5($this->security->xss_clean($this->input->post('input_password')));
-			}
-
-			$status = ($this->session->userdata('admin_type_id')!='3'?$this->input->post('input_status'):'1');
-						
-			$submit_user = $this->session->userdata('username');
-			$submit_time = date('Y-m-d H:i:s');
-			$modifiable = '1';
-
-			$m = $this->admins_model;
-
-			$m->set_fullname($fullname);
-			$m->set_type_fk($type_fk);
-			$m->set_email($email);
-			$m->set_phone_number($phone_number);
-
-			if(!empty($username))
-				$m->set_username($username);
-
-			if(!empty($password))
-				$m->set_password($password);
-
-			$m->set_status($status);
-
-			if($type_fk=='3' or $type_fk=='4'){
-				$sekolah_id = $this->security->xss_clean($this->input->post('input_sekolah_id'));
-				$m->set_sekolah_id($sekolah_id);
-			}
-
-			if($act=='add')
-			{
-				$m->set_created_by($submit_user);
-				$m->set_created_time($submit_time);
-				$m->set_modifiable($modifiable);
-
-				$result = $dao->insert($m);
-				$label = 'menyimpan';
-			}
-			else
-			{
-				$m->set_modified_by($submit_user);
-				$m->set_modified_time($submit_time);				
-
-				$result = $dao->update($m,array('admin_id'=>$id));
-				$label = 'merubah';
-			}
-
-			if(!$result)
-			{
-				die('ERROR: gagal '.$label.' data');
-			}
-
-			$this->load->view($this->active_controller.'/management_user/list_of_data',array('rows'=>$this->get_user_data()));
 		}
 
 		function delete_user_data(){
-			$this->load->model(array('admins_model'));
+			$this->aah->check_access();
 
-			$id = $this->input->post('id');
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/management_user');
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
 
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
+			if($delete_access)
+			{
+				$this->load->model(array('admins_model'));
 
-			$m = $this->admins_model;
-			$result = $dao->delete($m,array('admin_id'=>$id));
-			if(!$result){
-				die('ERROR: gagal menghapus data');
+				$id = $this->input->post('id');
+
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+
+				$m = $this->admins_model;
+				$result = $dao->delete($m,array('admin_id'=>$id));
+				if(!$result){
+					die('ERROR: gagal menghapus data');
+				}
+
+				$data2['update_access'] = $update_access;
+				$data2['delete_access'] = $delete_access;
+				$data2['rows'] = $this->get_user_data();
+
+				$this->load->view($this->active_controller.'/management_user/list_of_data',$data2);
+
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk menghapus data!';
 			}
-
-			$this->load->view($this->active_controller.'/management_user/list_of_data',array('rows'=>$this->get_user_data()));
 		}
 
 		//END OF MANAGEMENT USER FUNCTION PACKET
 
-		//SCHOOL FUNCTION PAKET
-		function school(){
-			if(is_null($this->session->userdata('admin_id'))){
-				redirect('backoffice/login_page');
-			}
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
-			$data['active_url'] = str_replace('::','/',__METHOD__);
-			$data['dt2_rows'] = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
-			$data['form_id'] = "search-school-form";
-			$data['active_controller'] = $this->active_controller;
-			$data['containsTable'] = true;
-			$this->backoffice_template->render($this->active_controller.'/school/index',$data);
-		}
 
-		function search_school_data(){
-			$search_dt2 = $this->input->post('search_dt2');
-			$data['list_of_data'] = $this->load->view($this->active_controller.'/school/list_of_data',
-														array('rows'=>$this->get_school_data($search_dt2),'search_dt2'=>$search_dt2),true);
-			$this->load->view($this->active_controller.'/school/data_view',$data);
-		}
+		//SCHEDULE FUNCTION PACKET
+		function schedule(){
+			$this->aah->check_access();
 
-		function get_school_data($dt2){
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
-			
-			$cond = "";
-			if(!empty($dt2))
-				$cond = "WHERE a.dt2_id='".$dt2."'";
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/schedule');
+			$read_access = $this->aah->check_privilege('read',$nav_id);
 
-			$sql = "SELECT a.*,b.nama_dt2,c.akronim as jenjang FROM sekolah as a 
-					LEFT JOIN ref_dt2 as b ON (a.dt2_id=b.dt2_id) 
-					LEFT JOIN ref_tipe_sekolah as c ON (a.tipe_sekolah_id=c.ref_tipe_sklh_id)
-					".$cond;
-			
-			$rows = $dao->execute(0,$sql)->result_array();
-			return $rows;
-		}
-
-		function load_school_form(){
-			$this->load->model(array('sekolah_model'));
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
-			
-			$act = $this->input->post('act');
-			$search_dt2 = $this->input->post('search_dt2');
-
-			$id_name = 'sekolah_id';
-
-		    $m = $this->sekolah_model;
-		    $id_value = ($act=='edit'?$this->input->post('id'):'');
-		    $curr_data = $dao->get_data_by_id($act,$m,$id_value);
-
-		    $dt2_opts = array();
-		    $sekolah_opts = array();		    
-
-		    $new_schoolId = $this->global_model->get_incrementID('sekolah_id','sekolah');
-
-		    $data['sekolah_id'] = ($act=='add'?$new_schoolId:$id_value);
-		    $data['jenjang_rows'] = $dao->execute(0,"SELECT * FROM ref_tipe_sekolah")->result_array();
-		    $data['dt2_rows'] = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
-		    $data['curr_data'] = $curr_data;
-		    $data['active_controller'] = $this->active_controller;
-		    $data['form_id'] = 'school-form';
-		    $data['id_value'] = $id_value;
-		    $data['act'] = $act;
-		    $data['search_dt2'] = $search_dt2;
-
-			$this->load->view($this->active_controller.'/school/form_content',$data);
-		}
-
-		function submit_school_data(){
-			$this->load->model(array('sekolah_model'));
-
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
-
-			$act = $this->input->post('act');
-			$search_dt2 = $this->input->post('search_dt2');
-
-			$tipe_sekolah_id = $this->security->xss_clean($this->input->post('input_tipe_sekolah_id'));
-			$nama_sekolah = $this->security->xss_clean($this->input->post('input_nama_sekolah'));
-			$dt2_id = $this->security->xss_clean($this->input->post('input_dt2_id'));
-			$alamat = $this->security->xss_clean($this->input->post('input_alamat'));
-			$telepon = $this->security->xss_clean($this->input->post('input_telepon'));
-			$email = $this->security->xss_clean($this->input->post('input_email'));				
-
-			$m = $this->sekolah_model;
-
-			$m->set_tipe_sekolah_id($tipe_sekolah_id);
-			$m->set_nama_sekolah($nama_sekolah);
-			$m->set_dt2_id($dt2_id);
-			$m->set_alamat($alamat);
-			$m->set_telepon($telepon);
-			$m->set_email($email);
-
-			if($act=='add')
+			if($read_access)
 			{
-				$sekolah_id = $this->security->xss_clean($this->input->post('input_sekolah_id'));
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+				$data['active_url'] = str_replace('::','/',__METHOD__);				
+				$data['form_id'] = "search-school-form";
+				$data['active_controller'] = $this->active_controller;
+				$data['containsTable'] = true;				
+
+				$this->backoffice_template->render($this->active_controller.'/schedule/index',$data);
+			}else{
+				$this->error_403();
+			}
+		}
+
 				
-				$m->set_sekolah_id($sekolah_id);
+		function load_schedule1(){
+			$this->load->helper(array('date_helper'));
 
-				$result = $dao->insert($m);
-				$label = 'menyimpan';
-			}
-			else
-			{
-				$id = $this->input->post('id');
-				$result = $dao->update($m,array('sekolah_id'=>$id));
-				$label = 'merubah';
-			}
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/schedule');
+			$update_access = $this->aah->check_privilege('update',$nav_id);
 
-			if(!$result)
-			{
-				die('ERROR: gagal '.$label.' data');
-			}
-
-			$this->load->view($this->active_controller.'/school/list_of_data',array('rows'=>$this->get_school_data($search_dt2),
-																					'search_dt2'=>$search_dt2));
-
-		}
-
-		function delete_school_data(){
-			$this->load->model(array('sekolah_model'));
-
-			$id = $this->input->post('id');
-			$search_dt2 = $this->input->post('search_dt2');
-
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
-
-			$m = $this->sekolah_model;
-			$result = $dao->delete($m,array('sekolah_id'=>$id));
-			if(!$result){
-				die('ERROR: gagal menghapus data');
-			}
-
-			$this->load->view($this->active_controller.'/school/list_of_data',array('rows'=>$this->get_school_data($search_dt2),
-																					'search_dt2'=>$search_dt2));
-		}
-
-		//END OF SCHOOL FUNCTION PACKET
-
-
-
-		//FIELD FUNCTION PAKET
-		function field(){
-			if(is_null($this->session->userdata('admin_id'))){
-				redirect('backoffice/login_page');
-			}
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
-			$data['active_url'] = str_replace('::','/',__METHOD__);
-			$data['dt2_rows'] = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
-			$data['form_id'] = "search-school-form";
-			$data['active_controller'] = $this->active_controller;
-			$data['containsTable'] = true;
-			$this->backoffice_template->render($this->active_controller.'/field/index',$data);
-		}
-
-		function search_field_data(){
-			$search_dt2 = $this->input->post('search_dt2');
-			$data['list_of_data'] = $this->load->view($this->active_controller.'/field/list_of_data',
-														array('rows'=>$this->get_field_data($search_dt2),'search_dt2'=>$search_dt2),true);
-			$this->load->view($this->active_controller.'/field/data_view',$data);
-		}
-
-		function get_field_data($dt2){
 			$this->global_model->reinitialize_dao();
 			$dao = $this->global_model->get_dao();
 			
-			$cond = "";
-			if(!empty($dt2))
-				$cond = "WHERE dt2_id='".$dt2."'";
-
-			$sql = "SELECT a.*,b.nama_sekolah FROM kompetensi_smk as a 
-					INNER JOIN (SELECT sekolah_id,nama_sekolah FROM sekolah ".$cond.") as b ON (a.sekolah_id=b.sekolah_id)";
+			$tipe_sekolah_rows = $dao->execute(0,"SELECT * FROM ref_tipe_sekolah")->result_array();
 			
-			$rows = $dao->execute(0,$sql)->result_array();
-			return $rows;
-		}
-
-		function load_field_form(){
-			$this->load->model(array('kompetensi_smk_model'));
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
+			$sql = "SELECT a.jalur_id,b.nama_jalur,c.tgl_buka,
+					c.tgl_tutup,c.jadwal_id FROM pengaturan_kuota_jalur as a 
+					LEFT JOIN ref_jalur_pendaftaran as b ON (a.jalur_id=b.ref_jalur_id)
+					LEFT JOIN jadwal_jalur_pendaftaran as c ON (a.tipe_sekolah_id=c.tipe_sklh_id AND a.jalur_id=c.jalur_id) 
+					WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND a.tipe_sekolah_id=?";
 			
-			$act = $this->input->post('act');
-			$search_dt2 = $this->input->post('search_dt2');
+			$dao->set_sql_with_params($sql);
+			$jadwal_dao = $dao;
 
-			$id_name = 'kompetensi_id';
+			$data['tipe_sekolah_rows'] = $tipe_sekolah_rows;
+			$data2['update_access'] = $update_access;
 
-		    $m = $this->kompetensi_smk_model;
-		    $id_value = ($act=='edit'?$this->input->post('id'):'');
-		    $curr_data = $dao->get_data_by_id($act,$m,$id_value);
+			$list_of_data = array();
+			$schedule_seq = 0;
+			foreach($tipe_sekolah_rows as $row){
+				$schedule_seq++;
 
-		    $dt2_opts = array();
-		    $sekolah_opts = array();		    
-
-		    $new_fieldId = $this->global_model->get_incrementID('kompetensi_id','kompetensi_smk');
-
-		    $sekolah_opts = array();
-		    $dt2_id = '';
-		    if($act=='edit'){
-		    	$row = $dao->execute(0,"SELECT dt2_id FROM sekolah WHERE sekolah_id='".$curr_data['sekolah_id']."'")->row_array();
-	    		$sql = "SELECT sekolah_id,nama_sekolah FROM sekolah 
-	    				WHERE dt2_id='".$row['dt2_id']."'";
-	    		$sekolah_opts = $dao->execute(0,$sql)->result_array();
-	    		$dt2_id = $row['dt2_id'];
-		    }
-
-		    $data['kompetensi_id'] = ($act=='add'?$new_fieldId:$id_value);
-		    $data['dt2_opts'] = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
-		    $data['sekolah_opts'] = $sekolah_opts;
-		    $data['dt2_id'] = $dt2_id;
-		    $data['curr_data'] = $curr_data;
-		    $data['active_controller'] = $this->active_controller;
-		    $data['form_id'] = 'field-form';
-		    $data['id_value'] = $id_value;
-		    $data['act'] = $act;
-		    $data['search_dt2'] = $search_dt2;
-
-			$this->load->view($this->active_controller.'/field/form_content',$data);
-		}
-
-		function submit_field_data(){
-			$this->load->model(array('kompetensi_smk_model'));
-
-			$this->global_model->reinitialize_dao();
-			$dao = $this->global_model->get_dao();
-
-			$act = $this->input->post('act');
-			$search_dt2 = $this->input->post('search_dt2');
-
-			$nama_kompetensi = $this->security->xss_clean($this->input->post('input_nama_kompetensi'));
-			$sekolah_id = $this->security->xss_clean($this->input->post('input_sekolah_id'));
-
-			$m = $this->kompetensi_smk_model;
-
-			$m->set_nama_kompetensi($nama_kompetensi);
-			$m->set_sekolah_id($sekolah_id);
-
-			if($act=='add')
-			{
-				$kompetensi_id = $this->security->xss_clean($this->input->post('input_kompetensi_id'));
+				$params = array($row['ref_tipe_sklh_id']);
+				$jadwal_dao->set_sql_params($params);
+				$rows = $jadwal_dao->execute(1)->result_array();
 				
-				$m->set_kompetensi_id($kompetensi_id);
-
-				$result = $dao->insert($m);				
-				$label = 'menyimpan';
-			}
-			else
-			{
-				$id = $this->input->post('id');
-				$result = $dao->update($m,array('kompetensi_id'=>$id));
-				$label = 'merubah';
+				$data2['schedule_seq'] = $schedule_seq;
+				$data2['rows'] = $rows;
+				$data2['tipe_sekolah_id'] = $row['ref_tipe_sklh_id'];
+				$list_of_data[$schedule_seq] = $this->load->view($this->active_controller.'/schedule/list_schedule1',$data2,true);
 			}
 
-			if(!$result)
-			{
-				die('ERROR: gagal '.$label.' data');
-			}
-
-			$this->load->view($this->active_controller.'/field/list_of_data',array('rows'=>$this->get_field_data($search_dt2),
-																					'search_dt2'=>$search_dt2));
-
+			$data['list_of_data'] = $list_of_data;
+			$this->load->view($this->active_controller.'/schedule/schedule1',$data);
 		}
 
-		function delete_field_data(){
-			$this->load->model(array('kompetensi_smk_model'));
+		function load_schedule2(){
+			$this->load->helper(array('date_helper'));
 
-			$id = $this->input->post('id');
-			$search_dt2 = $this->input->post('search_dt2');
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/schedule');
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);			
+			
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();			
+
+			$tipe_sekolah_rows = $dao->execute(0,"SELECT * FROM ref_tipe_sekolah")->result_array();			
+			
+			$sql = "SELECT a.jadwal_id,b.nama_jalur,a.kegiatan,
+					a.lokasi,a.tgl_buka,a.tgl_tutup,a.keterangan FROM jadwal_kegiatan_pendaftaran as a 
+					LEFT JOIN ref_jalur_pendaftaran as b ON (a.jalur_id=b.ref_jalur_id)
+					WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND a.tipe_sklh_id=?";
+						
+			$dao->set_sql_with_params($sql);
+			$jadwal_dao = $dao;
+
+			$data['tipe_sekolah_rows'] = $tipe_sekolah_rows;			
+			
+			$data2['update_access'] = $update_access;
+			$data2['delete_access'] = $delete_access;
+			$data2['add_access'] = $add_access;
+
+			$list_of_data = array();
+			$schedule_seq = 0;
+			foreach($tipe_sekolah_rows as $row){
+				$schedule_seq++;
+
+				$params = array($row['ref_tipe_sklh_id']);
+				$jadwal_dao->set_sql_params($params);
+				$rows = $jadwal_dao->execute(1)->result_array();
+				
+				$data2['schedule_seq'] = $schedule_seq;
+				$data2['rows'] = $rows;
+				$data2['tipe_sekolah_id'] = $row['ref_tipe_sklh_id'];
+				$list_of_data[$schedule_seq] = $this->load->view($this->active_controller.'/schedule/list_schedule2',$data2,true);
+			}
+
+			$data['list_of_data'] = $list_of_data;
+			$this->load->view($this->active_controller.'/schedule/schedule2',$data);
+		}
+
+		function load_schedule_form(){
+			$this->load->helper('date_helper');
+
+			$this->aah->check_access();
 
 			$this->global_model->reinitialize_dao();
 			$dao = $this->global_model->get_dao();
 
-			$m = $this->kompetensi_smk_model;
-			$result = $dao->delete($m,array('kompetensi_id'=>$id));
-			if(!$result){
-				die('ERROR: gagal menghapus data');
+			$type = $this->input->post('type');
+			$act = $this->input->post('act');
+			$id_value = ($act=='edit'?$this->input->post('id'):'');
+			$schedule_seq = $this->input->post('schedule_seq');
+			$tipe_sekolah_id = $this->input->post('tipe_sekolah_id');
+
+			$data = array();
+			$jalur_opts = array();
+			
+			if($type=='1'){				
+				$this->load->model(array('jadwal_jalur_pendaftaran_model'));
+				$m = $this->jadwal_jalur_pendaftaran_model;	    		
+			}else{
+				$this->load->model(array('jadwal_kegiatan_pendaftaran_model'));
+				$m = $this->jadwal_kegiatan_pendaftaran_model;
+				$jalur_opts = $dao->execute(0,"SELECT * FROM pengaturan_kuota_jalur as a LEFT JOIN ref_jalur_pendaftaran as b 
+											   ON (a.jalur_id=b.ref_jalur_id) WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."' 
+											   AND tipe_sekolah_id='".$tipe_sekolah_id."'")->result_array();
 			}
 
-			$this->load->view($this->active_controller.'/field/list_of_data',array('rows'=>$this->get_field_data($search_dt2),
-																					'search_dt2'=>$search_dt2));
+			
+    		$curr_data = $dao->get_data_by_id($act,$m,$id_value);
+    		
+    		$data['curr_data'] = $curr_data;
+    		$data['form_id'] = 'form-schedule'.$type;
+    		$data['id_value'] = $id_value;
+    		$data['schedule_seq'] = $schedule_seq;
+    		$data['act'] = $act;
+			$data['active_controller'] = $this->active_controller;
+			$data['jalur_opts'] = $jalur_opts;
+			$data['tipe_sekolah_id'] = $tipe_sekolah_id;
+
+			$this->load->view($this->active_controller.'/schedule/form_schedule'.$type,$data);
 		}
 
-		//END OF FIELD FUNCTION PACKET
+		function submit_schedule_data(){
+			$this->aah->check_access();
+			$this->load->helper('date_helper');
 
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/schedule');
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			$act = $this->input->post('act');
+
+			if(($act=='add' and $add_access) or ($act=='edit' and $update_access))
+			{
+
+				$type = $this->input->post('type');
+				$id = $this->input->post('id');
+				$tipe_sekolah_id = $this->input->post('tipe_sekolah_id');
+				$schedule_seq = $this->input->post('schedule_seq');
+				
+
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+
+				if($type=='1'){
+					$this->load->model(array('jadwal_jalur_pendaftaran_model'));
+					$tgl_buka = us_date_format($this->security->xss_clean($this->input->post('input_tgl_buka')));
+					$tgl_tutup = us_date_format($this->security->xss_clean($this->input->post('input_tgl_tutup')));
+
+					$m = $this->jadwal_jalur_pendaftaran_model;
+
+					$m->set_tgl_buka($tgl_buka);
+					$m->set_tgl_tutup($tgl_tutup);
+
+					$result = $dao->update($m,array('jadwal_id'=>$id));
+					if(!$result){
+						die('ERROR: gagal merubah data');
+					}
+
+
+					$sql = "SELECT a.jalur_id,b.nama_jalur,c.tgl_buka,
+							c.tgl_tutup,c.jadwal_id FROM pengaturan_kuota_jalur as a 
+							LEFT JOIN ref_jalur_pendaftaran as b ON (a.jalur_id=b.ref_jalur_id)
+							LEFT JOIN jadwal_jalur_pendaftaran as c ON (a.tipe_sekolah_id=c.tipe_sklh_id AND a.jalur_id=c.jalur_id) 
+							WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND tipe_sekolah_id='".$tipe_sekolah_id."'";
+
+					$data['update_access'] = $update_access;
+					$data['schedule_seq'] = $schedule_seq;
+					$data['tipe_sekolah_id'] = $tipe_sekolah_id;
+					$data['rows'] = $dao->execute(0,$sql)->result_array();
+
+					$this->load->view($this->active_controller.'/schedule/list_schedule1',$data);
+
+				}else{
+					$this->load->model(array('jadwal_kegiatan_pendaftaran_model'));
+
+					$jalur_id = $this->security->xss_clean($this->input->post('input_jalur_id'));
+					$tipe_sekolah_id = $this->security->xss_clean($this->input->post('tipe_sekolah_id'));
+					$kegiatan = $this->security->xss_clean($this->input->post('input_kegiatan'));
+					$lokasi = $this->security->xss_clean($this->input->post('input_lokasi'));
+					$tgl_buka = us_date_format($this->security->xss_clean($this->input->post('input_tgl_buka')));
+					$tgl_tutup = us_date_format($this->security->xss_clean($this->input->post('input_tgl_tutup')));
+					$keterangan = $this->security->xss_clean($this->input->post('input_keterangan'));
+
+					$m = $this->jadwal_kegiatan_pendaftaran_model;
+					$m->set_jalur_id($jalur_id);
+					$m->set_kegiatan($kegiatan);
+					$m->set_lokasi($lokasi);
+					$m->set_tgl_buka($tgl_buka);
+					$m->set_tgl_tutup($tgl_tutup);
+					$m->set_keterangan($keterangan);
+
+					if($act=='add'){
+						$m->set_tipe_sklh_id($tipe_sekolah_id);
+						$m->set_thn_pelajaran($this->_SYS_PARAMS[0]);
+						$result = $dao->insert($m);
+					}else{
+						$result = $dao->update($m,array('jadwal_id'=>$id));
+					}
+
+					if(!$result)
+					{
+						die('ERROR: gagal '.$label.' data');
+					}
+
+					$sql = "SELECT a.jadwal_id,b.nama_jalur,a.kegiatan,
+							a.lokasi,a.tgl_buka,a.tgl_tutup,a.keterangan FROM jadwal_kegiatan_pendaftaran as a 
+							LEFT JOIN ref_jalur_pendaftaran as b ON (a.jalur_id=b.ref_jalur_id)
+							WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND a.tipe_sklh_id='".$tipe_sekolah_id."'";
+					
+					$data['add_access'] = $add_access;			
+					$data['update_access'] = $update_access;
+					$data['delete_access'] = $delete_access;
+					$data['schedule_seq'] = $schedule_seq;
+					$data['tipe_sekolah_id'] = $tipe_sekolah_id;
+					$data['rows'] = $dao->execute(0,$sql)->result_array();
+
+					$this->load->view($this->active_controller.'/schedule/list_schedule2',$data);
+
+				}
+
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk '.($act=='add'?'menambah':'merubah').' data!';
+			}
+		}
+
+		function delete_schedule_data(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/schedule');
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			if($delete_access)
+			{
+				$this->load->helper('date_helper');
+				$type = $this->input->post('type');	
+				$schedule_seq = $this->input->post('schedule_seq');
+				$tipe_sekolah_id = $this->input->post('tipe_sekolah_id');
+				
+				$this->load->model(array('jadwal_kegiatan_pendaftaran_model'));
+				$m = $this->jadwal_kegiatan_pendaftaran_model;
+
+				$id = $this->input->post('id');
+
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+
+				$result = $dao->delete($m,array('jadwal_id'=>$id));
+
+				if(!$result){
+					die('ERROR: gagal menghapus data');
+				}
+								
+				$sql = "SELECT a.jadwal_id,b.nama_jalur,a.kegiatan,
+						a.lokasi,a.tgl_buka,a.tgl_tutup,a.keterangan FROM jadwal_kegiatan_pendaftaran as a 
+						LEFT JOIN ref_jalur_pendaftaran as b ON (a.jalur_id=b.ref_jalur_id)
+						WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND a.tipe_sklh_id='".$tipe_sekolah_id."'";
+				
+				$data['add_access'] = $add_access;			
+				$data['update_access'] = $update_access;
+				$data['delete_access'] = $delete_access;
+				$data['schedule_seq'] = $schedule_seq;
+				$data['tipe_sekolah_id'] = $tipe_sekolah_id;
+				$data['rows'] = $dao->execute(0,$sql)->result_array();
+
+				$this->load->view($this->active_controller.'/schedule/list_schedule2',$data);
+
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk menghapus data!';
+			}
+		}
+
+		//END OF SCHEDULE FUNCTION PACKET
+
+
+
+		//QUOTA FUNCTION PACKET
+		function quota(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/quota');
+			$read_access = $this->aah->check_privilege('read',$nav_id);
+
+			if($read_access)
+			{
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+				$data['active_url'] = str_replace('::','/',__METHOD__);
+				$data['form_id'] = "search-school-form";
+				$data['active_controller'] = $this->active_controller;
+				$data['containsTable'] = true;
+				$this->backoffice_template->render($this->active_controller.'/quota/index',$data);
+			}else{
+				$this->error_403();
+			}
+		}
+
+				
+		function load_quota1(){
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/quota');
+			$update_access = $this->aah->check_privilege('update',$nav_id);			
+			
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();			
+
+			$tipe_sekolah_rows = $dao->execute(0,"SELECT * FROM ref_tipe_sekolah")->result_array();
+			
+			$sql = "SELECT a.*,b.nama_jalur,c.nama_ktg_jalur 
+					FROM pengaturan_kuota_jalur as a 
+					LEFT JOIN ref_jalur_pendaftaran as b ON (a.jalur_id=b.ref_jalur_id)
+					LEFT JOIN ref_ktg_jalur_pendaftaran as c ON (a.ktg_jalur_id=c.ktg_jalur_id) 					
+					WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND a.tipe_sekolah_id=?";
+			
+			$dao->set_sql_with_params($sql);
+			$jadwal_dao = $dao;
+
+			$data['tipe_sekolah_rows'] = $tipe_sekolah_rows;
+			$data2['update_access'] = $update_access;
+
+			$list_of_data = array();
+			$quota_seq = 0;
+			foreach($tipe_sekolah_rows as $row){
+				$quota_seq++;
+
+				$params = array($row['ref_tipe_sklh_id']);
+				$jadwal_dao->set_sql_params($params);
+				$rows = $jadwal_dao->execute(1)->result_array();
+				
+				$data2['quota_seq'] = $quota_seq;
+				$data2['rows'] = $rows;
+				$data2['tipe_sekolah_id'] = $row['ref_tipe_sklh_id'];
+				$data2['tipe_sekolah'] = $row['akronim'];
+				$list_of_data[$quota_seq] = $this->load->view($this->active_controller.'/quota/list_quota1',$data2,true);
+			}
+
+			$data['list_of_data'] = $list_of_data;
+			$this->load->view($this->active_controller.'/quota/quota1',$data);
+		}
+
+		function load_quota2(){
+			
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/quota');
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+						
+			$sql = "SELECT a.pengaturan_kuota_id,a.jml_rombel,a.jml_siswa_rombel,(a.jml_rombel*a.jml_siswa_rombel) as jml_diterima,
+					a.kuota_domisili,a.kuota_afirmasi,a.kuota_akademik,a.kuota_prestasi,a.kuota_khusus,a.jml_kuota,
+					b.nama_sekolah FROM pengaturan_kuota_sma as a 
+					LEFT JOIN sekolah as b ON (a.sekolah_id=b.sekolah_id)
+					WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."'";			
+			$rows = $dao->execute(0,$sql)->result_array();
+
+			$data2['update_access'] = $update_access;
+			$data2['delete_access'] = $delete_access;
+			$data2['add_access'] = $add_access;			
+			$data2['rows'] = $rows;
+
+			$list_of_data = $this->load->view($this->active_controller.'/quota/list_quota2',$data2,true);
+
+			$data['list_of_data'] = $list_of_data;
+			$this->load->view($this->active_controller.'/quota/quota2',$data);
+		}
+
+		function load_quota3(){
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/quota');
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+						
+			$sql = "SELECT a.pengaturan_kuota_id,a.jml_rombel,a.jml_siswa_rombel,(a.jml_rombel*a.jml_siswa_rombel) as jml_diterima,
+					a.kuota_domisili,a.kuota_afirmasi,a.kuota_akademik,a.kuota_prestasi,a.kuota_khusus,a.jml_kuota,
+					b.nama_sekolah,c.nama_kompetensi FROM pengaturan_kuota_smk as a 
+					LEFT JOIN sekolah as b ON (a.sekolah_id=b.sekolah_id)
+					LEFT JOIN kompetensi_smk as c ON (a.kompetensi_id=c.kompetensi_id)
+					WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."'";
+
+			$rows = $dao->execute(0,$sql)->result_array();
+
+			$data2['update_access'] = $update_access;
+			$data2['delete_access'] = $delete_access;
+			$data2['add_access'] = $add_access;			
+			$data2['rows'] = $rows;
+
+			$list_of_data = $this->load->view($this->active_controller.'/quota/list_quota3',$data2,true);
+
+			$data['list_of_data'] = $list_of_data;
+			$this->load->view($this->active_controller.'/quota/quota2',$data);
+		}
+
+		function load_quota_form(){
+			$this->load->helper('date_helper');
+
+			$this->aah->check_access();
+
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+
+			$type = $this->input->post('type');
+			$act = $this->input->post('act');
+			$id_value = ($act=='edit'?$this->input->post('id'):'');			
+
+			$data = array();			
+			
+			
+
+			if($type=='1'){				
+
+				$quota_seq = $this->input->post('quota_seq');
+				$tipe_sekolah_id = $this->input->post('tipe_sekolah_id');
+				$tipe_sekolah = $this->input->post('tipe_sekolah');
+
+				$this->load->model(array('pengaturan_kuota_jalur_model'));
+				$m = $this->pengaturan_kuota_jalur_model;
+				$curr_data = $dao->get_data_by_id($act,$m,$id_value);
+
+				$sql = "SELECT SUM(jml_rombel*jml_siswa_rombel) as daya_tampung FROM pengaturan_kuota_".($tipe_sekolah_id=='1'?'sma':'smk');
+				$row = $dao->execute(0,$sql)->row_array();
+
+				$data['daya_tampung'] = $row['daya_tampung'];
+				$data['tipe_sekolah_id'] = $tipe_sekolah_id;
+				$data['tipe_sekolah'] = $tipe_sekolah;
+				$data['quota_seq'] = $quota_seq;
+
+
+			}else if($type=='2'){
+				$this->load->model(array('pengaturan_kuota_sma_model'));
+				$m = $this->pengaturan_kuota_sma_model;
+				
+				$curr_data = $dao->get_data_by_id($act,$m,$id_value);
+
+				$dt2_id = "";
+				$sekolah_opts = array();
+
+				if($act=='edit'){
+					$row = $dao->execute(0,"SELECT dt2_id FROM sekolah WHERE sekolah_id='".$curr_data['sekolah_id']."'")->row_array();
+					$dt2_id = $row['dt2_id'];
+					$sekolah_opts = $dao->execute(0,"SELECT sekolah_id,nama_sekolah FROM sekolah WHERE dt2_id='".$dt2_id."'")->result_array();
+				}
+
+				$data['dt2_opts'] = $dao->execute(0,"SELECT * FROM ref_dt2")->result_array();
+				$data['sekolah_opts'] = $sekolah_opts;
+				$data['dt2_id'] = $dt2_id;
+
+			}else{
+				$this->load->model(array('pengaturan_kuota_smk_model'));
+				$m = $this->pengaturan_kuota_smk_model;
+				
+				$curr_data = $dao->get_data_by_id($act,$m,$id_value);
+
+				$dt2_id = "";
+				$sekolah_opts = array();
+
+				if($act=='edit'){
+					$row = $dao->execute(0,"SELECT dt2_id FROM sekolah WHERE sekolah_id='".$curr_data['sekolah_id']."'")->row_array();
+					$dt2_id = $row['dt2_id'];
+					$sekolah_opts = $dao->execute(0,"SELECT sekolah_id,nama_sekolah FROM sekolah WHERE dt2_id='".$dt2_id."'")->result_array();
+				}
+
+				$data['dt2_opts'] = $dao->execute(0,"SELECT * FROM ref_dt2")->result_array();
+				$data['sekolah_opts'] = $sekolah_opts;
+				$data['dt2_id'] = $dt2_id;
+			}    	
+
+    		$data['curr_data'] = $curr_data;
+    		$data['form_id'] = 'form-quota'.$type;
+    		$data['id_value'] = $id_value;
+    		$data['act'] = $act;
+			$data['active_controller'] = $this->active_controller;
+
+			$this->load->view($this->active_controller.'/quota/form_quota'.$type,$data);
+		}
+
+		function submit_quota_data(){
+			$this->aah->check_access();
+			$this->load->helper('date_helper');
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/quota');
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			$act = $this->input->post('act');
+
+			if(($act=='add' and $add_access) or ($act=='edit' and $update_access))
+			{
+
+				$type = $this->input->post('type');
+				$id = $this->input->post('id');
+				$tipe_sekolah_id = $this->input->post('tipe_sekolah_id');
+				$tipe_sekolah = $this->input->post('tipe_sekolah');
+				$quota_seq = $this->input->post('quota_seq');
+
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+
+				if($type=='1'){
+					$this->load->model(array('pengaturan_kuota_jalur_model'));
+
+					$jml_sekolah = str_replace(',','',$this->security->xss_clean($this->input->post('input_jml_sekolah')));
+					$persen_kuota = str_replace(',','',$this->security->xss_clean($this->input->post('input_persen_kuota')));
+					$jumlah_kuota = str_replace(',','',$this->security->xss_clean($this->input->post('input_jumlah_kuota')));
+
+					$m = $this->pengaturan_kuota_jalur_model;
+
+					$m->set_jml_sekolah($jml_sekolah);
+					$m->set_persen_kuota($persen_kuota);
+					$m->set_jumlah_kuota($jumlah_kuota);
+
+					$result = $dao->update($m,array('pengaturan_kuota_id'=>$id));
+					if(!$result){
+						die('ERROR: gagal merubah data');
+					}
+
+					$sql = "SELECT a.*,b.nama_jalur,c.nama_ktg_jalur 
+							FROM pengaturan_kuota_jalur as a 
+							LEFT JOIN ref_jalur_pendaftaran as b ON (a.jalur_id=b.ref_jalur_id)
+							LEFT JOIN ref_ktg_jalur_pendaftaran as c ON (a.ktg_jalur_id=c.ktg_jalur_id) 					
+							WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND a.tipe_sekolah_id='".$tipe_sekolah_id."'";
+
+					$data['quota_seq'] = $quota_seq;
+					$data['rows'] = $dao->execute(0,$sql)->result_array();
+					$data['tipe_sekolah_id'] = $tipe_sekolah_id;
+					$data['tipe_sekolah'] = $tipe_sekolah;
+					$data['update_access'] = $update_access;
+					
+					$this->load->view($this->active_controller.'/quota/list_quota1',$data);
+
+				}else if($type=='2'){
+					$this->load->model(array('pengaturan_kuota_sma_model'));
+
+					$sekolah_id = $this->security->xss_clean($this->input->post('input_sekolah_id'));
+					$jml_rombel = str_replace(',','',$this->security->xss_clean($this->input->post('input_jml_rombel')));
+					$jml_siswa_rombel = str_replace(',','',$this->security->xss_clean($this->input->post('input_jml_siswa_rombel')));
+					$kuota_domisili = str_replace(',','',$this->security->xss_clean($this->input->post('input_kuota_domisili')));
+					$kuota_afirmasi = str_replace(',','',$this->security->xss_clean($this->input->post('input_kuota_afirmasi')));
+					$kuota_akademik = str_replace(',','',$this->security->xss_clean($this->input->post('input_kuota_akademik')));
+					$kuota_prestasi = str_replace(',','',$this->security->xss_clean($this->input->post('input_kuota_prestasi')));
+					$kuota_khusus = str_replace(',','',$this->security->xss_clean($this->input->post('input_kuota_khusus')));
+					$jml_kuota = str_replace(',','',$this->security->xss_clean($this->input->post('input_jml_kuota')));
+
+					$m = $this->pengaturan_kuota_sma_model;
+
+					$m->set_sekolah_id($sekolah_id);
+					$m->set_jml_rombel($jml_rombel);
+					$m->set_jml_siswa_rombel($jml_siswa_rombel);
+					$m->set_kuota_domisili($kuota_domisili);
+					$m->set_kuota_afirmasi($kuota_afirmasi);
+					$m->set_kuota_akademik($kuota_akademik);
+					$m->set_kuota_prestasi($kuota_prestasi);
+					$m->set_kuota_khusus($kuota_khusus);
+					$m->set_jml_kuota($jml_kuota);
+
+					if($act=='add'){						
+						$m->set_thn_pelajaran($this->_SYS_PARAMS[0]);
+						$result = $dao->insert($m);
+					}else{
+						$result = $dao->update($m,array('pengaturan_kuota_id'=>$id));
+					}
+
+					if(!$result)
+					{
+						die('ERROR: gagal '.$label.' data');
+					}
+
+					$sql = "SELECT a.pengaturan_kuota_id,a.jml_rombel,a.jml_siswa_rombel,(a.jml_rombel*a.jml_siswa_rombel) as jml_diterima,
+							a.kuota_domisili,a.kuota_afirmasi,a.kuota_akademik,a.kuota_prestasi,a.kuota_khusus,a.jml_kuota,
+							b.nama_sekolah FROM pengaturan_kuota_sma as a 
+							LEFT JOIN sekolah as b ON (a.sekolah_id=b.sekolah_id)
+							WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."'";
+
+					$rows = $dao->execute(0,$sql)->result_array();
+
+					$data['update_access'] = $update_access;
+					$data['delete_access'] = $delete_access;
+					$data['add_access'] = $add_access;			
+					$data['rows'] = $rows;
+
+					$this->load->view($this->active_controller.'/quota/list_quota2',$data);					
+				}
+				else
+				{
+
+				}
+
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk '.($act=='add'?'menambah':'merubah').' data!';
+			}
+		}
+
+		function delete_quota_data(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/schedule');
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			if($delete_access)
+			{
+				$this->load->helper('date_helper');
+				$type = $this->input->post('type');	
+				$id = $this->input->post('id');
+
+
+				if($type=='2')
+				{
+					$this->load->model(array('pengaturan_kuota_sma_model'));
+					$m = $this->pengaturan_kuota_sma_model;
+				}else{
+					$this->load->model(array('pengaturan_kuota_smk_model'));
+					$m = $this->pengaturan_kuota_smk_model;
+				}
+				
+
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+
+				$result = $dao->delete($m,array('pengaturan_kuota_id'=>$id));
+
+				if(!$result){
+					die('ERROR: gagal menghapus data');
+				}
+
+				if($type=='2'){
+					$sql = "SELECT a.pengaturan_kuota_id,a.jml_rombel,a.jml_siswa_rombel,(a.jml_rombel*a.jml_siswa_rombel) as jml_diterima,
+							a.kuota_domisili,a.kuota_afirmasi,a.kuota_akademik,a.kuota_prestasi,a.kuota_khusus,a.jml_kuota,
+							b.nama_sekolah FROM pengaturan_kuota_sma as a 
+							LEFT JOIN sekolah as b ON (a.sekolah_id=b.sekolah_id)
+							WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."'";
+
+					$rows = $dao->execute(0,$sql)->result_array();
+
+					$data['update_access'] = $update_access;
+					$data['delete_access'] = $delete_access;
+					$data['add_access'] = $add_access;			
+					$data['rows'] = $rows;					
+				}else{
+
+				}
+
+				$this->load->view($this->active_controller.'/quota/list_quota'.$type,$data);
+
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk menghapus data!';
+			}
+		}
+
+		//END OF QUOTA FUNCTION PACKET
 	}
 ?>

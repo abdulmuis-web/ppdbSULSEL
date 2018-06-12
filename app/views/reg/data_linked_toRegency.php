@@ -36,7 +36,7 @@
 		$output .= "<tr><td align='center'>".$i."</td>";
 	
 		if($lintas_dt2!='0'){
-			$output .= "<td><select name='input_dt2_sekolah_tujuan".$i."' id='input_dt2_sekolah_tujuan".$i."' 
+			$output .= "<td><div id='cont_input_dt2_sekolah_tujuan".$i."'><select name='input_dt2_sekolah_tujuan".$i."' id='input_dt2_sekolah_tujuan".$i."' 
 			onchange=\"get_destSchools($(this).val(),'".$dt2_id."','".$tipe_sekolah."','".$lintas_dt2."','".$i."');\" class='form-control' required>";
 
 			$output .= "<option value=''></option>";
@@ -46,7 +46,7 @@
 
 				$output .= "<option value='".$row['dt2_sekolah_id']."' ".$selected.">".$row['nama_dt2'].$keterangan."</option>";
 			}
-			$output .= "</select></td>";
+			$output .= "</select></div></td>";
 		}
 		
 		$output .= "<td><div id='dest-school-loader".$i."' style='display:none'><img src='".$this->config->item('img_path')."ajax-loaders/ajax-loader-1.gif'/></div>

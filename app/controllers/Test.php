@@ -553,5 +553,16 @@
 			
 		}
 
+		function check_status_dateRange(){
+
+			$this->load->helper('date_helper');
+
+			$date1 = '2018-06-08';
+			$date2 = '2018-06-10';
+
+			$status = check_status_dateRange($date1,$date2);
+			echo $status;
+		}
+
 	}
 ?>

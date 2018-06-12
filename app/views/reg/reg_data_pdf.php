@@ -26,16 +26,18 @@
 			 <tr><td>Sekolah Asal</td><td class='bor-right'>".$sekolah_asal."</td></tr>
 			 <tr><td>Alamat</td><td class='bor-right'>".$alamat."</td></tr>
 			 <tr><td>Kecamatan</td><td class='bor-right'>".$kecamatan."</td></tr>						
-			 <tr><td>Kota/Kab.</td><td class='bor-right'>".$nm_dt2."</td></tr>
+			 <tr><td>Kab./Kota</td><td class='bor-right'>".$nm_dt2."</td></tr>
 			 <tr><td>Jalur Pendaftaran</td><td class='bor-right'>".$jalur_pendaftaran['nama_jalur']."</td></tr>
 			 <tr><td>Jenjang Sekolah Pilihan</td><td class='bor-right'>".$tipe_sekolah['nama_tipe_sekolah']." (".$tipe_sekolah['akronim'].")</td></tr>
-			 <tr><td valign='top' class='bor-bottom'>Sekolah Pilihan</td><td class='bor-right bor-bottom'><ol type='1'>";
+			 <tr><td valign='top'>Sekolah Pilihan</td><td class='bor-right'><ol type='1'>";
 
 	foreach($sekolah_pilihan_arr as $item){
 		$html .= "<li>".$item."</li>";
 	}
 	$html .= "</ol></td></tr>
+			  <tr><td class='bor-bottom'>Tgl. Pendaftaran</td><td class='bor-right bor-bottom'>".indo_date_format($tgl_pendaftaran,'longDate')."</td></tr>
 			  </tbody></table>
+			  <small>No. Seri : ".$no_seri."</small>
 			 </div></body></html>";
 	
 	$mpdf->SetTitle('Data Registrasi');
