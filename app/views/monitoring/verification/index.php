@@ -121,7 +121,7 @@
 
 		for(i=1;i<=n;i++)
 		{
-			url.push(base_url+'monitoring/first_load');
+			url.push(base_url+'monitoring/load_counter');
 			loaders.push('#loader-counter'+i);
 			contents.push('#content-counter'+i);
 			_data_ajax = ['jalur_id='+$('#jalur_id'+i).val(),'status=3','i='+i];

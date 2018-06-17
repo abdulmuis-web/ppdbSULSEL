@@ -88,15 +88,12 @@
 		    $m = $this->sekolah_model;
 		    $id_value = ($act=='edit'?$this->input->post('id'):'');
 		    $curr_data = $dao->get_data_by_id($act,$m,$id_value);
-
-		    $dt2_opts = array();
-		    $sekolah_opts = array();		    
-
+		    
 		    $new_schoolId = $this->global_model->get_incrementID('sekolah_id','sekolah');
 
 		    $data['sekolah_id'] = ($act=='add'?$new_schoolId:$id_value);
-		    $data['jenjang_rows'] = $dao->execute(0,"SELECT * FROM ref_tipe_sekolah")->result_array();
-		    $data['dt2_rows'] = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
+		    $data['jenjang_opts'] = $dao->execute(0,"SELECT * FROM ref_tipe_sekolah")->result_array();
+		    $data['dt2_opts'] = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
 		    $data['curr_data'] = $curr_data;
 		    $data['active_controller'] = $this->active_controller;
 		    $data['form_id'] = 'school-form';
@@ -410,8 +407,6 @@
 
 		//END OF FIELD FUNCTION PACKET
 
-
-
 		function reset_registration(){
 			$this->aah->check_access();
 			
@@ -625,8 +620,16 @@
 			$dao = $this->global_model->get_dao();
 
 			$m1 = $this->pendaftaran_model;
-			$m2 = $this->pendaftaran_sekolah_pilihan_model;
-			$m3 = $this->pendaftaran_kompetensi_pilihan_model;
+			if($tipe_sekolah_id=='1')
+			{
+				$m2 = $this->pendaftaran_sekolah_pilihan_model;
+				$condM2 = array('id_pendaftaran'=>$id_pendaftaran,'sekolah_id'=>$sekolah_id);
+			}
+			else
+			{
+				$m2 = $this->pendaftaran_kompetensi_pilihan_model;
+				$condM2 = array('id_pendaftaran'=>$id_pendaftaran,'kompetensi_id'=>$sekolah_id);
+			}
 
 			$this->db->trans_begin();
 
@@ -636,23 +639,14 @@
 				$this->db->trans_rollback();
 				die('ERROR: gagal mendaftar ulang');
 			}
-
-
+						
 			$m2->set_status('5');
-			$result = $dao->update($m2,array('id_pendaftaran'=>$id_pendaftaran,'sekolah_id'=>$sekolah_id));
+			$result = $dao->update($m2,$condM2);
 			if(!$result){
 				$this->db->trans_rollback();
 				die('ERROR: gagal mendaftar ulang');
 			}
-
-			if($tipe_sekolah_id=='2'){
-				$m3->set_status('5');
-				$result = $dao->update($m3,array('id_pendaftaran'=>$id_pendaftaran,'kompetensi_id'=>$kompetensi_id));
-				if(!$result){
-					$this->db->trans_rollback();
-					die('ERROR: gagal mendaftar ulang');
-				}
-			}
+			
 
 			//insert registration log
 			$m = $this->log_status_pendaftaran_model;
@@ -812,30 +806,28 @@
 			}
 
 
-			$status_pendaftaran = (!$status1 || !$status2 || !$status3?'2':'1');
+			$status_pendaftaran = (!$status1 || !$status2 || !$status3?'2':'1');			
 
-			$m = $this->pendaftaran_sekolah_pilihan_model;
-			if($tipe_sekolah_id=='1' and $tipe_jalur=='1')
-				$m->set_jarak_sekolah($jarak);						
-
-			$m->set_status('1');
-			$m->set_status($status_pendaftaran);
-			$result = $dao->update($m,array('id_pendaftaran'=>$id_pendaftaran,'sekolah_id'=>$sekolah_id));
-			if(!$result){
-				$this->db->trans_rollback();
-				die('ERROR: gagal menyimpan verifikasi');
+			if($tipe_sekolah_id=='1')
+			{
+				$m = $this->pendaftaran_sekolah_pilihan_model;
+				if($tipe_sekolah_id=='1' and $tipe_jalur=='1')
+					$m->set_jarak_sekolah($jarak);
+				$m->set_status('1');
+				$m->set_status($status_pendaftaran);
+				$result = $dao->update($m,array('id_pendaftaran'=>$id_pendaftaran,'sekolah_id'=>$sekolah_id));				
 			}
-
-
-			if($tipe_sekolah_id=='2'){
+			else
+			{
 				$m = $this->pendaftaran_kompetensi_pilihan_model;
 				$m->set_status('1');
 				$m->set_status($status_pendaftaran);
-				$result = $dao->update($m,array('id_pendaftaran'=>$id_pendaftaran,'kompetensi_id'=>$kompetensi_id));
-				if(!$result){
-					$this->db->trans_rollback();
-					die('ERROR: gagal menyimpan verifikasi');
-				}
+				$result = $dao->update($m,array('id_pendaftaran'=>$id_pendaftaran,'kompetensi_id'=>$kompetensi_id));				
+			}
+
+			if(!$result){
+				$this->db->trans_rollback();
+				die('ERROR: gagal menyimpan verifikasi');
 			}
 
 			//insert registration log
@@ -892,6 +884,30 @@
 			
 		}
 
+		function get_quota($jalur_id,$tipe_sekolah_id,$sekolah_id,$kompetensi_id,$dao){
+
+			if($tipe_sekolah_id=='1')
+			{
+				$sql = "SELECT * FROM pengaturan_kuota_sma
+						WHERE sekolah_id='".$sekolah_id."' AND thn_pelajaran='".$this->_SYS_PARAMS[0]."'";
+			}else{
+				$sql = "SELECT * FROM pengaturan_kuota_smk
+						WHERE sekolah_id='".$sekolah_id."' AND kompetensi_id='".$kompetensi_id."' AND thn_pelajaran='".$this->_SYS_PARAMS[0]."'";
+			}
+			$kuota_row = $dao->execute(0,$sql)->row_array();
+
+			switch($jalur_id){
+				case '1':$kuota = $kuota_row['kuota_domisili'];break;
+				case '2':$kuota = $kuota_row['kuota_afirmasi'];break;
+				case '3':$kuota = $kuota_row['kuota_akademik'];break;
+				case '4':$kuota = $kuota_row['kuota_prestasi'];break;
+				case '5':$kuota = $kuota_row['kuota_khusus'];break;
+				default:$kuota=0;
+			}
+
+			return $kuota;
+		}
+
 		function ranking_process(){			
 
 			$this->load->helper(array('mix_helper','date_helper'));
@@ -921,39 +937,27 @@
 			$sekolah_pilihan_ke = $this->input->post('ranking_sekolah_pilihan_ke');
 			$tgl_verifikasi = $this->input->post('ranking_tgl_verifikasi');
 
-			if($tipe_sekolah_id=='1')
-			{
-				$sql = "SELECT kuota_domisili,kuota_afirmasi,kuota_akademik,kuota_prestasi,kuota_khusus FROM pengaturan_kuota_sma
-						WHERE sekolah_id='".$sekolah_id."' AND thn_pelajaran='".$this->_SYS_PARAMS[0]."'";
-			}else{
-				$sql = "SELECT kuota_domisili,kuota_afirmasi,kuota_akademik,kuota_prestasi,kuota_khusus FROM pengaturan_kuota_smk
-						WHERE sekolah_id='".$sekolah_id."' AND kompetensi_id='".$kompetensi_id."' AND thn_pelajaran='".$this->_SYS_PARAMS[0]."'";
-			}
-			$kuota_row = $dao->execute(0,$sql)->row_array();
-
-			switch($jalur_id){
-				case '1':$kuota = $kuota_row['kuota_domisili'];break;
-				case '2':$kuota = $kuota_row['kuota_afirmasi'];break;
-				case '3':$kuota = $kuota_row['kuota_akademik'];break;
-				case '4':$kuota = $kuota_row['kuota_prestasi'];break;
-				case '5':$kuota = $kuota_row['kuota_khusus'];break;
-				default:$kuota=0;
-			}
+			$kuota = $this->get_quota($jalur_id,$tipe_sekolah_id,$sekolah_id,$kompetensi_id,$dao);
 
 			$this->db->trans_begin();
 
 			$m1 = $this->hasil_seleksi_model;
-			$m2 = $this->pendaftaran_sekolah_pilihan_model;
-			$m3 = $this->pendaftaran_kompetensi_pilihan_model;
+			if($tipe_sekolah_id=='1')
+			{
+				$m2 = $this->pendaftaran_sekolah_pilihan_model;
+				$condM2 = array('sekolah_id'=>$sekolah_id);
+
+			}else{
+				$m2 = $this->pendaftaran_kompetensi_pilihan_model;
+				$condM2 = array('kompetensi_id'=>$kompetensi_id);
+			}
 
 			$this->rank->set_dbAccess_needs($id_pendaftaran,$sekolah_id,$tipe_sekolah_id,$kompetensi_id,$jalur_id,$this->_SYS_PARAMS[0],$dao);
-			
 			$opponents = $this->rank->set_opponents(1);			
-			
 			$myReg = $this->rank->set_myReg(1);
 			
 			if(!$myReg or !$opponents){
-				
+				$db->trans_rollback();
 				die('ERROR: gagal menetapkan peringkat');
 			}
 			
@@ -969,21 +973,18 @@
 
 			$this->rank->process();
 
-			$m1->set_jalur_id($jalur_id);
-			$m1->set_sekolah_id($sekolah_id);
-			$m1->set_tipe_sekolah_id($tipe_sekolah_id);
-			$m1->set_kompetensi_id($kompetensi_id);
-			$m1->set_thn_pelajaran($this->_SYS_PARAMS[0]);
-
 			$result = $dao->delete($m1,array('sekolah_id'=>$sekolah_id,'kompetensi_id'=>$kompetensi_id,'jalur_id'=>$jalur_id));
 			if(!$result){
 				$this->db->trans_rollback();
 				die('ERROR: gagal menetapkan peringkat');
 			}			
 
-			$condM2 = array('sekolah_id'=>$sekolah_id);
-			if($tipe_sekolah_id=='2')
-				$condM3 = array('kompetensi_id'=>$kompetensi_id);
+			$m1->set_jalur_id($jalur_id);
+			$m1->set_sekolah_id($sekolah_id);
+			$m1->set_tipe_sekolah_id($tipe_sekolah_id);
+			$m1->set_kompetensi_id($kompetensi_id);
+			$m1->set_thn_pelajaran($this->_SYS_PARAMS[0]);
+			
 
 			$idPendaftaran_arr = array();
 
@@ -1004,20 +1005,20 @@
 						$this->db->trans_rollback();
 						die('ERROR: gagal menetapkan peringkat');
 					}
-
+										
 					$condM2['id_pendaftaran'] = $row['id_pendaftaran'];
-					$m2->set_status(($row['peringkat']<=$kuota?'3':'4'));
-					$result = $dao->update($m2,$condM2);
+					$status = ($row['peringkat']<=$kuota?'3':'4');
+
+					$m2->set_status($status);
+					$result = $dao->update($m2,$condM2);					
+
 					if(!$result){
 						$this->db->trans_rollback();
 						die('ERROR: gagal menetapkan peringkat');
 					}
 
-					if($tipe_sekolah_id=='2')
-					{
-						$condM3['id_pendaftaran'] = $row['id_pendaftaran'];
-						$m3->set_status(($row['peringkat']<=$kuota?'3':'4'));
-						$result = $dao->update($m3,$condM3);
+					if($status=='4'){
+						$result = $this->set_reg_status($row['id_pendaftaran'],$tipe_sekolah_id,$sekolah_id,$kompetensi_id);
 						if(!$result){
 							$this->db->trans_rollback();
 							die('ERROR: gagal menetapkan peringkat');
@@ -1043,7 +1044,6 @@
 				$this->db->trans_rollback();
 				die('ERROR: gagal menyimpan verifikasi');
 			}
-
 
 			$this->db->trans_commit();
 
@@ -1076,6 +1076,30 @@
 
 			$this->load->view($this->active_controller.'/verification/ranking_result',$data);
 
+		}
+
+		function set_reg_status($regid,$tipe_sekolah_id,$sekolah_id,$kompetensi_id){
+			$this->load->model(array('pendaftaran_model'));
+
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+
+			$table = ($tipe_sekolah_id=='1'?'pendaftaran_sekolah_pilihan':'pendaftaran_kompetensi_pilihan');
+			$field = ($tipe_sekolah_id=='1'?'sekolah_id':'kompetensi_id');
+			$value = ($tipe_sekolah_id=='1'?$sekolah_id:$kompetensi_id);
+
+			$sql = "SELECT status FROM ".$table." WHERE id_pendaftaran='".$regid."' AND ".$field."<>'".$value."'";
+
+			$rows = $dao->execute(0,$sql)->result_array();
+
+			$occurrences = array_count_values(array_column($rows,'status'));
+			$result = true;
+			if(isset($occurrences[4]) && count($rows)==$occurrences[4]){
+				$m = $this->pendaftaran_model;
+				$m->set_status('3');
+				$result = $dao->update($m,array('id_pendaftaran'=>$regid));
+			}
+			return $result;
 		}
 
 		function search_verification(){
@@ -1290,7 +1314,7 @@
 						LEFT JOIN (SELECT x.nama,x.id_pendaftaran,x.alamat,x.sekolah_asal,x.no_pendaftaran,x.jk,y.nama_dt2 FROM pendaftaran as x 
 							LEFT JOIN ref_dt2 as y ON (x.dt2_id=y.dt2_id)) as b ON (a.id_pendaftaran=b.id_pendaftaran)
 						LEFT JOIN kompetensi_smk as c ON (a.kompetensi_id=c.kompetensi_id) 
-						LEFT JOIN pendaftaran_jalur_pilihan as c ON (a.id_pendaftaran=d.id_pendaftaran)";
+						LEFT JOIN pendaftaran_jalur_pilihan as d ON (a.id_pendaftaran=d.id_pendaftaran)";
 			}
 
 			$sql .= $cond;			
@@ -1319,39 +1343,108 @@
 
 			$this->load->model(array('pendaftaran_kompetensi_pilihan_model','pendaftaran_sekolah_pilihan_model',
 									 'log_status_pendaftaran_model','hasil_seleksi_model'));
+			$this->load->library('PPDB_ranking','','rank');
+
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+
 			$id_pendaftaran = $this->input->post('id_pendaftaran');
 			$kompetensi_id = $this->input->post('kompetensi_id');
 			$jalur_id = $this->input->post('jalur_id');
+			$sekolah_id = $this->session->userdata('sekolah_id');
+			$tipe_sekolah_id = $this->session->userdata('tipe_sekolah');
 
-			$dao = $this->global_model->get_dao();
+			$kuota = $this->get_quota($jalur_id,$tipe_sekolah_id,$sekolah_id,$kompetensi_id,$dao);
 
-			$this->db->trans_begin();			
+			$this->db->trans_begin();
 
 			if($this->session->userdata('tipe_sekolah')=='1')
 			{	
-				$m2 = $this->pendaftaran_sekolah_pilihan_model;			
-				$cond1 = array('id_pendaftaran'=>$id_pendaftaran);
-				$cond2 = array('id_pendaftaran'=>$id_pendaftaran,'sekolah_id'=>$this->session->userdata('sekolah_id'));
+				$m2 = $this->pendaftaran_sekolah_pilihan_model;
+				$cond = array('id_pendaftaran'=>$id_pendaftaran,'sekolah_id'=>$this->session->userdata('sekolah_id'));
+
+				$row = $dao->execute(0,"SELECT * FROM pengaturan_kuota_sma WHERE thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND sekolah_id='".$sekolah_id."'")->row_array();
+
 			}else{
 				$m2 = $this->pendaftaran_kompetensi_pilihan_model;
-				$cond1 = array('id_pendaftaran'=>$id_pendaftaran,'kompetensi_id'=>$kompetensi_id);
-				$cond2 = $cond1;
+				$cond = array('id_pendaftaran'=>$id_pendaftaran,'kompetensi_id'=>$kompetensi_id);				
 			}
 
-			$m1 = $this->hasil_seleksi_model;			
-			$result = $dao->delete($m1,$cond1);
+			//model hasil_seleksi_model
+			$m1 = $this->hasil_seleksi_model;
+
+			$result = $dao->delete($m1,$cond);
 			if(!$result){
 				$this->db->trans_rollback();
 				die('failed');
 			}
 
 			$m2->set_status('0');
-			$result = $dao->update($m2,$cond2);
+			$result = $dao->update($m2,$cond);
 			if(!$result){
 				$this->db->trans_rollback();
 				die('failed');
 			}
 
+			//re-arrange rating
+			$this->rank->set_dbAccess_needs($id_pendaftaran,$sekolah_id,$tipe_sekolah_id,$kompetensi_id,$jalur_id,$this->_SYS_PARAMS[0],$dao);
+			$opponents = $this->rank->set_opponents(1);
+
+			if(!$opponents){
+				$this->db->trans_rollback();
+				die('failed');
+			}
+
+			//delete current hasil_seleksi
+			$result = $dao->delete($m1,array('sekolah_id'=>$sekolah_id,'kompetensi_id'=>$kompetensi_id,'jalur_id'=>$jalur_id));
+			if(!$result){
+				$this->db->trans_rollback();
+				die('failed');
+			}
+
+			$this->rank->re_arrange();
+
+			$m1->set_jalur_id($jalur_id);
+			$m1->set_sekolah_id($sekolah_id);
+			$m1->set_tipe_sekolah_id($tipe_sekolah_id);
+			$m1->set_kompetensi_id($kompetensi_id);
+			$m1->set_thn_pelajaran($this->_SYS_PARAMS[0]);
+			
+			if($tipe_sekolah_id=='1')
+				$condM2 = array('sekolah_id'=>$sekolah_id);
+			else
+				$condM2 = array('kompetensi_id'=>$kompetensi_id);
+
+			$idPendaftaran_arr = array();
+			foreach($this->rank->get_rankList() as $row){
+				
+				if(!in_array($row['id_pendaftaran'],$idPendaftaran_arr))
+				{
+					$idPendaftaran_arr[] = $row['id_pendaftaran'];
+
+					$hasil_id = $this->global_model->get_incrementID('hasil_id','hasil_seleksi');
+					$m1->set_hasil_id($hasil_id);
+					$m1->set_id_pendaftaran($row['id_pendaftaran']);
+					$m1->set_pilihan_ke($row['pilihan_ke']);
+					$m1->set_score($row['score']);
+					$m1->set_peringkat($row['peringkat']);
+					$result = $dao->insert($m1);
+					if(!$result){
+						$this->db->trans_rollback();
+						die('failed');
+					}
+
+					$condM2['id_pendaftaran'] = $row['id_pendaftaran'];
+					$m2->set_status(($row['peringkat']<=$kuota?'3':'4'));
+					$result = $dao->update($m2,$condM2);
+					if(!$result){
+						$this->db->trans_rollback();
+						die('ERROR: gagal menetapkan peringkat');
+					}
+
+				}
+			}
+			
 			//insert registration log
 			$m = $this->log_status_pendaftaran_model;
 
@@ -1369,8 +1462,6 @@
 				$this->db->trans_rollback();
 				die('failed');
 			}
-
-
 
 			$this->db->trans_commit();
 
@@ -1513,6 +1604,22 @@
 			$data = $this->get_administration_result($decoded_regid,'3',$decoded_fieldid);
 
 			$this->load->view($this->active_controller.'/settlement/print_settlement',$data);
+		}
+
+		function input_registration(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/school');
+			$read_access = $this->aah->check_privilege('read',$nav_id);
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+
+			$data['active_url'] = str_replace('::','/',__METHOD__);
+			$data['form_id'] = "input-registration-form";
+			$data['active_controller'] = $this->active_controller;
+			$data['containsTable'] = false;
+			$data['add_access'] = $add_access;
+
+			$this->backoffice_template->render($this->active_controller.'/input_registration/form',$data);
 		}
 	}
 ?>

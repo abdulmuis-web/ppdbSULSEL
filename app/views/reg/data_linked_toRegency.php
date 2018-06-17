@@ -51,7 +51,7 @@
 		
 		$output .= "<td><div id='dest-school-loader".$i."' style='display:none'><img src='".$this->config->item('img_path')."ajax-loaders/ajax-loader-1.gif'/></div>
 					<div id='cont_input_sekolah_tujuan".$i."'>
-					<select name='input_sekolah_tujuan".$i."' class='form-control' ".($i==1?'required':'').">";
+					<select name='input_sekolah_tujuan".$i."' id='input_sekolah_tujuan".$i."' class='form-control' ".($i==1?'required':'').">";
 
 		$output .= "<option value=''></option>";
 
@@ -68,7 +68,7 @@
 
 			$output .= "<td><div id='dest-field-loader".$i."' style='display:none'><img src='".$this->config->item('img_path')."ajax-loaders/ajax-loader-1.gif'/></div>
 						<div id='cont_input_kompetensi_tujuan".$i."'>
-						<select name='input_kompetensi_tujuan".$i."' class='form-control' ".($i==1?'required':'')."><option value=''>- Pilih SMK lebih dulu -</option></select></div></td>";
+						<select name='input_kompetensi_tujuan".$i."' id='input_kompetensi_tujuan".$i."' class='form-control' ".($i==1?'required':'')."><option value=''>- Pilih SMK lebih dulu -</option></select></div></td>";
 		}
 
 		echo "</tr>";

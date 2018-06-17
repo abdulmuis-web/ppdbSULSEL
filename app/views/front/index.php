@@ -39,7 +39,7 @@
 
                         echo "
                         <div class='col-lg-".$cw." col-md-".$cw." wow flipInY' data-wow-delay='.8s'>
-                            <div class='packages' style='min-height:42  0px'>
+                            <div class='packages' style='min-height:420px'>
                                 <h4>".$alp.". ".$row1['nama_tipe_sekolah']." (".$row1['akronim'].")</h4><br />
                                 <ol type='1' align='left'>";
                                     foreach($rows2 as $row2){

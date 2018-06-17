@@ -89,7 +89,7 @@
 
 					if($row['type_fk']=='3' or $row['type_fk']=='4'){
 						
-						$row2 = $this->_dao->execute(0,"SELECT a.tipe_sekolah_id,a.latitude,a.longitude,a.nama_sekolah,b.nama_dt2 
+						$row2 = $this->_dao->execute(0,"SELECT a.dt2_id,a.tipe_sekolah_id,a.latitude,a.longitude,a.nama_sekolah,b.nama_dt2 
 														FROM sekolah as a LEFT JOIN ref_dt2 as b ON (a.dt2_id=b.dt2_id) 
 														WHERE sekolah_id='".$row['sekolah_id']."'")->row_array();
 
@@ -98,7 +98,8 @@
 						$dt_session['tipe_sekolah'] = $row2['tipe_sekolah_id'];
 						$dt_session['latitude'] = $row2['latitude'];
 						$dt_session['longitude'] = $row2['longitude'];
-						$dt_session['dt2'] = $row2['nama_dt2'];
+						$dt_session['dt2_id'] = $row2['dt2_id'];
+						$dt_session['nama_dt2'] = $row2['nama_dt2'];
 
 					}
 

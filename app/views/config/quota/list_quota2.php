@@ -13,6 +13,7 @@
 				  <input type='hidden' id='ajax-req-dt' name='type' value='2'/>
 				  <i class='fa fa-plus'></i> Tambah</a>&nbsp;";
 
+			/*
 			if($update_access)
 				echo "<a id='autoConfig-button2' onclick=\"load_form_autoConfig(this.id)\" class='btn btn-default btn-xs' data-toggle='modal' data-target='#remoteModal'>";
 			else
@@ -21,11 +22,12 @@
 			echo "<input type='hidden' name='act' value='add' id='ajax-req-dt'/>
 				  <input type='hidden' id='ajax-req-dt' name='type' value='2'/>
 				  <i class='fa fa-gear'></i> Pengaturan Otomatis</a>";
-
+			*/
 		echo "</div>
 	</div>
 	<table id='data-table-jq2' class='table table-bordered'>
 		<thead>
+			<th>No.</th>
 			<th>Nama Sekolah</th>
 			<th>Jml. Diterima</th>			
 			<th>Domisili</th>
@@ -41,6 +43,7 @@
 			foreach($rows as $row){
 				$no++;				
 				echo "<tr>
+				<td align='center'>".$no."</td>
 				<td>".$row['nama_sekolah']."</td>
 				<td align='right'>".number_format($row['jml_diterima'])."</td>
 				<td align='right'>".number_format($row['kuota_domisili'])."</td>
@@ -70,7 +73,7 @@
 	            	<input type='hidden' id='ajax-req-dt' name='id' value='".$row['pengaturan_kuota_id']."'/>
 	            	<input type='hidden' id='ajax-req-dt' name='type' value='2'/>
 	            	<input type='hidden' id='ajax-req-dt' name='act' value='delete'/>
-	            	<i class='fa fa-trash-o'></i></a>&nbsp
+	            	<i class='fa fa-trash-o'></i></a>
 				</td></tr>";
 			}
 		echo "</tbody>

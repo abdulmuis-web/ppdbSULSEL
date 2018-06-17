@@ -39,7 +39,7 @@
 								<img src="<?=$this->config->item('img_path');?>ajax-loaders/ajax-loader-1.gif"/>
 							</div>
 							<div id="content_input_sekolah_id">
-								<select name="input_sekolah_id" id="input_sekolah_id" class="form-control" required>
+								<select name="input_sekolah_id" id="input_sekolah_id" onchange="get_fields(this.value)" class="form-control" required>
 									<option value=""><?=($act=='add'?"-- Pilih Kab./Kota lebih dulu --":"");?></option>
 									<?php
 										foreach($sekolah_opts as $opt){
@@ -177,7 +177,7 @@
         if(quota3_stat.checkForm())
         {        	
         	ajax_object.reset_object();
-            ajax_object.set_content('#list_quota2')
+            ajax_object.set_content('#list_quota3')
                            .set_loading('#preloadAnimation')
                            .enable_pnotify()
                            .set_form($quota3_form)
@@ -209,7 +209,13 @@
 
     function get_schools(dt2_id){
 		ajax_object.reset_object();
-		var data_ajax = new Array('dt2_id='+dt2_id,'tipe_sekolah_id=1');
+		var data_ajax = new Array('dt2_id='+dt2_id,'tipe_sekolah_id=2','onchange=true');
         ajax_object.set_url($('#baseUrl').val()+'config/get_schools').set_data_ajax(data_ajax).set_loading('#loader_input_sekolah_id').set_content('#content_input_sekolah_id').request_ajax();
+	}
+
+	function get_fields(sekolah_id){
+		ajax_object.reset_object();
+		var data_ajax = new Array('sekolah_id='+sekolah_id);
+        ajax_object.set_url($('#baseUrl').val()+'config/get_fields').set_data_ajax(data_ajax).set_loading('#loader_input_kompetensi_id').set_content('#content_input_kompetensi_id').request_ajax();
 	}
 </script>

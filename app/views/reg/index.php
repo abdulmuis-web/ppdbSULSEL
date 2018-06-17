@@ -34,8 +34,6 @@
 			            	</li>";
 	            	}
 	            ?>
-	            
-	            
 	        </ul>
 
 	    </nav>
@@ -58,6 +56,7 @@
 	                </div>
 	                <div class='collapse navbar-collapse' id='bs-example-navbar-collapse-1'>
 	                    <ul class='nav navbar-nav navbar-left' id='tab-menu'>
+	                        
 	                        <!--li>
 	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this);\" id='tab-menu1'>
 	                        		<input type='hidden' id='ajax-req-dt' name='tab_id' value='0'/>
@@ -66,6 +65,7 @@
 	                        		<i class='fa fa-info-circle'></i> 
 	                        		<b>Panduan</b></a>
 	                        </li -->
+
 	                        <li>
 	                        	<a href='javascript:;' class='active' onclick=\"tabMenu_navigation(this,'Aturan');\" id='tab-menu2'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='1'/>
@@ -80,13 +80,15 @@
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
 	                        	<i class='fa fa-calendar'></i> <b>Jadwal</b></a>
 	                        </li>
-	                        <li>
+	                        
+	                        <!--li>
 	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this,'Prosedur');\" id='tab-menu4'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='3'/>
                         		<input type='hidden' id='ajax-req-dt' name='stage' value='".$stage."'/>
                         		<input type='hidden' id='ajax-req-dt' name='path' value='".$path."'/>
 	                        	<i class='fa fa-check-circle'></i> <b>Prosedur</b></a>
-	                        </li>
+	                        </li-->
+
 	                        <li>
 	                        	<a href='javascript:;' onclick=\"tabMenu_navigation(this,'Daftar');\" id='tab-menu5'>
 	                        	<input type='hidden' id='ajax-req-dt' name='tab_id' value='4'/>

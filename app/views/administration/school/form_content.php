@@ -30,7 +30,7 @@
 							<select name="input_tipe_sekolah_id" id="input_tipe_sekolah_id" class="form-control" required>
 								<option value=""></option>
 								<?php
-								foreach($jenjang_rows as $row){
+								foreach($jenjang_opts as $row){
 									$selected = ($row['ref_tipe_sklh_id']==$curr_data['tipe_sekolah_id']?'selected':'');
 									echo "<option value='".$row['ref_tipe_sklh_id']."' ".$selected.">".$row['nama_tipe_sekolah']." (".$row['akronim'].")</option>";
 								}
@@ -56,7 +56,7 @@
 							<select name="input_dt2_id" id="input_dt2_id" class="form-control" required>
 								<option value=""></option>
 								<?php
-								foreach($dt2_rows as $row){
+								foreach($dt2_opts as $row){
 									$selected = ($row['dt2_id']==$curr_data['dt2_id']?'selected':'');
 									echo "<option value='".$row['dt2_id']."' ".$selected.">".$row['nama_dt2']."</option>";
 								}
@@ -118,8 +118,11 @@
                     error.insertAfter(element.parent());
                 }
     	});
+   
+    var act = "<?=$act;?>";
 
     $school_form.submit(function(){
+    	var lbl_act = (act=='add'?'menambah':'merubah')+' data';
         if(school_stat.checkForm())
         {        	
         	ajax_object.reset_object();
@@ -127,7 +130,7 @@
                            .set_loading('#preloadAnimation')
                            .enable_pnotify()
                            .set_form($school_form)
-                           .submit_ajax('');
+                           .submit_ajax(lbl_act);
             $('#close-modal-form').click();
             return false;
         }

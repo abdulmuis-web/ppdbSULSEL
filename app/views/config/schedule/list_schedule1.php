@@ -3,7 +3,7 @@
 	echo "
 	<table class='table table-bordered'>
 		<thead>
-			<tr><th>Nama Jalur</th><th>Tgl. Buka</th><th>Tgl. Tutup</th><th>Status</th><th>Aksi</th></tr>
+			<tr><th>No.</th><th>Nama Jalur</th><th>Tgl. Buka</th><th>Tgl. Tutup</th><th>Status</th><th>Aksi</th></tr>
 		</thead>
 		<tbody>";
 			$no = 0;
@@ -15,7 +15,9 @@
 					case 'on':$lbl_status="<font color='green'>Sedang berlangsung</font>";break;
 					case 'finish':$lbl_status="<font color='red'>Tutup</font>";break;
 				}
-				echo "<tr><td>".$row['nama_jalur']."</td><td>".indo_date_format($row['tgl_buka'],'shortDate')."</td>
+				echo "<tr>
+				<td align='center'>".$no."</td>
+				<td>".$row['nama_jalur']."</td><td>".indo_date_format($row['tgl_buka'],'shortDate')."</td>
 				<td>".indo_date_format($row['tgl_tutup'],'shortDate')."</td>
 				<td>".$lbl_status."</td>
 				<td align='center'>";

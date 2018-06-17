@@ -440,11 +440,12 @@
 				<div class="col-md-12">
 					<hr></hr>
 					<center>
-						<button type="submit" class="btn btn-success" id="submit-btn"><i class="fa fa-save"></i> Submit</button><br /><br />
+						<button type="submit" class="btn btn-success" id="submit-btn"><i class="fa fa-save"></i> Submit</button><br /><br />					
+
 						<div id="submit-loader" style="display:none">
 							<img src="<?=$this->config->item('img_path');?>ajax-loaders/ajax-loader-1.gif"/> Data sedang dikirim ke Server ... !!
 						</div>
-						<div id="submit-notify" style="display:none"></div>
+						<div id="submit-notify" style="display:none;color:red"></div>
 					</center>
 				</div>
 			</div>
@@ -466,7 +467,7 @@
 		                        <div class="col-lg-6 col-md-6">&nbsp;</div>
 		                        <div class="col-lg-6 col-md-6">
 		                            <button type="button" class="btn btn-default" onclick="$('#input_persetujuan').prop('checked',true)" data-dismiss="modal"><i class="fa fa-check"></i> Setuju</button>
-		                            <button type="button" class="btn btn-default" onclick="$('#input_persetujuan').prop('checked',false)" data-dismiss="modal"><i class="fa fa-times"></i> Tidak Setuju</button>
+		                            <button type="button" class="btn btn-default" onclick="$('#input_persetujuan').prop('checked',false)" data-dismiss="modal"><i class="fa fa-times"></i> Tidak Setuju</button>		                            
 		                        </div>
 		                    </div>  
 		                </div>
@@ -506,9 +507,31 @@
    		return true;
    	}
 
-   	function validate_choosen(){
+   	function validate_chosen(){
    		var stage = $('#input_tipe_sekolah').val();
    		var n = $('#input_jml_sekolah').val();
+   		var input_name = (stage=='1'?'input_sekolah_tujuan':'input_kompetensi_tujuan');
+
+   		var chosen = [];
+   		var status = true;
+   		for(i=1;i<=n;i++){
+
+   			val = $('#'+input_name+i).val();   			
+
+   			if(chosen.indexOf(val)<0 || chosen.length==0)
+			{
+				chosen.push(val);				
+			}else{
+				status = false;
+				break;
+			}
+   		}
+
+   		if(!status){
+   			alert((stage=='1'?'Sekolah':'Kompetensi')+' pilihan harus berbeda!');
+   			return false;
+   		}
+   		return true;
    	}
 
     $(function() {
@@ -536,51 +559,53 @@
 
             if(stat.checkForm())
             {
-
-            	if(validate_checkboxes('input_tingkat_kejuaraan',path))
+            	if(validate_chosen())
             	{
-	            	if($('#input_persetujuan').prop('checked')==true)
+	            	if(validate_checkboxes('input_tingkat_kejuaraan',path))
 	            	{
-	            		if(confirm('Anda yakin data inputan sudah benar?'))
-	            		{
-			                $.ajax({
-			                  type:'POST',
-			                  url:$reg_form.attr('action'),
-			                  data:$reg_form.serialize(),
-			                  beforeSend:function(){    
-			                  	$submitNotify.hide();
-			                    $submitLoader.show();
-			                    $submitBtn.attr('disabled',true);
-			                  },
-			                  success:function(data){                    
+		            	if($('#input_persetujuan').prop('checked')==true)
+		            	{
+		            		if(confirm('Anda yakin data inputan sudah benar?'))
+		            		{
+				                $.ajax({
+				                  type:'POST',
+				                  url:$reg_form.attr('action'),
+				                  data:$reg_form.serialize(),
+				                  beforeSend:function(){    
+				                  	$submitNotify.hide();
+				                    $submitLoader.show();
+				                    $submitBtn.attr('disabled',true);
+				                  },
+				                  success:function(data){                    
 
-			                    error=/ERROR/;
+				                    error=/ERROR/;
 
-			                    if(data=='failed' || data.match(error))
-			                    {
-			                        if(data=='failed')
-			                        {
-			                            content_box = "Data gagal dikirim, silahkan ulangi lagi !";
-			                        }else{
-			                            x = data.split(':');
-			                            content_box = x[1].trim();
-			                        }
-			                        
-			                        $submitLoader.hide();
-			                        $submitNotify.html(content_box);
-			                        $submitNotify.show();
-			                        $submitBtn.attr('disabled',false);
-			                    }else{
+				                    if(data=='failed' || data.match(error))
+				                    {
+				                        if(data=='failed')
+				                        {
+				                            content_box = "Data gagal dikirim, silahkan ulangi lagi !";
+				                        }else{
+				                            x = data.split(':');
+				                            content_box = x[1].trim();
+				                        }
+				                        
+				                        $submitLoader.hide();
+				                        $submitNotify.html(content_box);
+				                        $submitNotify.show();
+				                        $submitBtn.attr('disabled',false);
+				                    }else{
 
-			                    	$content.html(data);
+				                    	$content.html(data);
 
-			                    }
-			                  }
-			                  
-			                });
+				                    }
+				                  }
+				                  
+				                });
+							}
+						}else{
+							alert('Anda wajib menyetujui Ketentuan Berlaku!');
 						}
-					}else{
-						alert('Anda wajib menyetujui Ketentuan Berlaku!');
 					}
 				}
                 return false;

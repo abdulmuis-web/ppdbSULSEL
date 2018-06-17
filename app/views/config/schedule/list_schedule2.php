@@ -19,7 +19,7 @@
 	</div>
 	<table id='data-table-jq".$schedule_seq."' class='table table-bordered'>
 		<thead>
-			<tr><th>Nama Kegiatan</th><th>Jalur</th><th>Tanggal</th><th>Lokasi</th><th>Keterangan</th><th>Aksi</th></tr>
+			<tr><th>No.</th><th>Nama Kegiatan</th><th>Jalur</th><th>Tanggal</th><th>Lokasi</th><th>Keterangan</th><th>Aksi</th></tr>
 		</thead>
 		<tbody>";
 			$no = 0;
@@ -32,6 +32,7 @@
 					case 'finish':$lbl_status="<font color='red'>Tutup</font>";break;
 				}
 				echo "<tr>
+				<td align='center'>".$no."</td>
 				<td>".$row['kegiatan']."</td>
 				<td>".$row['nama_jalur']."</td>
 				<td align='center'>".mix_2Date($row['tgl_buka'],$row['tgl_tutup'])."</td>

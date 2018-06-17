@@ -159,18 +159,20 @@
 				$s = true;
 			}
 			
-			$sql .= " WHERE ";
-			$s = false;
-			foreach($cond as $field=>$value){
-				$sql .= ($s?" AND ":"").$field."=";
+			if(count($cond)>0){
+				$sql .= " WHERE ";
+				$s = false;
+				foreach($cond as $field=>$value){
+					$sql .= ($s?" AND ":"").$field."=";
 
-				if($exec_type==1){
-					$sql .= ":".$field;
-					$this->_params[$field] = $value;
-				}else{
-					$sql .= "'".$value."'";
+					if($exec_type==1){
+						$sql .= ":".$field;
+						$this->_params[$field] = $value;
+					}else{
+						$sql .= "'".$value."'";
+					}
+					$s = true;
 				}
-				$s = true;
 			}
 			
 			if($exec_type=='0'){
@@ -232,16 +234,29 @@
 					$sql .= ($s?",":"").$key;
 					$s = true;
 				}
+				$params = array();
+				$cond = "";
+				if(is_array($id_value)){
+					$s = false;
+					foreach($id_value as $key=>$val){
+						$cond .= ($s?" AND ":"").$key."=?";
+						$params[] = $val;
+						$s = true;
+					}
+				}else{
+					$cond = $pk."=?";
+					$params[] = $id_value;
+				}
 
-				$sql .= " FROM ".$model->get_tbl_name()." WHERE ".$pk."=?";
+				$sql .= " FROM ".$model->get_tbl_name()." WHERE ".$cond;
 								
 				$this->set_sql_with_params($sql);
-				$this->set_sql_params(array($id_value));				
+				$this->set_sql_params($params);
 				$query = $this->execute(1);
 
 				$data = $query->row_array();
 
-				if(!is_null($data[$pk]) and !empty($data[$pk])){
+				if(count($data)>0){
 					foreach($fields as $key=>$val){
 						$model->{'set_'.$key}($data[$key]);
 					}
@@ -254,9 +269,7 @@
 			
 		}
 
-
-		function debug(){
-			
+		function debug(){			
 			$sql = ($this->_sql!=''?$this->_sql:$this->_sql_without_params);
 			echo "<pre>".$sql."</pre><br />";
 			echo "<pre>";

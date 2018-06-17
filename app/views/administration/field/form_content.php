@@ -98,15 +98,18 @@
                 }
     	});
 
+    var act = "<?=$act;?>";
+
     $field_form.submit(function(){
+    	var lbl_act = (act=='add'?'menambah':'merubah')+' data';
         if(field_stat.checkForm())
-        {        	
+        {
         	ajax_object.reset_object();
             ajax_object.set_plugin_datatable(true).set_content('#list_of_data')
                            .set_loading('#preloadAnimation')
                            .enable_pnotify()
                            .set_form($field_form)
-                           .submit_ajax('');
+                           .submit_ajax(lbl_act);
             $('#close-modal-form').click();
             return false;
         }

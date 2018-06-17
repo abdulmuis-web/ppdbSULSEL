@@ -5,7 +5,7 @@
 		<div class='col-lg-12 col-md-12'>";
 
 			if($add_access)
-				echo "<a id='add-button2' onclick=\"load_form(this.id)\" class='btn btn-default btn-xs' data-toggle='modal' data-target='#remoteModal'>";
+				echo "<a id='add-button3' onclick=\"load_form(this.id)\" class='btn btn-default btn-xs' data-toggle='modal' data-target='#remoteModal'>";
 			else
 				echo "<a onclick=\"alert('anda tidak diijinkan untuk menambah data');\" class='btn btn-default btn-xs'>";
 
@@ -13,19 +13,21 @@
 				  <input type='hidden' id='ajax-req-dt' name='type' value='3'/>
 				  <i class='fa fa-plus'></i> Tambah</a>&nbsp;";
 
+			/*
 			if($update_access)
-				echo "<a id='autoConfig-button2' onclick=\"load_form_autoConfig(this.id)\" class='btn btn-default btn-xs' data-toggle='modal' data-target='#remoteModal'>";
+				echo "<a id='autoConfig-button3' onclick=\"load_form_autoConfig(this.id)\" class='btn btn-default btn-xs' data-toggle='modal' data-target='#remoteModal'>";
 			else
 				echo "<a onclick=\"alert('anda tidak diijinkan untuk merubah data');\" class='btn btn-default btn-xs'>";
 
 			echo "<input type='hidden' name='act' value='add' id='ajax-req-dt'/>
 				  <input type='hidden' id='ajax-req-dt' name='type' value='3'/>
 				  <i class='fa fa-gear'></i> Pengaturan Otomatis</a>";
-
+			*/
 		echo "</div>
 	</div>
 	<table id='data-table-jq3' class='table table-bordered'>
 		<thead>
+			<td>No.</th>
 			<th>Nama Sekolah</th>
 			<th>Nama Kompetensi</th>
 			<th>Jml. Diterima</th>			
@@ -42,6 +44,7 @@
 			foreach($rows as $row){
 				$no++;				
 				echo "<tr>
+				<td align='center'>".$no."</td>
 				<td>".$row['nama_sekolah']."</td>
 				<td>".$row['nama_kompetensi']."</td>
 				<td align='right'>".number_format($row['jml_diterima'])."</td>				
@@ -59,20 +62,20 @@
 	                
 	                echo "
 	                <input type='hidden' id='ajax-req-dt' name='id' value='".$row['pengaturan_kuota_id']."'/>
-	                <input type='hidden' id='ajax-req-dt' name='type' value='2'/>
+	                <input type='hidden' id='ajax-req-dt' name='type' value='3'/>
 	                <input type='hidden' id='ajax-req-dt' name='act' value='edit'/>
 	            	<i class='fa fa-edit'></i></a>&nbsp";
 
 	            	if($delete_access)
-	            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"if(confirm('Anda yakin?')){delete_record(this.id,'2')}\" id='delete2_".$no."'>";
+	            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"if(confirm('Anda yakin?')){delete_record(this.id,'3')}\" id='delete2_".$no."'>";
 	            	else
 	            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"alert('anda tidak diijinkan untuk menghapus data!')\">";
 
 	            	echo "
 	            	<input type='hidden' id='ajax-req-dt' name='id' value='".$row['pengaturan_kuota_id']."'/>
-	            	<input type='hidden' id='ajax-req-dt' name='type' value='2'/>
+	            	<input type='hidden' id='ajax-req-dt' name='type' value='3'/>
 	            	<input type='hidden' id='ajax-req-dt' name='act' value='delete'/>
-	            	<i class='fa fa-trash-o'></i></a>&nbsp
+	            	<i class='fa fa-trash-o'></i></a>
 				</td></tr>";
 			}
 		echo "</tbody>

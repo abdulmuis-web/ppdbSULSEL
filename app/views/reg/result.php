@@ -46,12 +46,15 @@
     					$query = $hasil_seleksi_dao->execute(1);
     					$hasil_seleksi_rows = $query->result_array();
                         
+                        $lbl_skor = ($path=='1' || $path=='2'?'Jarak':'Skor');
+                        $satuan = ($path=='1' || $path=='2'?' m':'');
+
     					echo "
     				    <table class='table table-bordered table-striped table-hover'>
     				    	<thead>
     				    		<tr>
     				    			<td width='4%' align='center'><b>Peringkat</b></td><td align='center'><b>Nama</b></td>
-    				    			<td align='center'><b>No. Registrasi</b></td><td align='center'><b>Skor</b></td>
+    				    			<td align='center'><b>No. Registrasi</b></td><td align='center'><b>".$lbl_skor."</b></td>
     				    		</tr>
     				    	</thead>
     				    	<tbody>";
@@ -79,7 +82,7 @@
     					    		}
     					    		echo "<tr ".$class.">
     					    		<td align='center'>".$row2['peringkat']."</td><td>".$row2['nama']."</td><td align='center'>".$row2['no_pendaftaran']."</td>
-    					    		<td align='right'>".number_format($row2['score'],2,',','.')."</td>
+    					    		<td align='right'>".number_format($row2['score'],2,',','.').$satuan."</td>
     					    		</tr>";
     					    	}
     

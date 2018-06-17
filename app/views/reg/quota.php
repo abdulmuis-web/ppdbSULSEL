@@ -41,7 +41,8 @@
 			<table id="school-quota-table" class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
-						<th width="4%">NO.</th><th>NAMA SEKOLAH</th><th>ALAMAT</th><th>KAB./KOTA</th><th>JML. ROMBEL</th><th>JML. DITERIMA</th>
+						<td width="4%" align="center"><b>No.</b></td><td align="center"><b>Nama Sekolah</b></td><td align="center"><b>Alamat</b></td><td align="center"><b>Kab./Kota</b></td><td align="center"><b>Jml. Rombel</b></td>
+						<td align="center"><b>Jml. Diterima</b></td>
 					</tr>
 				</thead>
 				<tbody>
@@ -66,15 +67,29 @@
 
 </div>
 
-<link rel="stylesheet" href="<?=$this->config->item('js_path');?>plugins/datatables/dataTables.bootstrap.css">
 
-<script type="text/javascript" src="<?=$this->config->item('js_path');?>plugins/datatables/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="<?=$this->config->item('js_path');?>plugins/datatables/dataTables.bootstrap.min.js"></script>
+<script src="<?=$this->config->item("js_path");?>plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="<?=$this->config->item("js_path");?>plugins/datatables/dataTables.colVis.min.js"></script>
+<script src="<?=$this->config->item("js_path");?>plugins/datatables/dataTables.tableTools.min.js"></script>
+<script src="<?=$this->config->item("js_path");?>plugins/datatables/dataTables.bootstrap.min.js"></script>
+<script src="<?=$this->config->item("js_path");?>plugins/datatable-responsive/datatables.responsive.min.js"></script>
 
 <script type="text/javascript">
 	$(document).ready(function(){
 		
-		$('#school-quota-table').DataTable();
+		$('#school-quota-table').DataTable({
+            "oLanguage": {
+            "sSearch": "Search :"
+            },
+            "aoColumnDefs": [
+                {
+                    'bSortable': false,
+                    'aTargets': [0]
+                } //disables sorting for column one
+            ],
+            'iDisplayLength': 10,
+            "sPaginationType": "full_numbers"
+        });
 
 	});
 </script>

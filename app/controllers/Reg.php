@@ -65,6 +65,7 @@
 				$data['tab_view'] = $this->tabs_view[(!empty($tab)?$tab:$this->default_tab)];
 			}
 			
+			
 			$dao = $this->global_model->get_dao();
 
 			if($path!='')
@@ -304,6 +305,7 @@
 							WHERE id_pendaftaran='".$this->session->userdata('nopes')."'";
 				}
 				
+				$sql .= " ORDER BY pilihan_ke ASC";
 				
 				$sekolah_pilihan_rows = $dao->execute(0,$sql)->result_array();
 				$sekolah_pilihan_arr = array();
@@ -528,19 +530,6 @@
 			$tgl_lahir = us_date_format($this->input->post('input_sekolah_asal'));
 			$alamat = $this->input->post('input_alamat');
 
-			$dao = $this->global_model->get_dao();
-
-			if($jalur_pendaftaran=='5')
-			{
-				//check no_peserta
-				$sql = "SELECT count(id_pendaftaran) n_row FROM pendaftaran WHERE id_pendaftaran='".$no_peserta."'";
-
-				$row = $dao->execute(0,$sql)->row_array();
-				if($row['n_row']>0)
-					die('ERROR:No. Peserta sudah digunakan!');
-			}
-
-			
 			$x_dt2 = explode('_',$this->input->post('input_dt2'));
 			$dt2_id = $x_dt2[0];
 			$nm_dt2 = $x_dt2[2];			
@@ -562,10 +551,38 @@
 
 			$mode_un = $this->input->post('input_mode_un');
 
+
+			//VALIDATING HERE
+
+			//check school/field chosen
+			$chosen = array();
+			$input_name = ($tipe_sekolah=='1'?'input_sekolah_tujuan':'input_kompetensi_tujuan');
+			for($i=1;$i<=$jml_sekolah;$i++){
+
+				$val = $this->input->post($input_name.$i);
+				if(!in_array($val,$chosen)){
+					$chosen[] = $val;
+				}else{
+					die('ERROR: '.($tipe_sekolah=='1'?'Sekolah':'Kompetensi').' pilihan harus berbeda');
+				}
+			}
+
+			//check id_pendaftaran
+			$dao = $this->global_model->get_dao();
+			if($jalur_pendaftaran=='5')
+			{
+				//check no_peserta
+				$sql = "SELECT count(id_pendaftaran) n_row FROM pendaftaran WHERE id_pendaftaran='".$no_peserta."'";
+
+				$row = $dao->execute(0,$sql)->row_array();
+				if($row['n_row']>0)
+					die('ERROR:No. Peserta sudah digunakan!');
+			}
+
+
+			
 			//begin transaction
-
 			$this->db->trans_begin();
-
 
 			$no_registrasi = $this->generate_regnumb($dt2_id,$tipe_sekolah,$jalur_pendaftaran);
 			$wkt_pendaftaran = date('Y-m-d H:i:s');
@@ -599,6 +616,9 @@
 				$m->set_sekolah_asal($sekolah_asal);
 				$result = $dao->insert($m);
 			}
+			
+
+
 			if(!$result){				
 				$this->db->trans_rollback();				
 				die('failed');
@@ -616,6 +636,8 @@
 				$this->db->trans_rollback();
 				die('failed');
 			}
+
+
 
 
 			//insert pendaftaran_sekolah_pilihan
@@ -644,6 +666,8 @@
 						}
 
 						$nmSekolah_pilihan_arr[] = $x_sekolah_pilihan[1];
+
+
 					}
 				}
 			}else{
@@ -715,6 +739,7 @@
 						die('failed');
 					}
 
+
 				}
 			}
 
@@ -731,6 +756,7 @@
 				$this->db->trans_rollback();
 				die('failed');
 			}
+
 
 
 			//insert pendaftaran_prestasi
@@ -783,6 +809,8 @@
 							}
 
 						}
+
+
 						
 					}
 				}
@@ -804,6 +832,7 @@
 				die('failed');
 			}
 
+			
 
 			$this->db->trans_commit();
 			//end of transaction

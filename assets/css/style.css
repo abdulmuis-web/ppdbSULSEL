@@ -71,17 +71,18 @@ p{
 	border:1px solid #fff!important;
 }
 
-
 /*LOGIN INFO*/
 .login-info{
-	height:110px;
-	width:380px;                
+	height:100px;
+	width:450px;
+	overflow:hidden;
 	position:absolute;top:51px;right:0;
-	background:rgba(252,252,252,0.5);
+	background:#fff;
 	border:1px solid #fff;
 	padding:10px 0 10px!important;
-	color:#4f4f4f;
-	font-size:0.8em;
+	color:#565656;
+	font-size:0.9em;
+	font-weight:bold;
 }
 
 @media(max-width: 768px){
@@ -248,7 +249,7 @@ p{
 }
 
 .stage .packages{
-	height:350px;
+	min-height:400px;
 	position:relative;
 	padding:30px;
 	border:1px solid #ccc;

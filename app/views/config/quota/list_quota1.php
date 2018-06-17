@@ -3,7 +3,7 @@
 	echo "
 	<table class='table table-bordered'>
 		<thead>
-			<tr><th>Nama Jalur</th><th>Kategori</th><th>Jml. Sekolah Pilihan</th><th>Kuota (%)</th><th>Jml. Diterima</th><th>Aksi</th></tr>
+			<tr><th>No.</th><th>Nama Jalur</th><th>Kategori</th><th>Jml. Sekolah Pilihan</th><th>Kuota (%)</th><th>Jml. Diterima</th><th>Aksi</th></tr>
 		</thead>
 		<tbody>";
 			$no = 0;
@@ -11,6 +11,7 @@
 				$no++;
 				
 				echo "<tr>
+				<td align='center'>".$no."</td>
 				<td>".$row['nama_jalur']."</td>
 				<td>".$row['nama_ktg_jalur']."</td>
 				<td align='right'>".$row['jml_sekolah']."</td>

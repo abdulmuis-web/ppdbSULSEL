@@ -7,6 +7,7 @@
 
 		function __construct(){
 			$this->rank=1;
+			$this->rankList = array();
 		}
 
 		function set_dbAccess_needs($regid,$school,$school_type,$field,$path,$year,$dao){
@@ -107,6 +108,18 @@
 								);
 		}
 
+		function re_arrange(){
+			if(count($this->opponents)>0){
+				$opponents = $this->opponents;
+				$i = 0;
+				foreach($opponents as $row){
+					$i++;
+					$inputRankList = array($row['id_pendaftaran'],$row['pilihan_ke'],$row['tot_nilai'],$row['score'],$row['waktu_pendaftaran'],$i);
+					$this->fill_rankList($inputRankList);
+				}
+			}
+		}
+
 		function set_levelAchievement($levelAchievement){
 			$this->levelAchievement = $levelAchievement;
 		}
@@ -152,7 +165,12 @@
 
 
 			}else if($this->path=='3'){
-				$radiusWeight = $this->get_distanceWeight($this->myReg['jarak_sekolah']);
+
+				if($this->school_type=='1')
+					$radiusWeight = $this->get_distanceWeight($this->myReg['jarak_sekolah']);
+				else
+					$radiusWeight = 0;
+
 				$compVal1_2 = $this->myReg['tot_nilai'] + (strtolower($this->myReg['mode_un'])=='unbk'? (20*$this->myReg['tot_nilai'])/100 :0) + $radiusWeight;
 
 				$compVal2_2 = array($this->myReg['nil_matematika'],$this->myReg['nil_bhs_inggris'],$this->myReg['nil_bhs_indonesia']);
@@ -363,7 +381,7 @@
 						LEFT JOIN (SELECT id_pendaftaran,waktu_pendaftaran,mode_un FROM pendaftaran) as c ON (a.id_pendaftaran=c.id_pendaftaran) 
 						WHERE a.id_pendaftaran='".$this->regid."'";
 			}else{
-				$sql = "SELECT a.id_pendaftaran,b.pilihan_ke,a.nil_matematika,a.nil_bhs_inggris,a.nil_bhs_indonesia,a.tot_nilai,
+				$sql = "SELECT a.id_pendaftaran,b.pilihan_ke,a.nil_matematika,a.nil_bhs_inggris,a.nil_bhs_indonesia,a.tot_nilai,'' as jarak_sekolah,
 						c.waktu_pendaftaran,c.mode_un FROM pendaftaran_nilai_un as a 
 						LEFT JOIN (SELECT id_pendaftaran,pilihan_ke FROM pendaftaran_kompetensi_pilihan WHERE kompetensi_id='".$this->field."') as b 
 						ON (a.id_pendaftaran=b.id_pendaftaran)

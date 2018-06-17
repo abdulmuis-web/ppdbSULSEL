@@ -1,18 +1,17 @@
 import os,sys,time,datetime
+import pymysql.cursors as pcur
 from pathlib import Path
+import pymysql.cursors as pcur
 
 main_path = Path(__file__).resolve().parent
-
 path1 = str(main_path)+str(os.path.sep)+'configs'
-
 sys.path.append(path1)
 
 from db_connection import DB_connection as db
 
 db = db();
 
-def get_sys_params():
-	conn = db.connect()
+def get_sys_params(conn):
 	cursor = conn.cursor()
 	cursor.execute("SELECT * FROM system_params")
 	sys_params = []
@@ -20,253 +19,155 @@ def get_sys_params():
 	for row in cursor.fetchall():
 		sys_params.append(row[2])
 
-	cursor.close()
-	conn.close()
+	cursor.close()	
 
 	return sys_params
 
-def get_trigger(school_type):
-	conn = db.connect()
-	curr_time = datetime.datetime.now().strftime('%Y-%m-%d')
-	cursor = conn.cursor()
-	sys_params = get_sys_params()
 
-	sql = "SELECT tgl_buka FROM jadwal_jalur_pendaftaran WHERE thn_pelajaran='"+sys_params[0]+"' AND " \
-		  "tipe_sklh_id=%s AND jalur_id=%s" %(str(school_type),'1')
+def new_sequence(conn,type,id,year):
+	cursor = conn.cursor(pcur.DictCursor)
+	table = ('his_pengaturan_kuota_jalur' if type=='1' else 'his_pengaturan_kuota_sma')
+	field = ('jalur_id' if type=='1' else 'sekolah_id')
+
+	sql = "SELECT seq FROM "+table+" WHERE thn_pelajaran='"+year+"' AND "+field+"='"+str(id)+"' ORDER BY seq DESC"
 	cursor.execute(sql)
-	row=cursor.fetchone();
-	
-	cursor.close()
-	conn.close()
+	row = cursor.fetchone()
+	new_seq = 1
+	if len(row)>0:
+		new_seq += row['seq']
 
-	return (str(curr_time)==str(row[0]))
-	
-def get_paths():
-	conn = db.connect()	
-	cursor = conn.cursor()
+	return new_seq
 
-	sql = "SELECT ref_jalur_id FROM ref_jalur_pendaftaran"
+def transmit_schoolQuota(conn,receive_quota,transmit_quota,old_data,path):
+	cursor = conn.cursor(pcur.DictCursor)
+
+	switcher = {
+		2:'kuota_afirmasi',
+		3:'kuota_akademik',
+		4:'kuota_prestasi',
+		5:'kuota_khusus',
+	}
+
+	sql = "UPDATE pengaturan_kuota_sma SET kuota_domisili='"+str(receive_quota)+"',"+switcher.get(path)+"='"+str(transmit_quota)+"' "\
+		  "WHERE sekolah_id='"+str(old_data['sekolah_id'])+"' AND thn_pelajaran='"+old_data['thn_pelajaran']+"'"
+	
+	result = execute_sqlManipulating(sql,cursor)
+
+	seq = new_sequence(conn,'2',old_data['sekolah_id'],old_data['thn_pelajaran'])
+	sql = "INSERT INTO his_pengaturan_kuota_sma (seq,sekolah_id,thn_pelajaran,jml_rombel,jml_siswa_rombel,kuota_domisili, "\
+		  "kuota_afirmasi,kuota_akademik,kuota_prestasi,kuota_khusus,jml_kuota) VALUES('"+str(seq)+"','"+str(old_data['sekolah_id']+"','"+old_data['thn_pelajaran']+"', "\
+		  "'"+str(old_data['jml_rombel'])+"','"+str(old_data['jml_siswa_rombel'])+"','"+str(old_data['kuota_domisili'])+"','"+str(old_data['kuota_afirmasi'])+"', "\
+		  "'"+str(old_data['kuota_akademik'])+"','"+str(old_data['kuota_prestasi'])+"','"+str(old_data['kuota_khusus'])+"','"+str(old_data['jml_kuota'])+"')"
+	
+	result = execute_sqlManipulating(sql,cursor)
+
+
+def execute_sqlManipulating(sql,cursor):
+	try:
+		cursor.execute(sql)
+		result = cursor.rowcount
+	except:
+		result = False
+	
+	return result
+
+
+def calculate_quota_toTransmit(conn,item,year):
+	
+	cursor = conn.cursor(pcur.DictCursor)
+	diff_path = item['kuota']-item['pendaftar_jalur']
+
+	sql = "SELECT * FROM pengaturan_kuota_sma WHERE thn_pelajaran='"+year+"'"
 	cursor.execute(sql)
-	paths = []
-	for row in cursor.fetchall():
-		paths.append(row[0])
-
-	cursor.close()
-	conn.close()
-
-	return paths
-
-def execute(school_type):
-	conn = db.connect()
-	cursor1 = conn.cursor()	
-
-	sys_params = get_sys_params()
+	rows = cursor.fetchall()
 	
-	sql = "SELECT SUM(jumlah_kuota) as n_kuota FROM pengaturan_kuota_jalur WHERE thn_pelajaran='"+sys_params[0]+"' AND tipe_sekolah_id=%s"%(school_type)
+	switcher = {
+					2:'kuota_afirmasi',
+					3:'kuota_akademik',
+					4:'kuota_prestasi',
+					5:'kuota_khusus',
+				}
 
-	cursor1.execute(sql)
-	tot_quota = cursor1.fetchone()[0]	
-	paths = get_paths()
+	for row in rows:		
+		
+		school_quota = row[switcher.get(item['jalur_id'])]
+		sql = "SELECT COUNT(1) pendaftar_sekolah FROM pendaftaran_sekolah_pilihan WHERE sekolah_id='"+str(row['sekolah_id']+"' AND jalur_id='"+str(item['jalur_id'])+"'"
+		cursor.execute(sql)
+		row = cursor.fetchone()
 
-	tot_pathAdd = 0
-	tot_pathAddSchool = {}
-	
-	first_path_quota = 0
-	for path in paths:
-
-		#sum of path quota
-		sql = "SELECT * FROM pengaturan_kuota_jalur WHERE thn_pelajaran='"+sys_params[0]+"' AND "\
-			  "tipe_sekolah_id=%s AND jalur_id=%s" %(school_type,path)
-
-		cursor1.execute(sql)
-		row1 = cursor1.fetchone()
-		path_quota1 = row1[7]		
-
-		if path==1:
-			first_path_quota = path_quota1
-
-		if path!=1:
-
-			#sum of path registrant
-			sql = "SELECT SUM(1) n_terdaftar FROM pendaftaran_jalur_pilihan as a "\
-				  "INNER JOIN (SELECT id_pendaftaran FROM pendaftaran WHERE status='2') as b ON (a.id_pendaftaran=b.id_pendaftaran) "\
-				  "WHERE tipe_sekolah_id=%s AND jalur_id=%s" %(school_type,path)
+		dif_school = school_quota-row['pendaftar_sekolah']
+		
+		if dif_school>0:
+			receive_quota = row['kuota_domisili']+dif_school
+			transmit_quota = row['pendaftar_sekolah']
 			
-			cursor1.execute(sql)
-			row2 = cursor1.fetchone()
-			path_quota2 = float(row2[0] if not row2[0] is None else 0)
-			
-			cursor2 = conn.cursor()
+			old_data = {'sekolah_id':row['sekolah_id'],'thn_pelajaran':row['thn_pelajaran'],'jml_rombel':row['jml_rombel'],
+					    'jml_siswa_rombel':row['jml_siswa_rombel'],'kuota_domisili':row['kuota_domisili'],'kuota_afirmasi':row['kuota_afirmasi'],
+					    'kuota_akademik':row['kuota_akademik'],'kuota_prestasi':row['kuota_prestasi'],'kuota_khusus':row['kuota_khusus'],
+					    'jml_kuota':row['jml_kuota']}
 
-			conds = [{'key':'thn_pelajaran','val':sys_params[0]},{'key':'jalur_id','val':str(path)},{'key':'tipe_sekolah_id','val':str(school_type)}]
-
-			seq = get_increment_value('seq','his_pengaturan_kuota_jalur',conds)
-			data = {'seq':"'"+str(seq)+"'",'jalur_id':"'"+str(row1[1])+"'",'ktg_jalur_id':"'"+str(row1[2])+"'",'thn_pelajaran':"'"+row1[3]+"'",
-					'tipe_sekolah_id':"'"+str(row1[4])+"'",'persen_kuota':"'"+str(row1[6])+"'",'jumlah_kuota':"'"+str(path_quota1)+"'"}
-			result = insert_data('his_pengaturan_kuota_jalur',data,cursor2)
-			if result==False:
-				conn.rollback()
-
-			percent_quota = path_quota2*100/tot_quota
-
-			cursor2 = conn.cursor()
-			data = {'persen_kuota':"'"+str(percent_quota)+"'",'jumlah_kuota':"'"+str(path_quota2)+"'"}
-			result = update_data('pengaturan_kuota_jalur',data,conds,cursor2)
-			if result==False:
-				conn.rollback()
-
-			#sum of additional quota to delegate to "Jalur Domisili"
-			tot_pathAdd += (path_quota1-path_quota2)
-
-			if school_type=='1'
-				sql = "SELECT * FROM pengaturan_kuota_sma WHERE thn_pelajaran='"+sys_params[0]+"'"
-				cursor1.execute(sql)
-				for row in cursor1.fetchall():
-					sql = "SELECT SUM(1) n_terdaftar FROM pendaftaran_sekolah_pilihan as a "\
-						  "INNER JOIN (SELECT id_pendaftaran FROM pendaftaran WHERE status='2') as b ON (a.id_pendaftaran=b.id_pendaftaran) "\
-						  "WHERE jalur_id=%s AND sekolah_id=%s" %(path,row[1])
-					
-	
-
-	first_path_quota += tot_pathAdd
-	percent_quota = first_path_quota*100/tot_quota
-
-	print('tot_pathAdd:',tot_pathAdd)
-	print('first_path_quota:',first_path_quota)
-	print('percent_quota:',percent_quota)
-	
-
-	cursor2 = conn.cursor()
-
-	conds = [{'key':'thn_pelajaran','val':sys_params[0]},{'key':'jalur_id','val':'1'},{'key':'tipe_sekolah_id','val':str(school_type)}]
-	data = {'persen_kuota':"'"+str(percent_quota)+"'",'jumlah_kuota':"'"+str(first_path_quota)+"'"}
-	result = update_data('pengaturan_kuota_jalur',data,conds,cursor2)
-	if result==False:
-		conn.rollback()
+			transmit_schoolQuota(conn,receive_quota,transmit_quota,old_data,item['jalur_id'])
 
 	conn.commit()
 
-
-def insert_data(tbl,data,cursor):
-	fields = '('
-	values = '('
-	s = False
-	for key,val in data.items():
-		comma = (',' if s else '')
-		fields += comma+key
-		values += comma+val
-		s = True
-
-	fields += ')'
-	values += ')'
-
-	sql_manipulating = "INSERT INTO "+tbl+" "+fields+" VALUES "+values
-
-	# try:
-	# 	cursor.execute(sql_manipulating)
-	# 	result = cursor.rowcount
-	# except:		
-	# 	result = False
-	# finally:
-	# 	cursor.close()
-
-	result = True
-	# print(sql_manipulating)
-	# print('\n')
-	# print('hasil eksekusi : ',result)
-	# print('\n')
-
-	return result
-
-
-def update_data(tbl,data,conds,cursor):
-
-	sql_manipulating = "UPDATE "+tbl+" SET "
-	s = False
-	for key,val in data.items():
-		comma = (',' if s else '')
-		sql_manipulating += comma+key+"="+val
-		s = True
-
-	str_cond = "WHERE "
-	s = False
-	for cond in conds:
-		str_cond += (' AND ' if s else '')+cond['key']+"='"+cond['val']+"'"
-		s = True
-
-	sql_manipulating += " " + str_cond
-
-	# try:
-	# 	cursor.execute(sql_manipulating)
-	# 	result = cursor.rowcount
-	# except:
-	# 	result = False
-	# finally:
-	# 	cursor.close()	
-
-	result = True
-	# print(sql_manipulating)
-	# print('\n')
-	# print('hasil eksekusi : ',result)
-	# print('\n')
-	
-	return result
-
-def get_increment_value(key,table,conds=[]):
-	conn = db.connect()
-	cursor = conn.cursor()
-	sql = "SELECT "+key+" FROM "+table+" "
-
-	if(len(conds)>0):
-		sql += "WHERE "
-		s = False
-		for cond in conds:			
-			sql += (' AND ' if s else '')+cond['key']+"='"+cond['val']+"'"
-			s = True
-
-	sql += " ORDER BY "+key+" DESC"
-	
-	cursor.execute(sql)
-	new_value = 1
-	if(cursor.rowcount>0):
-		row = cursor.fetchone()
-		new_value += row[0]
-
-	return new_value
-
-
-def get_school_types():
-	conn = db.connect()
-	cursor = conn.cursor()
-	cursor.execute("SELECT ref_tipe_sklh_id FROM ref_tipe_sekolah")
-	rows = cursor.fetchall()
-	types = []
-	for row in rows:
-		types.append(row[0])
-
 	cursor.close()
-	conn.close()
 
-	return types
+def recalculate_path_quota(conn,path,transmit_quota,tot_capacity):
+	cursor = conn.cursor(pcur.DictCursor)
+	percent = (100/tot_capacity*transmit_quota)
+	sql = "UPDATE pengaturan_kuota_jalur SET jumlah_kuota='"+str(transmit_quota)+"',persen_kuota='"+str(percent)+"' "\
+	 	  "WHERE jalur_id='"+path+"' AND tipe_sekolah_id='1'"
+	result = execute_sqlManipulating(sql,cursor)
+
 
 def main_method():
-	alive = True	
-
-	while alive:
-
-		school_types = get_school_types()
-
-		for type in school_types:
-			trigger = get_trigger(type)
-			
-			if(trigger):
-				execute(type)
-
-
-if __name__=='__main__':
-	#main_method()
-
-	execute('1')
-
+	global db
 	
-		
+	conn = db.conn()
+	cursor1 = conn.cursor(pcur.DictCursor)
+	cursor2 = conn.cursor(pcur.DictCursor)
+
+	sys_params = get_sys_params()
+
+	sql = "SELECT SUM(jml_rombel*jml_siswa_rombel) as tot FROM pengaturan_kuota_sma";
+	cursor1.execute(sql)
+	row = cursor1.fetchone()
+	tot_capacity = row['tot']
+
+	receiver = {}
+	transmitter = []
+
+	sql = "SELECT a.jalur_id,a.persen_kuota,a.jumlah_kuota, " \
+		  "(SELECT COUNT(1) FROM pendaftaran_jalur_pilihan as x WHERE x.jalur_id=a.jalur_id AND x.tipe_sekolah_id=a.tipe_sekolah_id) as pendaftar_jalur " \
+		  "FROM pengaturan_kuota_jalur as a WHERE a.tipe_sekolah_id='1'"
+
+	cursor1.execute(sql)
+	
+	tot_path_receiver =	0
+
+	for row in cursor1.fetchall():
+		if row['jalur_id']=='1':
+			receiver['persen'] = row['persen_kuota']
+			receiver['kuota'] = row['jumlah_kuota']
+		else:
+			transmitter.append({'jalur_id':row['jalur_id'],'persen':row['persen_kuota'],'kuota':row['jumlah_kuota'],'pendaftar':row['pendaftar_jalur']})
+
+			dif_path = row['jumlah_kuota']-row['pendaftar_jalur']
+			tot_path_receiver += dif_path
+
+			transmit_quota = row['pendaftar_jalur']
+
+			recalculate_path_quota(conn,row['jalur_id'],transmit_quota,tot_capacity)
+
+	tot_path_receiver += receiver['kuota']
+	percent = (100/tot_capacity*tot_path_receiver)
+	sql = "UPDATE pengaturan_kuota_jalur SET jumlah_kuota='"+str(tot_path_receiver)+"',persen_kuota='"+str(percent)+"' WHERE jalur_id='1' AND tipe_sekolah_id='1'"
+	result = execute_sqlManipulating(sql,cursor2)
+
+	conn.commit()
+
+	for item in transmitter:
+		result = calculate_quota_toTransmit(conn,item,sys_params[0])
+
+if __name__=='__main__':	
+	test_dateCompare()

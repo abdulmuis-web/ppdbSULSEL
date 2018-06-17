@@ -337,6 +337,6 @@
 	 * And away we go...
 	 *
 	 */
-
-	require_once COREPATH.'application.php';
+	
+	require_once COREPATH.'Application.php';
 ?>
