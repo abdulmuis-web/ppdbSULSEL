@@ -11,6 +11,18 @@
 			echo "there is no any activity here";
 		}
 
+		function update_pengaturan_dt2_sekolah(){
+			$this->load->library('DAO');
+			$this->load->model(array('global_model','pendaftaran_model'));
+			$dao = $this->global_model->get_dao();
+			$rows = $dao->execute(0,"SELECT * FROM pengaturan_dt2_sekolah")->result_array();
+
+			foreach($rows as $row){
+				$sql = "UPDATE pengaturan_dt2_sekolah SET status='".trim($row['status'])."' WHERE dt2_id='".$row['dt2_id']."' AND dt2_sekolah_id='".$row['dt2_sekolah_id']."'";
+				$result = $dao->execute(0,$sql);
+			}
+		}
+
 		function change_registrantName(){
 			$this->load->library('DAO');
 			$this->load->model(array('global_model','pendaftaran_model'));

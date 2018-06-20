@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap CSS -->
+    <link rel="shortcut icon" href="<?=$this->config->item('img_path');?>logo_sulsel.png" type="image/x-icon">
+    <link rel="icon" href="<?=$this->config->item('img_path');?>logo_sulsel.png" type="image/x-icon">
     <link rel="stylesheet" href="<?=$this->config->item('css_path');?>bootstrap.min.css">
     <link rel="stylesheet" href="<?=$this->config->item('css_path');?>style.css">
     <link rel="stylesheet" href="<?=$this->config->item('css_path');?>font-awesome.min.css">

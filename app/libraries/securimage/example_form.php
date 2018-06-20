@@ -52,7 +52,7 @@ if (isset($_SESSION['ctform']['error']) &&  $_SESSION['ctform']['error'] == true
 <div class="success">The captcha was correct and the message has been sent!  The captcha was solved in <?php echo $_SESSION['ctform']['timetosolve'] ?> seconds.</div><br />
 <?php endif; ?>
 
-<form method="post" action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] . $_SERVER['QUERY_STRING']) ?>" id="contact_form">
+<form method="post" action="submit_captcha.php" id="contact_form">
   <input type="hidden" name="do" value="contact">
 
   <p>
@@ -85,7 +85,7 @@ if (isset($_SESSION['ctform']['error']) &&  $_SESSION['ctform']['error'] == true
       require_once 'securimage.php';
       $options = array();
       $options['input_name']             = 'ct_captcha'; // change name of input element for form post
-      $options['disable_flash_fallback'] = false; // allow flash fallback
+      /*$options['disable_flash_fallback'] = false; // allow flash fallback*/
 
       if (!empty($_SESSION['ctform']['captcha_error'])) {
         // error html to show in captcha output
@@ -184,6 +184,8 @@ function process_si_contact_form()
       require_once dirname(__FILE__) . '/securimage.php';
       $securimage = new Securimage();
 
+      echo $captcha.'<br />';
+      var_dump($securimage->check($captcha));
       if ($securimage->check($captcha) == false) {
         $errors['captcha_error'] = 'Incorrect security code entered<br />';
       }

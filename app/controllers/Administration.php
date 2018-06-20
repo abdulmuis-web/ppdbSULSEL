@@ -505,8 +505,12 @@
 
 			$m1->set_status('0');
 			$m1->set_no_pendaftaran('0');
+			$m1->set_no_seri('0');
+			$m1->set_passphrase('0');
+			$m1->set_show_passphrase('0');
 
 			$result = $dao->update($m1,$params);
+			
 			
 			foreach($arr_m as $m){
 				
@@ -1244,6 +1248,14 @@
 				{
 					if($sekolah_pilihan_row['status']=='0')
 					{
+					    if($pendaftaran_row['jalur_id']=='4'){
+							$sql = "SELECT a.*,b.tingkat_kejuaraan,c.bidang_kejuaraan FROM pendaftaran_prestasi as a 
+									LEFT JOIN ref_tingkat_kejuaraan as b ON (a.tkt_kejuaraan_id=b.ref_tkt_kejuaraan_id)
+									LEFT JOIN ref_bidang_kejuaraan as c ON (a.bdg_kejuaraan_id=c.ref_bdg_kejuaraan_id) 
+									WHERE a.id_pendaftaran='".$pendaftaran_row['id_pendaftaran']."'";
+							$prestasi_rows = $dao->execute(0,$sql)->result_array();
+						}
+					   
 						if($sekolah_pilihan_row['pilihan_ke']>1){
 
 							$prev_pilihan = $sekolah_pilihan_row['pilihan_ke']-1;
@@ -1252,16 +1264,8 @@
 									AND pilihan_ke='".$prev_pilihan."' LIMIT 0,1";
 
 							$row = $dao->execute(0,$sql)->row_array();
-
-							if($row['status']!='0'){
-								if($pendaftaran_row['jalur_id']=='4'){
-									$sql = "SELECT a.*,b.tingkat_kejuaraan,c.bidang_kejuaraan FROM pendaftaran_prestasi as a 
-											LEFT JOIN ref_tingkat_kejuaraan as b ON (a.tkt_kejuaraan_id=b.ref_tkt_kejuaraan_id)
-											LEFT JOIN ref_bidang_kejuaraan as c ON (a.bdg_kejuaraan_id=c.ref_bdg_kejuaraan_id) 
-											WHERE a.id_pendaftaran='".$pendaftaran_row['id_pendaftaran']."'";
-									$prestasi_rows = $dao->execute(0,$sql)->result_array();
-								}
-							}else{
+                            
+							if($row['status']=='0'){
 								$error = 3; //prev choise haven't been verified
 							}
 						}
@@ -1621,5 +1625,640 @@
 
 			$this->backoffice_template->render($this->active_controller.'/input_registration/form',$data);
 		}
+
+
+		// DOCUMENTS FUNCTION PACKET
+		function documents(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/documents');
+			$read_access = $this->aah->check_privilege('read',$nav_id);
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			if($read_access){
+				$data['active_url'] = str_replace('::','/',__METHOD__);
+				$data['containsTable'] = true;
+				
+				$data['add_access'] = $add_access;
+				
+				$data2['update_access'] = $update_access;
+				$data2['delete_access'] = $delete_access;
+				$data2['rows'] = $this->get_document_data();
+
+				$data['list_of_data'] = $this->load->view($this->active_controller.'/documents/list_of_data',$data2,true);
+				$this->backoffice_template->render($this->active_controller.'/documents/index',$data);
+			}else{
+				$this->error_403();
+			}
+		}
+
+		function get_document_data(){
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();			
+
+			$sql = "SELECT * FROM ref_dokumen_persyaratan";
+			
+			$rows = $dao->execute(0,$sql)->result_array();
+			return $rows;
+		}
+
+		function load_document_form(){
+			$this->aah->check_access();
+
+			$this->load->model(array('ref_dokumen_persyaratan_model'));
+
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+			
+			$act = $this->input->post('act');
+			$id_name = 'admin_id';		    
+
+		    $m = $this->ref_dokumen_persyaratan_model;
+		    $id_value = ($act=='edit'?$this->input->post('id'):'');
+		    $curr_data = $dao->get_data_by_id($act,$m,$id_value);		    
+
+		    $data['curr_data'] = $curr_data;
+		    $data['form_id'] = 'user-form';
+		    $data['id_value'] = $id_value;		    
+		    $data['act'] = $act;		 
+		    $data['active_controller'] = $this->active_controller;
+
+			$this->load->view($this->active_controller.'/documents/form_content',$data);
+		}		
+
+		function submit_document_data(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/documents');
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+			$act = $this->input->post('act');
+
+			if(($act=='add' and $add_access) or ($act=='edit' and $update_access))
+			{
+
+				$this->load->model(array('ref_dokumen_persyaratan_model'));
+
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+				
+				$id = $this->input->post('id');
+				$nama_dokumen = $this->security->xss_clean($this->input->post('input_nama_dokumen'));				
+
+				$m = $this->ref_dokumen_persyaratan_model;
+
+				$m->set_nama_dokumen($nama_dokumen);				
+
+				if($act=='add')
+				{
+					$id = $this->global_model->get_incrementID('ref_dokumen_id','ref_dokumen_persyaratan');
+					$m->set_ref_dokumen_id($id);
+					$result = $dao->insert($m);
+					$label = 'menyimpan';
+				}
+				else
+				{
+					$result = $dao->update($m,array('ref_dokumen_id'=>$id));
+					$label = 'merubah';
+				}
+
+				if(!$result)
+				{
+					die('ERROR: gagal '.$label.' data');
+				}
+
+				$data2['update_access'] = $update_access;
+				$data2['delete_access'] = $delete_access;
+				$data2['rows'] = $this->get_document_data();
+
+				$this->load->view($this->active_controller.'/documents/list_of_data',$data2);
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk '.($act=='add'?'menambah':'merubah').' data!';
+			}
+		}
+
+		function delete_document_data(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/documents');
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			if($delete_access)
+			{
+				$this->load->model(array('ref_dokumen_persyaratan_model'));
+
+				$id = $this->input->post('id');
+
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+
+				$m = $this->ref_dokumen_persyaratan_model;
+				$result = $dao->delete($m,array('ref_dokumen_id'=>$id));
+				if(!$result){
+					die('ERROR: gagal menghapus data');
+				}
+
+				$data2['update_access'] = $update_access;
+				$data2['delete_access'] = $delete_access;
+				$data2['rows'] = $this->get_document_data();
+
+				$this->load->view($this->active_controller.'/documents/list_of_data',$data2);
+
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk menghapus data!';
+			}
+		}
+
+		//END OF DOCUMENTS FUNCTION PACKET
+
+
+		//BORDER REGENCY FUNCTION PACKET
+		function border_regency(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/border_regency');
+			$read_access = $this->aah->check_privilege('read',$nav_id);
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+
+			if($read_access){
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+				$data['active_url'] = str_replace('::','/',__METHOD__);
+
+				$sql = "SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'";
+				if($this->session->userdata('admin_type_id')=='3'){
+					$sql .= " AND dt2_id='".$this->session->userdata('dt2_id')."'";
+				}
+
+				$data['dt2_rows'] = $dao->execute(0,$sql)->result_array();
+				$data['form_id'] = "search-border-regency-form";
+				$data['active_controller'] = $this->active_controller;
+				$data['containsTable'] = true;
+				$data['add_access'] = $add_access;
+
+				$data_view = '';
+				if($this->session->userdata('admin_type_id')=='3'){
+					$data_view = $this->search_border_regency_data(true);
+				}
+				$data['data_view'] = $data_view;
+
+				$this->backoffice_template->render($this->active_controller.'/border_regency/index',$data);
+			}else{
+				$this->error_403();
+			}
+		}
+
+		function search_border_regency_data($return=false){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/border_regency');			
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			if($this->session->userdata('admin_type_id')=='3')
+				$search_dt2 = $this->session->userdata('dt2_id');
+			else
+				$search_dt2 = $this->input->post('search_dt2');
+
+			$data2['update_access'] = $update_access;
+			$data2['delete_access'] = $delete_access;
+			$data2['rows'] = $this->get_border_regency_data($search_dt2);
+			$data2['search_dt2'] = $search_dt2;
+
+			$data['list_of_data'] = $this->load->view($this->active_controller.'/border_regency/list_of_data',$data2,true);
+
+			if($return){				
+				return $this->load->view($this->active_controller.'/border_regency/data_view',$data,true);
+			}else{
+				$this->load->view($this->active_controller.'/border_regency/data_view',$data);
+			}
+		}
+
+		function get_border_regency_data($dt2){
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+			
+			$cond = "WHERE status='perbatasan'";
+			if(!empty($dt2))
+				$cond .= " AND a.dt2_id='".$dt2."'";			
+
+			$sql = "SELECT a.*,b.nama_dt2,c.nama_dt2 as nama_dt2_perbatasan FROM pengaturan_dt2_sekolah as a 
+					LEFT JOIN ref_dt2 as b ON (a.dt2_id=b.dt2_id) 
+					LEFT JOIN ref_dt2 as c ON (a.dt2_sekolah_id=c.dt2_id) 
+					".$cond;
+			
+			$rows = $dao->execute(0,$sql)->result_array();
+			return $rows;
+		}
+
+		function load_border_regency_form(){
+			$this->aah->check_access();
+
+			$this->load->model(array('pengaturan_dt2_sekolah_model'));
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+			
+			$act = $this->input->post('act');
+			$search_dt2 = $this->input->post('search_dt2');
+
+		    $m = $this->pengaturan_dt2_sekolah_model;
+		   		    
+		    $dt2_id = ($act=='edit'?$this->input->post('dt2_id'):'');
+		    $dt2_sekolah_id = ($act=='edit'?$this->input->post('dt2_sekolah_id'):'');
+
+		    $id_value = array('dt2_id'=>'','dt2_sekolah_id'=>'');
+		    if($act=='edit'){
+		    	$id_value['dt2_id'] = $dt2_id;
+		    	$id_value['dt2_sekolah_id'] = $dt2_sekolah_id;
+		    }
+		    $curr_data = $dao->get_data_by_id($act,$m,$id_value);
+
+		    $dt2_sekolah_opts = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
+		    if($this->session->userdata('admin_type_id')=='3'){
+				$sql = "SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."' AND dt2_id='".$this->session->userdata('dt2_id')."'";
+				$dt2_opts = $dao->execute(0,$sql)->result_array();
+		    }
+		    else
+		    	$dt2_opts = $dt2_sekolah_opts;
+
+		    $data['dt2_opts'] = $dt2_opts;
+		    $data['dt2_sekolah_opts'] = $dt2_sekolah_opts;
+		    $data['curr_data'] = $curr_data;
+		    $data['active_controller'] = $this->active_controller;
+		    $data['form_id'] = 'border-regency-form';
+		    $data['dt2_id'] = $dt2_id;
+		    $data['dt2_sekolah_id'] = $dt2_sekolah_id;
+		    $data['act'] = $act;
+		    $data['search_dt2'] = $search_dt2;
+
+			$this->load->view($this->active_controller.'/border_regency/form_content',$data);
+		}
+
+		function submit_border_regency_data(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/border_regency');
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+			$act = $this->input->post('act');
+
+			if(($act=='add' and $add_access) or ($act=='edit' and $update_access))
+			{
+				$this->load->model(array('pengaturan_dt2_sekolah_model'));
+
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+
+				$_dt2_id = $this->input->post("dt2_id");
+				$_dt2_sekolah_id = $this->input->post("dt2_sekolah_id");
+
+				if($this->session->userdata('admin_type_id')=='3'){
+					$search_dt2 = $this->session->userdata('dt2_id');
+					$dt2_id = $this->session->userdata('dt2_id');
+				}
+				else{
+					$search_dt2 = $this->input->post('search_dt2');
+					$dt2_id = $this->security->xss_clean($this->input->post('input_dt2_id'));
+				}
+
+				$dt2_sekolah_id = $this->security->xss_clean($this->input->post('input_dt2_sekolah_id'));
+
+				$m = $this->pengaturan_dt2_sekolah_model;
+
+				$m->set_dt2_id($dt2_id);
+				$m->set_dt2_sekolah_id($dt2_sekolah_id);
+				$m->set_status('perbatasan');
+
+				$this->db->trans_begin();
+				if($act=='add')
+				{
+					//check domicile
+					$sql = "SELECT COUNT(1) as n_domisili FROM pengaturan_dt2_sekolah WHERE dt2_id='".$dt2_id."' AND status='domisili'";
+					$row = $dao->execute(0,$sql)->row_array();
+					if($row['n_domisili']==0){
+						$m2 = $this->pengaturan_dt2_sekolah_model;
+						$m2->set_dt2_id($dt2_id);
+						$m2->set_dt2_sekolah_id($dt2_id);
+						$m2->set_status('domisili');
+						$result = $dao->insert($m2);
+						if(!$result){
+							$this->db->trans_rollback();
+							die('ERROR: gagal menyimpan data');
+						}
+					}
+
+					$result = $dao->insert($m);
+					$label = 'menyimpan';
+				}
+				else
+				{
+					$result = $dao->update($m,array('dt2_id'=>$_dt2_id,'dt2_sekolah_id'=>$_dt2_sekolah_id));
+				
+					$label = 'merubah';
+				}
+
+				if(!$result)
+				{
+					$this->db->trans_rollback();
+					die('ERROR: gagal '.$label.' data');
+				}
+				$this->db->trans_commit();
+
+				$data['update_access'] = $update_access;
+				$data['delete_access'] = $delete_access;
+				$data['rows'] = $this->get_border_regency_data($search_dt2);
+				$data['search_dt2'] = $search_dt2;
+
+				$this->load->view($this->active_controller.'/border_regency/list_of_data',$data);
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk '.($act=='add'?'menambah':'merubah').' data!';
+			}
+
+		}
+
+		function delete_border_regency_data(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/border_regency');
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			if($delete_access)
+			{
+				$this->load->model(array('pengaturan_dt2_sekolah_model'));
+
+				$dt2_id = $this->input->post('dt2_id');
+				$dt2_sekolah_id = $this->input->post('dt2_sekolah_id');
+
+				if($this->session->userdata('admin_type_id')=='3')
+					$search_dt2 = $this->session->userdata('dt2_id');
+				else
+					$search_dt2 = $this->input->post('search_dt2');
+				
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+
+				$m = $this->pengaturan_dt2_sekolah_model;
+				$result = $dao->delete($m,array('dt2_id'=>$dt2_id,'dt2_sekolah_id'=>$dt2_sekolah_id));
+				if(!$result){
+					die('ERROR: gagal menghapus data');
+				}
+				
+				$data['update_access'] = $update_access;
+				$data['delete_access'] = $delete_access;
+				$data['rows'] = $this->get_border_regency_data($search_dt2);
+				$data['search_dt2'] = $search_dt2;
+
+				$this->load->view($this->active_controller.'/border_regency/list_of_data',$data);
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk menghapus data!';
+			}
+		}
+		//END OF BORDER REGENCY FUNCTION PACKET
+
+
+
+		//BORDER SCHOOL FUNCTION PACKET
+		function border_school(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/border_school');
+			$read_access = $this->aah->check_privilege('read',$nav_id);
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+
+			if($read_access){
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+				$data['active_url'] = str_replace('::','/',__METHOD__);
+
+				$sql = "SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'";
+				if($this->session->userdata('admin_type_id')=='3'){
+					$sql .= " AND dt2_id='".$this->session->userdata('dt2_id')."'";
+				}
+
+				$data['dt2_rows'] = $dao->execute(0,$sql)->result_array();
+				$data['form_id'] = "search-border-school-form";
+				$data['active_controller'] = $this->active_controller;
+				$data['containsTable'] = true;
+				$data['add_access'] = $add_access;
+
+				$data_view = '';
+				if($this->session->userdata('admin_type_id')=='3'){
+					$data_view = $this->search_border_school_data(true);
+				}
+				$data['data_view'] = $data_view;
+
+				$this->backoffice_template->render($this->active_controller.'/border_school/index',$data);
+			}else{
+				$this->error_403();
+			}
+		}
+
+		function search_border_school_data($return=false){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/border_school');			
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			if($this->session->userdata('admin_type_id')=='3')
+				$search_dt2 = $this->session->userdata('dt2_id');
+			else
+				$search_dt2 = $this->input->post('search_dt2');
+
+			$data2['update_access'] = $update_access;
+			$data2['delete_access'] = $delete_access;
+			$data2['rows'] = $this->get_border_school_data($search_dt2);
+			$data2['search_dt2'] = $search_dt2;
+
+			$data['list_of_data'] = $this->load->view($this->active_controller.'/border_school/list_of_data',$data2,true);
+
+			if($return){
+				return $this->load->view($this->active_controller.'/border_school/data_view',$data,true);
+			}else{
+				$this->load->view($this->active_controller.'/border_school/data_view',$data);
+			}
+		}
+
+		function get_border_school_data($dt2){
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+			
+			$cond = "";
+			if(!empty($dt2))
+				$cond .= " WHERE a.dt2_id='".$dt2."'";
+
+			$sql = "SELECT a.sekper_id,b.nama_dt2,c.nama_sekolah FROM pengaturan_sekolah_perbatasan as a 
+					LEFT JOIN ref_dt2 as b ON (a.dt2_perbatasan_id=b.dt2_id)
+					LEFT JOIN sekolah as c ON (a.sekolah_id=c.sekolah_id)
+					".$cond;
+
+			$rows = $dao->execute(0,$sql)->result_array();
+			return $rows;
+		}
+
+		function load_border_school_form(){
+			$this->aah->check_access();
+
+			$this->load->model(array('pengaturan_sekolah_perbatasan_model'));
+			$this->global_model->reinitialize_dao();
+			$dao = $this->global_model->get_dao();
+			
+			$act = $this->input->post('act');
+			$search_dt2 = $this->input->post('search_dt2');
+
+		    $m = $this->pengaturan_sekolah_perbatasan_model;
+		   		    
+		    $id_name = 'sekper_id';
+		    $id_value = ($act=='edit'?$this->input->post('id'):'');
+
+		    $curr_data = $dao->get_data_by_id($act,$m,$id_value);
+
+		    if($this->session->userdata('admin_type_id')=='3'){
+				$sql = "SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."' AND dt2_id='".$this->session->userdata('dt2_id')."'";
+				$dt2_opts = $dao->execute(0,$sql)->result_array();
+		    }
+		    else
+		    	$dt2_opts = $dao->execute(0,"SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'")->result_array();
+
+		    $sekolah_opts = array();
+		    $dt2_sekolah_opts = array();
+		    if($this->session->userdata('admin_type_id')=='3' or $act=='edit'){
+		    	$sql = "SELECT dt2_sekolah_id as dt2_id,b.nama_dt2 FROM pengaturan_dt2_sekolah as a LEFT JOIN ref_dt2 as b ON (a.dt2_sekolah_id=b.dt2_id) 
+		   				WHERE a.dt2_id='".($this->session->userdata('admin_type_id')=='3'?$this->session->userdata('dt2_id'):$curr_data['dt2_id'])."' 
+		   				AND status='perbatasan'";
+
+		   		$dt2_sekolah_opts = $dao->execute(0,$sql)->result_array();
+			   	if($act=='edit'){
+		    		$sql = "SELECT sekolah_id,nama_sekolah FROM sekolah WHERE dt2_id='".$curr_data['dt2_perbatasan_id']."'";
+		    		$sekolah_opts = $dao->execute(0,$sql)->result_array();
+
+			    }
+			}
+
+		    $data['dt2_opts'] = $dt2_opts;
+		    $data['dt2_sekolah_opts'] = $dt2_sekolah_opts;
+		    $data['sekolah_opts'] = $sekolah_opts;
+		    $data['curr_data'] = $curr_data;
+		    $data['active_controller'] = $this->active_controller;
+		    $data['form_id'] = 'border-school-form';
+		    $data['id_value'] = $id_value;
+		    $data['act'] = $act;
+		    $data['search_dt2'] = $search_dt2;
+
+			$this->load->view($this->active_controller.'/border_school/form_content',$data);
+		}
+
+		function submit_border_school_data(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/border_school');
+			$add_access = $this->aah->check_privilege('add',$nav_id);
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+			$act = $this->input->post('act');
+
+			if(($act=='add' and $add_access) or ($act=='edit' and $update_access))
+			{
+				$this->load->model(array('pengaturan_sekolah_perbatasan_model'));
+
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();				
+
+				if($this->session->userdata('admin_type_id')=='3'){
+					$search_dt2 = $this->session->userdata('dt2_id');
+					$dt2_id = $this->session->userdata('dt2_id');
+				}
+				else{
+					$search_dt2 = $this->input->post('search_dt2');
+					$dt2_id = $this->security->xss_clean($this->input->post('input_dt2_id'));
+				}
+
+				$dt2_perbatasan_id = $this->security->xss_clean($this->input->post('input_dt2_perbatasan_id'));
+				$sekolah_id = $this->security->xss_clean($this->input->post('input_sekolah_id'));
+
+				$m = $this->pengaturan_sekolah_perbatasan_model;
+
+				$m->set_dt2_id($dt2_id);
+				$m->set_dt2_perbatasan_id($dt2_perbatasan_id);
+				$m->set_sekolah_id($sekolah_id);
+
+				$this->db->trans_begin();
+				if($act=='add')
+				{
+					$id = $this->global_model->get_incrementID('sekper_id','pengaturan_sekolah_perbatasan');
+					$m->set_sekper_id($id);
+					$result = $dao->insert($m);					
+					$label = 'menyimpan';
+				}
+				else
+				{
+					$id = $this->input->post('id');
+					$result = $dao->update($m,array('sekper_id'=>$id));
+					$label = 'merubah';
+				}
+
+				if(!$result)
+				{
+					$this->db->trans_rollback();
+					die('ERROR: gagal '.$label.' data');
+				}
+				$this->db->trans_commit();
+
+				$data['update_access'] = $update_access;
+				$data['delete_access'] = $delete_access;
+				$data['rows'] = $this->get_border_school_data($search_dt2);
+				$data['search_dt2'] = $search_dt2;
+
+				$this->load->view($this->active_controller.'/border_school/list_of_data',$data);
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk '.($act=='add'?'menambah':'merubah').' data!';
+			}
+
+		}
+
+		function delete_border_school_data(){
+			$this->aah->check_access();
+
+			$nav_id = $this->aah->get_nav_id(__CLASS__.'/border_regency');
+			$update_access = $this->aah->check_privilege('update',$nav_id);
+			$delete_access = $this->aah->check_privilege('delete',$nav_id);
+
+			if($delete_access)
+			{
+				$this->load->model(array('pengaturan_sekolah_perbatasan_model'));				
+
+				if($this->session->userdata('admin_type_id')=='3')
+					$search_dt2 = $this->session->userdata('dt2_id');
+				else
+					$search_dt2 = $this->input->post('search_dt2');
+				
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();
+
+				$id = $this->input->post('id');
+
+				$m = $this->pengaturan_sekolah_perbatasan_model;
+				$result = $dao->delete($m,array('sekper_id'=>$id));
+				if(!$result){
+					die('ERROR: gagal menghapus data');
+				}
+				
+				$data['update_access'] = $update_access;
+				$data['delete_access'] = $delete_access;
+				$data['rows'] = $this->get_border_school_data($search_dt2);
+				$data['search_dt2'] = $search_dt2;
+
+				$this->load->view($this->active_controller.'/border_school/list_of_data',$data);
+			}else{
+				echo 'ERROR: anda tidak diijinkan untuk menghapus data!';
+			}
+		}
+		//END OF BORDER SCHOOL FUNCTION PACKET
 	}
 ?>

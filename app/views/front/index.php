@@ -39,7 +39,7 @@
 
                         echo "
                         <div class='col-lg-".$cw." col-md-".$cw." wow flipInY' data-wow-delay='.8s'>
-                            <div class='packages' style='min-height:420px'>
+                            <div class='packages' style='min-height:650px'>
                                 <h4>".$alp.". ".$row1['nama_tipe_sekolah']." (".$row1['akronim'].")</h4><br />
                                 <ol type='1' align='left'>";
                                     foreach($rows2 as $row2){
@@ -91,15 +91,7 @@
                                 <h4>Jalur Pendaftaran :</h4>
                                 <ul>";
                                     foreach($rows2 as $row2){
-
-                                        if($row2['status_jadwal']=='0' || $row2['status_jadwal']==null || $row2['status_jadwal']==''){
-                                            $jadwal = "<font color='orange'>Belum buka</font>";
-                                        }else if($row2['status_jadwal']=='1'){                                            
-                                            $jadwal = "<font color='green'>Buka</font> ".$row2['tgl_buka'].", <font color='red'>Tutup</font> ".$row2['tgl_tutup']."</font>";
-                                        }else{
-                                            $jadwal = "<font color='red'>Tutup</font>";
-                                        }
-
+                                        $jadwal = "<font color='green'>Buka</font> ".indo_date_format($row2['tgl_buka'],'shortDate').", <font color='red'>Tutup</font> ".indo_date_format($row2['tgl_tutup'],'shortDate')."</font>";
                                         echo "<li>".$row2['nama_jalur']." | <b>".$jadwal."</b> <span class='badge badge-primary pull-right'>".$row2['nama_ktg_jalur']."</span></li>";
 
                                     }

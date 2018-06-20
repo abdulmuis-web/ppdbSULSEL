@@ -1,7 +1,21 @@
-<div class="container-fluid box">
+<?php
+	if($availability=='pre' or $availability=='finish'){
 
+		$msg = "";
+		if($availability=='pre'){
+			$msg = "Jalur Pendaftaran belum terbuka! <br />
+					Jadwal Pendaftaran Jalur ".$nama_jalur." terbuka pada tanggal ".mix_2Date($kuota_jalur_row['tgl_buka'],$kuota_jalur_row['tgl_tutup']);
+		}else{
+			$msg = "Pendaftaran Jalur ".$nama_jalur." sudah tertutup!";
+		}
+
+		echo "<div class='alert alert-warning'><strong>Perhatian !</strong> ".$msg."</div>";
+		die();
+	}
+?>
+
+<div class="container-fluid box">
 	<fieldset>
-		
 		<div class="alert alert-danger">
 		  <strong>Perhatian!</strong> Lengkapi formulir di bawah ini dengan data yang benar. <br />
 		  Perhatikan kembali data yang telah diisi sebelum menekan tombol Submit karena penginputan data hanya sekali saja!
@@ -141,12 +155,17 @@
 
 					<?php					
 
+					$value_input_rule = '';
+					if($input_arr['nil_bhs_indonesia']==0 and $input_arr['nil_bhs_inggris']==0 and $input_arr['nil_matematika']==0 and $input_arr['nil_ipa']==0)
+						$value_input_rule = 'required';
+					else
+						$value_input_rule = 'readonly';
 					echo "
 						<div class='form-group'>
 							<label class='control-label col-md-4' for='input_nil_bhs_indonesia'>Bhs. Indonesia <font color='red'>*</font></label>
 							<div class='col-md-8'>
 								<div class='input'>
-									<input class='form-control decimal' id='input_nil_bhs_indonesia' type='text' onkeyup=\"count_tot_value();\" name='input_nil_bhs_indonesia' value='".$input_arr['nil_bhs_indonesia']."' required>
+									<input class='form-control decimal' id='input_nil_bhs_indonesia' type='text' onkeyup=\"count_tot_value();\" name='input_nil_bhs_indonesia' value='".$input_arr['nil_bhs_indonesia']."' ".$value_input_rule.">
 								</div>
 							</div>
 						</div>
@@ -155,7 +174,7 @@
 							<label class='control-label col-md-4' for='input_nil_bhs_inggris'>Bhs. Inggris <font color='red'>*</font></label>
 							<div class='col-md-8'>
 								<div class='input'>
-									<input class='form-control decimal' id='input_nil_bhs_inggris' type='text' onkeyup=\"count_tot_value();\" name='input_nil_bhs_inggris' value='".$input_arr['nil_bhs_inggris']."' required>
+									<input class='form-control decimal' id='input_nil_bhs_inggris' type='text' onkeyup=\"count_tot_value();\" name='input_nil_bhs_inggris' value='".$input_arr['nil_bhs_inggris']."' ".$value_input_rule.">
 								</div>
 							</div>
 						</div>
@@ -164,7 +183,7 @@
 							<label class='control-label col-md-4' for='input_nil_matematika'>Matematika <font color='red'>*</font></label>
 							<div class='col-md-8'>
 								<div class='input'>
-									<input class='form-control decimal' id='input_nil_matematika' type='text' onkeyup=\"count_tot_value();\" name='input_nil_matematika' value='".$input_arr['nil_matematika']."' required>
+									<input class='form-control decimal' id='input_nil_matematika' type='text' onkeyup=\"count_tot_value();\" name='input_nil_matematika' value='".$input_arr['nil_matematika']."' ".$value_input_rule.">
 								</div>
 							</div>
 						</div>
@@ -173,7 +192,7 @@
 							<label class='control-label col-md-4' for='input_nil_ipa'>IPA <font color='red'>*</font></label>
 							<div class='col-md-8'>
 								<div class='input'>
-									<input class='form-control decimal' id='input_nil_ipa' type='text' onkeyup=\"count_tot_value();\" name='input_nil_ipa' value='".$input_arr['nil_ipa']."' required>
+									<input class='form-control decimal' id='input_nil_ipa' type='text' onkeyup=\"count_tot_value();\" name='input_nil_ipa' value='".$input_arr['nil_ipa']."' ".$value_input_rule.">
 								</div>
 							</div>
 						</div>					
@@ -512,13 +531,19 @@
    		var n = $('#input_jml_sekolah').val();
    		var input_name = (stage=='1'?'input_sekolah_tujuan':'input_kompetensi_tujuan');
 
+   		filled = 0;
+   		for(i=1;i<=n;i++){
+   			val = $('#'+input_name+i).val();
+   			filled += (val!=''?1:0);
+   		}
+
    		var chosen = [];
    		var status = true;
    		for(i=1;i<=n;i++){
 
-   			val = $('#'+input_name+i).val();   			
+   			val = $('#'+input_name+i).val();
 
-   			if(chosen.indexOf(val)<0 || chosen.length==0)
+   			if(chosen.indexOf(val)<0 || chosen.length==0 || filled==1)
 			{
 				chosen.push(val);				
 			}else{

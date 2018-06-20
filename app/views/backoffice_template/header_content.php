@@ -35,8 +35,8 @@
 		</style>
 
 		<!-- FAVICONS -->
-		<link rel="shortcut icon" href="<?=$this->config->item('img_path');?>favicon/favicon.ico" type="image/x-icon">
-		<link rel="icon" href="<?=$this->config->item('img_path');?>favicon/favicon.ico" type="image/x-icon">
+		<link rel="shortcut icon" href="<?=$this->config->item('img_path');?>logo_sulsel.png" type="image/x-icon">
+		<link rel="icon" href="<?=$this->config->item('img_path');?>logo_sulsel.png" type="image/x-icon">
 
 		<!-- PRELOAD STYLE -->
 		<link rel="stylesheet" type="text/css" media="screen" href="<?=$this->config->item('css_path');?>preload-style.css">		

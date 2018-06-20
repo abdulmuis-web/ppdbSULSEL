@@ -74,8 +74,8 @@
 												<div class='col-md-6'>
 													<table class='table table-bordered'>
 													<tbody>
-														<tr><td><b>L</b> : 0</td><td></td></tr>
-														<tr><td><b>P</b> : 0</td><td></td></tr>
+														<tr><td><b>".($type=='1'?'L':'SMA')."</b></td><td> : 0</td></tr>
+														<tr><td><b>".($type=='1'?'P':'SMK')."</b></td><td> : 0</td></tr>
 													</tbody>
 													</table>
 												</div>

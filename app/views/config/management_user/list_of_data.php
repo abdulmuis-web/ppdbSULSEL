@@ -9,7 +9,7 @@
 				<th>Email</th>
 				<th>Status</th>
 				<th>Terakhir Dimodifikasi</th>
-				<th width='8%'>Aksi</th>
+				<th>Aksi</th>
 			</tr>
 		</thead>
 		<tbody>";
@@ -38,19 +38,35 @@
 	                	echo "<a href='#' title='Edit' class='btn btn-xs btn-default' id='edit_".$no."' onclick=\"alert('anda tidak diijinkan untuk merubah data!')\">";
 	                
 	                echo "
-	                <input type='hidden' id='ajax-req-dt' name='id' value='".$row['admin_id']."'/>
+	                <input type='hidden' id='ajax-req-dt' name='id' value='".$admin_id."'/>
+	                <input type='hidden' id='ajax-req-dt' name='search_user_type' value='".$search_user_type."'/>
 	                <input type='hidden' id='ajax-req-dt' name='act' value='edit'/>
 	            	<i class='fa fa-edit'></i></a>&nbsp";
 
-	            	if($delete_access)
-	            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"if(confirm('Anda yakin?')){delete_record(this.id)}\" id='delete_".$no."'>";
-	            	else
-	            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"alert('anda tidak diijinkan untuk menghapus data!')\">";
+	            	if($admin_id!=$this->session->userdata('admin_id')){
+		            	if($delete_access)
+		            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"if(confirm('Anda yakin?')){delete_record(this.id)}\" id='delete_".$no."'>";
+		            	else
+		            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"alert('anda tidak diijinkan untuk menghapus data!')\">";
 
-	            	echo "
-	            	<input type='hidden' id='ajax-req-dt' name='id' value='".$row['admin_id']."'/>
-	            	<i class='fa fa-trash-o'></i></a>&nbsp
-	            </td>
+		            	echo "
+		            	<input type='hidden' id='ajax-req-dt' name='id' value='".$admin_id."'/>
+		            	<input type='hidden' id='ajax-req-dt' name='search_user_type' value='".$search_user_type."'/>
+		            	<i class='fa fa-trash-o'></i></a>&nbsp";
+
+						if($update_access)
+		            		echo "<a href='#' title='".($status=='0'?'Aktifkan':'Nonaktifkan')."' class='btn btn-xs btn-default' onclick=\"control_activation(this.id)\" id='control_activation_".$no."'>";
+		            	else
+		            		echo "<a href='#' title='".($status=='0'?'Aktifkan':'Nonaktifkan')."' class='btn btn-xs btn-default' onclick=\"alert('anda tidak diijinkan untuk merubah data!')\">";
+
+		            	echo "
+		            	<input type='hidden' id='ajax-req-dt' name='id' value='".$admin_id."'/>
+		            	<input type='hidden' id='ajax-req-dt' name='curr_status' value='".$status."'/>
+		            	<input type='hidden' id='ajax-req-dt' name='search_user_type' value='".$search_user_type."'/>
+		            	<i class='fa ".($status=='0'?'fa-unlock':'fa-lock')."'></i></a>";
+		            }
+
+	            echo "</td>
 				</tr>";
 			}
 			

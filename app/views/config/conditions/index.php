@@ -61,6 +61,10 @@
 								<li>
 									<a data-toggle="tab" href="#hr4"> Persyaratan Pendaftaran </span></a>
 								</li>
+
+								<li>
+									<a data-toggle="tab" href="#hr5"> Dok. Persyaratan </span></a>
+								</li>
 		
 							</ul>
 
@@ -102,6 +106,13 @@
 											<img src="<?=$this->config->item('img_path');?>ajax-loaders/ajax-loader-1.gif"/>
 										</div>
 										<div id="content-hr4"></div>
+									</div>
+
+									<div class="tab-pane" id="hr5">
+										<div id="loader-hr5" style="display:block" align="center">
+											<img src="<?=$this->config->item('img_path');?>ajax-loaders/ajax-loader-1.gif"/>
+										</div>
+										<div id="content-hr5"></div>
 									</div>
 
 								</div>
@@ -157,10 +168,11 @@
 
     function load_content(){
 		ajax_object.reset_object();
-        ajax_object.set_n_req(4)
-        		   .set_url([base_url+'config/load_conditions1',base_url+'config/load_conditions2',base_url+'config/load_conditions3',base_url+'config/load_conditions4'])
-        		   .set_loading(['#loader-hr1','#loader-hr2','#loader-hr3','#loader-hr4'])
-        		   .set_content(['#content-hr1','#content-hr2','#content-hr3','#content-hr4'])
+        ajax_object.set_n_req(5)
+        		   .set_url([base_url+'config/load_conditions1',base_url+'config/load_conditions2',base_url+'config/load_conditions3',
+        		   			 base_url+'config/load_conditions4',base_url+'config/load_conditions5'])
+        		   .set_loading(['#loader-hr1','#loader-hr2','#loader-hr3','#loader-hr4','#loader-hr5'])
+        		   .set_content(['#content-hr1','#content-hr2','#content-hr3','#content-hr4','#content-hr5'])
         		   .request_ajax();
 	}
 

@@ -22,9 +22,7 @@
                     <i class="social fa fa-linkedin" aria-hidden="true"></i>
                     <i class="social fa fa-pinterest" aria-hidden="true"></i>
                     <i class="social fa fa-youtube" aria-hidden="true"></i>
-                    <i class="social fa fa-github" aria-hidden="true"></i><br />
-                    <input type="email" placeholder="sucribe for updates"/>
-                    <button type="button" class="btn btn-success">Subscribe</button>
+                    <i class="social fa fa-github" aria-hidden="true"></i><br />                    
                 </div>
             </div>
         </div>

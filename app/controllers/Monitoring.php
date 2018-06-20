@@ -45,7 +45,7 @@
 			$jalur_rows = $dao->execute(0,$sql)->result_array();
 			$data['jalur_rows'] = $jalur_rows;
 			$data['nama_sekolah'] = $nama_sekolah;
-
+			$data['type'] = ($this->session->userdata('admin_type_id')=='3' || $this->session->userdata('admin_type_id')=='4'?'1':'2');
 			$this->backoffice_template->monitor($this->active_controller.'/'.$this->get_folder($status).'/index',$data);
 		}
 

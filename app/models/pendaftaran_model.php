@@ -7,7 +7,7 @@
 				$alamat,$kelurahan_id,$kecamatan_id,$dt2_id,$no_telp,
 				$sekolah_asal_id,$sekolah_asal,$nm_orang_tua,$mode_un,$nil_bhs_indonesia,
 				$nil_bhs_inggris,$nil_matematika,$nil_ipa,$tot_nil,$latitude,
-				$longitude,$gambar,$waktu_pendaftaran,$status,$no_pendaftaran,$no_seri;
+				$longitude,$gambar,$waktu_pendaftaran,$status,$no_pendaftaran,$no_seri,$passphrase,$show_passphrase;
 
 		const pkey = "id_pendaftaran";
 		const tbl_name = "pendaftaran";
@@ -46,6 +46,14 @@
 
 	    function get_mode_un() {
 	        return $this->mode_un;
+	    }
+
+	    function get_passphrase() {
+	        return $this->passphrase;
+	    }
+
+	    function get_show_passphrase() {
+	        return $this->show_passphrase;
 	    }
 
 	    function get_sekolah_asal() {
@@ -254,6 +262,14 @@
 
 	    function set_no_seri($data) {
 	        $this->no_seri=$data;
+	    }
+
+	    function set_passphrase($data) {
+	        $this->passphrase=$data;
+	    }
+
+	    function set_show_passphrase($data) {
+	        $this->show_passphrase=$data;
 	    }
 
 	    

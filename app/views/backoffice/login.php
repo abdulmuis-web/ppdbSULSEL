@@ -5,7 +5,8 @@
     <title>Admin Panel PPDB Online Prov. Sulsel 2018 | Log in</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    
+    <link rel="shortcut icon" href="<?=$this->config->item('img_path');?>logo_sulsel.png" type="image/x-icon">
+    <link rel="icon" href="<?=$this->config->item('img_path');?>logo_sulsel.png" type="image/x-icon">
     <!-- Bootstrap 3.3.4 -->
     <link rel="stylesheet" href="<?=$this->config->item('assets_path');?>css/bootstrap.min.css">
     
@@ -34,11 +35,18 @@
           <div class="col-md-12" align="center" style="position:relative">            
           </div>
         </div>
-            
-              <h3 align="center" style="margin-top:20px;padding:0">ADMIN Panel PPDB Online<br />
-                Provinsi Sulawesi Selatan</h3>
+              
+              <div class="row">
+                <div class="col-md-12" align="center" style="position:relative;">
+                  <img src="<?=$this->config->item('img_path');?>logo_sulsel.png" width="30%"/>
+                  <h3 align="center" style="margin-top:20px;padding:0">
+                ADMIN PANEL PPDB ONLINE<br />
+                PROVINSI SULAWESI SELATAN
+              </h3>
+                </div>
+              </div>              
                           
-                <div class="login-box" style="margin-top:10px!important;">
+                <div class="login-box" style="margin-top:10px!important;border:1px solid #eaeaea">
                   <div class="login-box-body">
                     <p class="login-box-msg">Sign in to start your session</p>
                     <input type="hidden" id="baseUrl" value="<?=base_url();?>"/>
@@ -103,12 +111,17 @@
                 $btnLogin.html("Log in");
 
                 if(data.status == 'success'){
-                  noty({text: "I know you and I\'m redirecting you to Dasboard Page "+$loadImg, layout: 'topRight', type: 'success'})    
+                  noty({text: "Akun anda dikenali, kami sementara mengarahkan anda ke Halaman Dasboard "+$loadImg, layout: 'topRight', type: 'success'})    
                   window.location.assign($('#baseUrl').val()+'backoffice/');
                 }else{
                   
-                  msg = (data.status =='failed1'?'Maaf, Username atau Password tidak dikenali !':'Akun anda tidak aktif, Silahkan hubungi Admin Dinas Pendidikan');
-                  noty({text: msg, layout: 'topRight', type: 'error', timeout:2000});
+                  msg = '';
+                  switch(data.status){
+                    case 'failed1':msg='Maaf, Username atau Password tidak dikenali!';break;
+                    case 'failed2':msg='Akun anda tidak aktif, silahkan hubungi Admin Dinas Pendidikan';break;
+                    case 'failed3':msg='Sistem sedang dikunci untuk sementara!';break;
+                  }
+                  noty({text: msg, layout: 'topRight', type: 'error', timeout:5000});
                 }
 
            
@@ -120,7 +133,7 @@
             return false;
           });
 
-        });        
+        });
 
       })(jQuery);
           

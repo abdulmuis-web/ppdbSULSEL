@@ -6,8 +6,8 @@
 	<div class='col-md-6'>
 	<table class='table table-bordered'>
 	<tbody>
-		<tr><td><b>L</b>:</td><td align='right'>".number_format($n1)."</td></tr>
-		<tr><td><b>P</b>:</td><td align='right'>".number_format($n2)."</td></tr>
+		<tr><td><b>".($type=='1'?'L':'SMA')."</b>:</td><td align='right'>".number_format($n1)."</td></tr>
+		<tr><td><b>".($type=='1'?'P':'SMK')."</b>:</td><td align='right'>".number_format($n2)."</td></tr>
 	</tbody>
 	</table>
 	</div>";

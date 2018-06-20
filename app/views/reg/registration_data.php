@@ -23,7 +23,7 @@
 						<tr><td>Jenjang Sekolah Pilihan</td><td>".$tipe_sekolah['nama_tipe_sekolah']." (".$tipe_sekolah['akronim'].")</td></tr>
 						<tr><td>".strtoupper($tipe_sekolah['akronim'])." Pilihan</td>
 							<td>
-								<ol type='1'>";
+								<ol type='1' style='margin:0;margin-left:15px;padding:0'>";
 									foreach($sekolah_pilihan_arr as $item){
 										echo "<li>".$item."</li>";
 									}
@@ -31,6 +31,9 @@
 							</td>
 						</tr>
 						<tr><td>Tgl. Pendaftaran</td><td>".indo_date_format($tgl_pendaftaran,'longDate')."</td></tr>";
+						if($show_passphrase=='1'){
+							echo "<tr><td>Password</td><td><b>".$passphrase."</b> <br /><small>*<font color='red'>Password ini diperlukan saat login selanjutnya!</font></small></td></tr>";
+						}
 						?>
 					</tbody>
 					<tfoot>

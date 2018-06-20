@@ -17,7 +17,16 @@
 
 		}
 
+		function securimage() {
+		    $lib_path = APPPATH.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.'securimage/';
+		    require_once($lib_path.'securimage.php');
+			$img = new Securimage();
+			$img->show(); // alternate use: $img->show('/path/to/background.jpg');
+		}
+
 		function index(){
+
+			$this->load->helper('date_helper');
 			
 			$_SYS_PARAMS = $this->global_model->get_system_params();
 
@@ -52,14 +61,40 @@
 
 		function login(){			
 			$this->load->helper('mix_helper');
+		    $lib_path = APPPATH.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.'securimage/';
+		    require_once($lib_path.'securimage.php');
 
 			$nopes = $this->security->xss_clean($this->input->post('login_nopes'));
-				
+			// $passphrase = $this->security->xss_clean($this->input->post('login_password'));			
+
 			$row = $this->pendaftaran_model->login($nopes);
 
 			$result = '';
 
 			if(!empty($row['id_pendaftaran'])){
+
+				// $delete_show_passphrase = false;
+
+				// if(!empty($row['no_pendaftaran'])){
+					
+				// 	if(empty($passphrase))
+				// 	{
+				// 		$result = 'ERROR: Silahkan masukkan password anda!';
+				// 		goto a;
+				// 	}else if($passphrase!=$row['passphrase']){
+				// 		$result = 'ERROR: Password anda salah!';
+				// 		goto a;
+				// 	}
+				// 	$delete_show_passphrase = ($row['show_passphrase']=='1');
+				// }
+
+
+				$captcha = $this->input->post('secure_code');
+				$img = new Securimage();
+				if ($img->check($captcha) == false) {
+					$result = 'ERROR: Kode Keamanan salah !';
+					goto a;
+				}
 
 				$dao = $this->global_model->get_dao();
 
@@ -73,8 +108,17 @@
 			    $ip = get_ip();
 			    $login_time = date('Y-m-d H:i:s');
 			    $session_content = "{\"nopes\":\"".$row['id_pendaftaran']."\",
-		    						 \"nama\":\"".$row['nama']."\",		    						
 		    						\"sekolah_asal\":\"".$row['sekolah_asal']."\"}";
+
+
+		    	// if($delete_show_passphrase){
+		    	// 	$sql = "UPDATE pendaftaran SET show_passphrase='0' WHERE id_pendaftaran='".$nopes."'";
+		    	// 	$result = $dao->execute(0,$sql);
+		    	// 	if(!$result){
+		    	// 		$result = 'failed';
+		    	// 		goto a;
+		    	// 	}
+		    	// }
 
 		    	$sql = "DELETE FROM user_logins WHERE user_id='".$nopes."'";
 		    	$result = $dao->execute(0,$sql);
@@ -84,7 +128,6 @@
 		    		goto a;
 		    	}
 
-		    	
 		    	$sql = "INSERT INTO user_sessions 
 		    			(session_id,user_id,user_type,user_agent,ip,login_time,session_content) 
 		    			VALUES('".$session_id."','".$nopes."','registrant','".$user_agent."','".$ip."','".$login_time."','".$session_content."')";
@@ -128,8 +171,8 @@
 
 				$this->session->set_userdata($dt_session);				
 
-
 				$result = 'success';
+				
 			}else{
 				$result = 'failed';
 			}

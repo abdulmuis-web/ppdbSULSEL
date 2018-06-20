@@ -65,7 +65,6 @@
 				$data['tab_view'] = $this->tabs_view[(!empty($tab)?$tab:$this->default_tab)];
 			}
 			
-			
 			$dao = $this->global_model->get_dao();
 
 			if($path!='')
@@ -77,7 +76,13 @@
 					$data['ketentuan_jalur_rows'] = $ketentuan_jalur_rows;
 					$data['nama_jalur'] = $this->jalur_pendaftaran_arr[$path];
 				}
+			}else{
+
+				$this->load->helper('date_helper');
+				$sql = "SELECT * FROM pengumuman WHERE status='1' ORDER BY waktu_posting DESC";				
+				$data['pengumuman_row'] = $dao->execute(0,$sql)->row_array();
 			}
+
 
 			$this->public_template->render('reg/index.php',$data);
 
@@ -89,12 +94,12 @@
 
 			$breadcrumbs = array(
 							array('url'=>base_url(),'text'=>'Home','active'=>false),
-							array('url'=>base_url().'stage/'.$stage,'text'=>$this->tipe_sekolah_arr[$stage],'active'=>false),
+							array('url'=>base_url().'reg/stage/'.$stage,'text'=>$this->tipe_sekolah_arr[$stage],'active'=>false),
 						);
 			if($path==''){
 				$breadcrumbs[] = array('url'=>'#','text'=>'Info Umum','active'=>true);
 			}else{
-				$breadcrumbs[] = array('url'=>base_url().'stage/'.$stage.'/'.$path,'text'=>$this->jalur_pendaftaran_arr[$path],'active'=>false);
+				$breadcrumbs[] = array('url'=>base_url().'reg/stage/'.$stage.'/'.$path,'text'=>$this->jalur_pendaftaran_arr[$path],'active'=>false);
 				$breadcrumbs[] = array('url'=>'#','text'=>$this->tabs[$tab],'active'=>true);
 			}
 			return $breadcrumbs;
@@ -109,7 +114,7 @@
 			$tab_id = (!is_null($this->input->post('tab_id'))?$this->input->post('tab_id'):$this->default_tab);
 
 			$data = array();
-
+			$this->global_model->reinitialize_dao();
 			$dao = $this->global_model->get_dao();
 
 			$view = $this->tabs_view[$tab_id];
@@ -117,166 +122,167 @@
 			$data['nama_jalur'] = $this->jalur_pendaftaran_arr[$path];
 			$data['tipe_sekolah'] = $this->tipe_sekolah_arr[$stage];
 
-			$sql = "SELECT jml_sekolah,persen_kuota,lintas_dt2 FROM pengaturan_kuota_jalur WHERE 
-					thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND jalur_id='".$path."' AND tipe_sekolah_id='".$stage."'";
+			$sql = "SELECT a.jml_sekolah,a.persen_kuota,a.lintas_dt2,b.tgl_buka,b.tgl_tutup FROM pengaturan_kuota_jalur as a 
+					LEFT JOIN jadwal_jalur_pendaftaran as b ON (a.jalur_id=b.jalur_id) AND (a.tipe_sekolah_id=b.tipe_sklh_id) 
+					WHERE a.thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND a.jalur_id='".$path."' AND a.tipe_sekolah_id='".$stage."'";
+			
 			$kuota_jalur_row = $dao->execute(0,$sql)->row_array();
 			
 			$data['kuota_jalur_row'] = $kuota_jalur_row;
 
 			if($tab_id==1){
-
 				$sql = "SELECT ketentuan FROM ketentuan_jalur WHERE thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND jalur_id='".$path."'";
 				$ketentuan_jalur_rows = $dao->execute(0,$sql)->result_array();
-
 				$data['ketentuan_jalur_rows'] = $ketentuan_jalur_rows;				
-
 			}else if($tab_id==2){
-
 				$sql = "SELECT * FROM jadwal_kegiatan_pendaftaran WHERE thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND jalur_id='".$path."'
 						AND tipe_sklh_id='".$stage."'";
 				$jadwal_kegiatan_rows = $dao->execute(0,$sql)->result_array();
-
 				$data['jadwal_kegiatan_rows'] = $jadwal_kegiatan_rows;				
-
 			}else if($tab_id==3){
-
+				// no action
 			}
 			if($tab_id==4)
 			{
 
-				if(!is_null($this->session->userdata('nopes')) or $path=='5')
+				$availability = check_status_dateRange($kuota_jalur_row['tgl_buka'],$kuota_jalur_row['tgl_tutup']);
+				$data['availability'] = $availability;
+				if($availability=='on')
 				{
-					$bidang_kejuaraan_opts = "<option value=''></option>";
-
-					if($path!='5' or ($path=='5' and is_null($this->session->userdata('nopes'))))
+					if(!is_null($this->session->userdata('nopes')) or $path=='5')
 					{
-						$sql = "SELECT a.status,b.* FROM pengaturan_dokumen_persyaratan as a LEFT JOIN ref_dokumen_persyaratan as b ON (a.dokumen_id=b.ref_dokumen_id) 
-								WHERE thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND jalur_id='".$path."'";
-						$dokumen_persyaratan_rows = $dao->execute(0,$sql)->result_array();
-						$data['dokumen_persyaratan_rows'] = $dokumen_persyaratan_rows;											
-					}
+						$bidang_kejuaraan_opts = "<option value=''></option>";
 
-					if(!is_null($this->session->userdata('nopes'))){
-						$nopes = $this->session->userdata('nopes');
-
-						$sql = "SELECT a.mode_un,a.tpt_lahir,a.tgl_lahir,a.nm_orang_tua,a.nil_bhs_indonesia,
-								a.nil_bhs_inggris,a.nil_matematika,a.nil_ipa,a.tot_nilai,a.dt2_id,
-								a.status,a.no_pendaftaran,b.dt2_kd
-								FROM pendaftaran as a 
-								LEFT JOIN (SELECT dt2_id,dt2_kd FROM ref_dt2) as b ON (a.dt2_id=b.dt2_id)
-								WHERE a.id_pendaftaran='".$nopes."'";
-						
-						
-						$peserta_row = $dao->execute(0,$sql)->row_array();
-						$status_peserta = trim($peserta_row['status']);
-					}
-
-					$row = $dao->execute(0,"SELECT * FROM ketentuan_berlaku")->row_array();
-					$data['ketentuan_berlaku'] = $row['deskripsi'];
-
-					if($path!='5')
-					{
-
-						if($status_peserta=='0')
+						if($path!='5' or ($path=='5' and is_null($this->session->userdata('nopes'))))
 						{
-							
-							$pengaturan_dt2_sekolah_rows = array();
-							
-							if($kuota_jalur_row['lintas_dt2']=='2')
-							{
-								$sql = "SELECT dt2_id as dt2_sekolah_id,nama_dt2 FROM ref_dt2";
-								$pengaturan_dt2_sekolah_rows = $dao->execute(0,$sql)->result_array();
-							}
-							
-							$sql = "SELECT * FROM ref_kecamatan WHERE dt2_id='".$peserta_row['dt2_kd']."'";
-							$kecamatan_rows = $dao->execute(0,$sql)->result_array();							
-
-							$sql = "SELECT sekolah_id,nama_sekolah FROM sekolah WHERE dt2_id='".$this->session->userdata('id_dt2')."' AND tipe_sekolah_id='".$stage."'";
-							$sekolah_rows = $dao->execute(0,$sql)->result_array();
-
-							$data['peserta_row'] = $peserta_row;
-							$data['pengaturan_dt2_sekolah_rows'] = $pengaturan_dt2_sekolah_rows;
-							$data['kecamatan_rows'] = $kecamatan_rows;
-							$data['sekolah_rows'] = $sekolah_rows;
-
-							if($path==4){
-								$tingkat_kejuaraan_rows = $dao->execute(0,"SELECT * FROM ref_tingkat_kejuaraan")->result_array();
-								$bidang_kejuaraan_rows = $dao->execute(0,"SELECT * FROM ref_bidang_kejuaraan")->result_array();					
-
-								foreach($bidang_kejuaraan_rows as $row){
-									$bidang_kejuaraan_opts .= "<option value='".$row['ref_bdg_kejuaraan_id']."'>".$row['bidang_kejuaraan']."</option>";
-								}
-
-								$data['tingkat_kejuaraan_rows'] = $tingkat_kejuaraan_rows;
-								$data['tingkat_kejuaraan_rows'] = $tingkat_kejuaraan_rows;					
-							}
-							
-							$input_arr = array('nopes'=>$this->session->userdata('nopes'),'nama'=>$this->session->userdata('nama'),
-											   'jk'=>($this->session->userdata('jk')=='L'?'Laki-laki':'Perempuan'),'sklh_asal'=>$this->session->userdata('sklh_asal'),
-											   'tpt_lahir'=>$peserta_row['tpt_lahir'],'tgl_lahir'=>indo_date_format($peserta_row['tgl_lahir'],'shortDate'),
-											   'alamat'=>$this->session->userdata('alamat'),'nm_dt2'=>$this->session->userdata('nm_dt2'),
-											   'nil_bhs_indonesia'=>$peserta_row['nil_bhs_indonesia'],
-											   'nil_bhs_inggris'=>$peserta_row['nil_bhs_inggris'],'nil_matematika'=>$peserta_row['nil_matematika'],
-											   'nil_ipa'=>$peserta_row['nil_ipa'],
-											   'tot_nilai'=>$peserta_row['tot_nilai']);
-
-							
-							$data['input_arr'] = $input_arr;
-							$data['input_rule'] = 'readonly';
-
-
-						}
-						else
-						{
-
-							$data = $this->prepare_registration_data($nopes);
+							$sql = "SELECT a.status,b.* FROM pengaturan_dokumen_persyaratan as a LEFT JOIN ref_dokumen_persyaratan as b ON (a.dokumen_id=b.ref_dokumen_id) 
+									WHERE thn_pelajaran='".$this->_SYS_PARAMS[0]."' AND jalur_id='".$path."'";
+							$dokumen_persyaratan_rows = $dao->execute(0,$sql)->result_array();
+							$data['dokumen_persyaratan_rows'] = $dokumen_persyaratan_rows;											
 						}
 
-						$view = $status_peserta=='0'?$this->tabs_view[$tab_id]:$this->tabs_view[8];
+						if(!is_null($this->session->userdata('nopes'))){
+							$nopes = $this->session->userdata('nopes');
 
-					}else{
-
-						if(is_null($this->session->userdata('nopes')))
-						{
-							$input_arr = array('nopes'=>'','nama'=>'','jk'=>'','sklh_asal'=>'','tpt_lahir'=>'',
-											   'tgl_lahir'=>'','alamat'=>'','nm_dt2'=>'',
-											   'nil_bhs_indonesia'=>'','nil_bhs_inggris'=>'','nil_matematika'=>'','nil_ipa'=>'',
-											   'tot_nilai'=>'');
-
-							if($path=='5'){								
-								$sql = "SELECT dt2_id as dt2_sekolah_id,nama_dt2 FROM ref_dt2";
-								$pengaturan_dt2_sekolah_rows = $dao->execute(0,$sql)->result_array();
-							}else{
-								$pengaturan_dt2_sekolah_rows = array();
-							}
-
-							$data['input_arr'] = $input_arr;
-							$data['input_rule'] = 'required';
+							$sql = "SELECT a.mode_un,a.tpt_lahir,a.tgl_lahir,a.nm_orang_tua,a.nil_bhs_indonesia,
+									a.nil_bhs_inggris,a.nil_matematika,a.nil_ipa,a.tot_nilai,a.dt2_id,
+									a.status,a.no_pendaftaran,b.dt2_kd
+									FROM pendaftaran as a 
+									LEFT JOIN (SELECT dt2_id,dt2_kd FROM ref_dt2) as b ON (a.dt2_id=b.dt2_id)
+									WHERE a.id_pendaftaran='".$nopes."'";
 							
-							$data['pengaturan_dt2_sekolah_rows'] = $pengaturan_dt2_sekolah_rows;
-							$data['sekolah_rows'] = array();
-						}else{
+							
+							$peserta_row = $dao->execute(0,$sql)->row_array();
+							$status_peserta = trim($peserta_row['status']);
+						}
+
+						$row = $dao->execute(0,"SELECT * FROM ketentuan_berlaku")->row_array();
+						$data['ketentuan_berlaku'] = $row['deskripsi'];
+
+						if($path!='5')
+						{
 
 							if($status_peserta=='0')
 							{
-								$data['warning'] = 'Jalur ini hanya diperuntukkan untuk peserta yang belum terdaftar!';
-								$view = 'warning';
-							}else{
+								
+								$pengaturan_dt2_sekolah_rows = array();
+								
+								if($kuota_jalur_row['lintas_dt2']=='2')
+								{
+									$sql = "SELECT dt2_id as dt2_sekolah_id,nama_dt2 FROM ref_dt2";
+									$pengaturan_dt2_sekolah_rows = $dao->execute(0,$sql)->result_array();
+								}
+								
+								$sql = "SELECT * FROM ref_kecamatan WHERE dt2_id='".$peserta_row['dt2_kd']."'";
+								$kecamatan_rows = $dao->execute(0,$sql)->result_array();							
+
+								$sql = "SELECT sekolah_id,nama_sekolah FROM sekolah WHERE dt2_id='".$this->session->userdata('id_dt2')."' AND tipe_sekolah_id='".$stage."'";
+								$sekolah_rows = $dao->execute(0,$sql)->result_array();
+
+								$data['peserta_row'] = $peserta_row;
+								$data['pengaturan_dt2_sekolah_rows'] = $pengaturan_dt2_sekolah_rows;
+								$data['kecamatan_rows'] = $kecamatan_rows;
+								$data['sekolah_rows'] = $sekolah_rows;
+
+								if($path==4){
+									$tingkat_kejuaraan_rows = $dao->execute(0,"SELECT * FROM ref_tingkat_kejuaraan")->result_array();
+									$bidang_kejuaraan_rows = $dao->execute(0,"SELECT * FROM ref_bidang_kejuaraan")->result_array();					
+
+									foreach($bidang_kejuaraan_rows as $row){
+										$bidang_kejuaraan_opts .= "<option value='".$row['ref_bdg_kejuaraan_id']."'>".$row['bidang_kejuaraan']."</option>";
+									}
+
+									$data['tingkat_kejuaraan_rows'] = $tingkat_kejuaraan_rows;
+									$data['tingkat_kejuaraan_rows'] = $tingkat_kejuaraan_rows;					
+								}
+								
+								$input_arr = array('nopes'=>$this->session->userdata('nopes'),'nama'=>$this->session->userdata('nama'),
+												   'jk'=>($this->session->userdata('jk')=='L'?'Laki-laki':'Perempuan'),'sklh_asal'=>$this->session->userdata('sklh_asal'),
+												   'tpt_lahir'=>$peserta_row['tpt_lahir'],'tgl_lahir'=>indo_date_format($peserta_row['tgl_lahir'],'shortDate'),
+												   'alamat'=>$this->session->userdata('alamat'),'nm_dt2'=>$this->session->userdata('nm_dt2'),
+												   'nil_bhs_indonesia'=>$peserta_row['nil_bhs_indonesia'],
+												   'nil_bhs_inggris'=>$peserta_row['nil_bhs_inggris'],'nil_matematika'=>$peserta_row['nil_matematika'],
+												   'nil_ipa'=>$peserta_row['nil_ipa'],
+												   'tot_nilai'=>$peserta_row['tot_nilai']);
+
+								
+								$data['input_arr'] = $input_arr;
+								$data['input_rule'] = 'readonly';
+
+
+							}
+							else
+							{
+
 								$data = $this->prepare_registration_data($nopes);
-								$view = $this->tabs_view[8];
+							}
+
+							$view = $status_peserta=='0'?$this->tabs_view[$tab_id]:$this->tabs_view[8];
+
+						}else{
+
+							if(is_null($this->session->userdata('nopes')))
+							{
+								$input_arr = array('nopes'=>'','nama'=>'','jk'=>'','sklh_asal'=>'','tpt_lahir'=>'',
+												   'tgl_lahir'=>'','alamat'=>'','nm_dt2'=>'',
+												   'nil_bhs_indonesia'=>'','nil_bhs_inggris'=>'','nil_matematika'=>'','nil_ipa'=>'',
+												   'tot_nilai'=>'');
+
+								if($path=='5'){								
+									$sql = "SELECT dt2_id as dt2_sekolah_id,nama_dt2 FROM ref_dt2";
+									$pengaturan_dt2_sekolah_rows = $dao->execute(0,$sql)->result_array();
+								}else{
+									$pengaturan_dt2_sekolah_rows = array();
+								}
+
+								$data['input_arr'] = $input_arr;
+								$data['input_rule'] = 'required';
+								
+								$data['pengaturan_dt2_sekolah_rows'] = $pengaturan_dt2_sekolah_rows;
+								$data['sekolah_rows'] = array();
+							}else{
+
+								if($status_peserta=='0')
+								{
+									$data['warning'] = 'Jalur ini hanya diperuntukkan untuk peserta yang belum terdaftar!';
+									$view = 'warning';
+								}else{
+									$data = $this->prepare_registration_data($nopes);
+									$view = $this->tabs_view[8];
+								}
 							}
 						}
+						
+						$sql = "SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'";
+								$dt2_rows = $dao->execute(0,$sql)->result_array();
+						$data['dt2_rows'] = $dt2_rows;
+
+						$data['bidang_kejuaraan_opts'] = $bidang_kejuaraan_opts;
+
+					}else{
+						$data['warning'] = 'Silahkan login untuk melakukan pendaftaran!';
+						$view = "warning";					
 					}
-					
-					$sql = "SELECT * FROM ref_dt2 WHERE provinsi_id='".$this->_SYS_PARAMS[1]."'";
-							$dt2_rows = $dao->execute(0,$sql)->result_array();
-					$data['dt2_rows'] = $dt2_rows;
-
-					$data['bidang_kejuaraan_opts'] = $bidang_kejuaraan_opts;
-
-				}else{
-					$data['warning'] = 'Silahkan login untuk melakukan pendaftaran!';
-					$view = "warning";					
 				}
 			}else if($tab_id==5){
 
@@ -345,7 +351,86 @@
 				$data['kompetensi_dao'] = $kompetensi_dao;
 				$data['tipe_sekolah'] = $jalur_row['tipe_sekolah_id'];
 
-			}else if($tab_id==6){
+			}else if($tab_id==6){								
+
+				$this->global_model->reinitialize_dao();
+				$dao = $this->global_model->get_dao();			
+
+				$sql = "SELECT (SELECT COUNT(1) FROM pendaftaran_jalur_pilihan as x WHERE x.jalur_id=a.ref_jalur_id) as n_pendaftaran, 
+						(SELECT SUM(jumlah_kuota) FROM pengaturan_kuota_jalur as y WHERE y.jalur_id=a.ref_jalur_id) as n_kuota
+						FROM ref_jalur_pendaftaran as a WHERE a.ref_jalur_id=?";
+
+				$dao->set_sql_with_params($sql);
+				
+				$labelChart = "[";
+				$dataChart = "[";
+				$s = false;
+				foreach($this->jalur_pendaftaran_arr as $key=>$val){
+					$params = array($key);
+					$dao->set_sql_params($params);
+					$row = $dao->execute(1)->row_array();
+
+
+					$ratio = ($row['n_kuota']>0?$row['n_pendaftaran']/$row['n_kuota']*100:0);
+					$labelChart .= ($s?",":"")."'".$val."'";
+					$dataChart .= ($s?",":"").number_format($ratio,3,'.',',');
+					$s = true;
+				}
+
+				$labelChart .= "]";
+				$dataChart .= "]";
+				$data['labelChart'] = $labelChart;
+				$data['dataChart'] = $dataChart;
+
+				$jenis_kuota = '';
+                switch($path){
+                	case '1':$jenis_kuota='domisili';break;
+                	case '2':$jenis_kuota='afirmasi';break;
+                	case '3':$jenis_kuota='akademik';break;
+                	case '4':$jenis_kuota='prestasi';break;
+                	case '5':$jenis_kuota='khusus';break;
+                }
+
+				$sql = "SELECT SUM(CASE WHEN a.tipe_sekolah=? THEN kuota_".$jenis_kuota." else 0 END) as tot_kuota 
+						FROM
+						(SELECT sekolah_id,kuota_".$jenis_kuota.",'1' AS tipe_sekolah FROM pengaturan_kuota_sma 
+						WHERE thn_pelajaran=?
+						UNION
+						SELECT DISTINCT sekolah_id, SUM(kuota_".$jenis_kuota.") AS kuota_".$jenis_kuota.", '2' AS tipe_sekolah FROM pengaturan_kuota_smk 
+						WHERE thn_pelajaran=? 
+						GROUP BY sekolah_id) AS a";
+				
+				
+				$this->global_model->reinitialize_dao();
+				$dao1 = $this->global_model->get_dao();
+				$dao1->set_sql_with_params($sql);
+
+				$sql = "SELECT COUNT(1) as tot_pendaftar FROM pendaftaran_jalur_pilihan WHERE jalur_id='".$path."' AND tipe_sekolah_id=?";
+				$this->global_model->reinitialize_dao();
+				$dao2 = $this->global_model->get_dao();
+				$dao2->set_sql_with_params($sql);
+
+				$kuota_sekolah = array();
+				$pendaftar_sekolah = array();
+
+				foreach($this->tipe_sekolah_arr as $key=>$val){
+					
+					$params1 = array($key,$this->_SYS_PARAMS[0],$this->_SYS_PARAMS[0]);
+					$dao1->set_sql_params($params1);
+					$row1 = $dao1->execute(1)->row_array();
+
+					$params2 = array($key);
+					$dao2->set_sql_params($params2);
+					$row2 = $dao2->execute(1)->row_array();
+
+                    $kuota_sekolah[$key] = $row1['tot_kuota'];
+                    $pendaftar_sekolah[$key] = $row2['tot_pendaftar'];
+				}
+
+				$data['tipe_sekolah_arr'] = $this->tipe_sekolah_arr;
+				$data['kuota_sekolah'] = $kuota_sekolah;
+				$data['pendaftar_sekolah'] = $pendaftar_sekolah;
+
 
 			}else if($tab_id==7){
 
@@ -373,27 +458,32 @@
 
                     $kuota_sekolah[$key] = $row['tot_kuota'];
 				}
-
 				
 				if($stage=='1'){
-					$sub_select = "SELECT sekolah_id,jml_rombel,jml_kuota FROM pengaturan_kuota_sma WHERE thn_pelajaran='".$this->_SYS_PARAMS[0]."'";
+					$sub_select = "SELECT * FROM pengaturan_kuota_sma WHERE thn_pelajaran='".$this->_SYS_PARAMS[0]."'";
 				}else{
-					$sub_select = "SELECT DISTINCT sekolah_id,SUM(jml_rombel) as jml_rombel,SUM(jml_kuota) as jml_kuota FROM pengaturan_kuota_smk 
-							WHERE thn_pelajaran='".$this->_SYS_PARAMS[0]."' GROUP BY sekolah_id";
+					$sub_select = "SELECT DISTINCT sekolah_id,SUM(jml_rombel) as jml_rombel,
+								  SUM(kuota_domisili) as kuota_domisili,
+								  SUM(kuota_afirmasi) as kuota_afirmasi,
+								  SUM(kuota_akademik) as kuota_akademik,
+								  SUM(kuota_prestasi) as kuota_prestasi,
+								  SUM(kuota_khusus) as kuota_khusus,
+								  SUM(jml_kuota) as jml_kuota 
+								  FROM pengaturan_kuota_smk 
+								  WHERE thn_pelajaran='".$this->_SYS_PARAMS[0]."' GROUP BY sekolah_id";
 				}
 
-				$sql = "SELECT b.*,a.jml_rombel,a.jml_kuota FROM (".$sub_select.") as a 
+				$sql = "SELECT *,(SELECT COUNT(1) FROM pendaftaran_sekolah_pilihan as x WHERE x.sekolah_id=a.sekolah_id AND x.jalur_id='".$path."') as tot_pendaftar 
+						FROM (".$sub_select.") as a 
 						INNER JOIN (SELECT x.sekolah_id,x.nama_sekolah,x.alamat,y.nama_dt2 FROM sekolah as x 
 									LEFT JOIN ref_dt2 as y ON (x.dt2_id=y.dt2_id) WHERE x.tipe_sekolah_id='".$stage."') as b 
 						ON (a.sekolah_id=b.sekolah_id)";
-				
 
 				$pengaturan_kuota_sekolah_rows = $dao->execute(0,$sql)->result_array();
 				
 				$data['kuota_sekolah'] = $kuota_sekolah;
 				$data['kuota_jalur'] = $kuota_jalur_row['persen_kuota'] * array_sum($kuota_sekolah)/100;
 				$data['pengaturan_kuota_sekolah_rows'] = $pengaturan_kuota_sekolah_rows;
-
 			}
 
 			$data['stage'] = $stage;
@@ -514,7 +604,7 @@
 
 		function submit_reg(){
 
-			$this->load->helper('date_helper');
+			$this->load->helper(array('date_helper','mix_helper'));
 
 			$this->load->model(array('pendaftaran_model','pendaftaran_dokumen_kelengkapan_model','pendaftaran_jalur_pilihan_model',
 									 'pendaftaran_sekolah_pilihan_model','pendaftaran_kompetensi_pilihan_model',
@@ -550,20 +640,29 @@
 			$tot_nilai = $this->input->post('input_tot_nilai');
 
 			$mode_un = $this->input->post('input_mode_un');
-
+			
 
 			//VALIDATING HERE
 
 			//check school/field chosen
 			$chosen = array();
 			$input_name = ($tipe_sekolah=='1'?'input_sekolah_tujuan':'input_kompetensi_tujuan');
-			for($i=1;$i<=$jml_sekolah;$i++){
 
-				$val = $this->input->post($input_name.$i);
-				if(!in_array($val,$chosen)){
-					$chosen[] = $val;
-				}else{
-					die('ERROR: '.($tipe_sekolah=='1'?'Sekolah':'Kompetensi').' pilihan harus berbeda');
+			$filled = 0;
+	   		for($i=1;$i<=$jml_sekolah;$i++){
+	   			$val = $this->input->post($input_name.$i);
+	   			$filled += ($val!=''?1:0);
+	   		}
+
+	   		if($filled>1){
+				for($i=1;$i<=$jml_sekolah;$i++)
+				{
+					$val = $this->input->post($input_name.$i);
+					if(!in_array($val,$chosen)){
+						$chosen[] = $val;
+					}else{
+						die('ERROR: '.($tipe_sekolah=='1'?'Sekolah':'Kompetensi').' pilihan harus berbeda');
+					}
 				}
 			}
 
@@ -587,6 +686,7 @@
 			$no_registrasi = $this->generate_regnumb($dt2_id,$tipe_sekolah,$jalur_pendaftaran);
 			$wkt_pendaftaran = date('Y-m-d H:i:s');
 			$no_seri = $this->generate_seri_numb($wkt_pendaftaran,$tipe_sekolah,$jalur_pendaftaran);
+			$passphrase = generatePassword(8);
 
 			//update pendaftaran
 			$m = $this->pendaftaran_model;
@@ -602,6 +702,8 @@
 			$m->set_status('1');
 			$m->set_no_pendaftaran($no_registrasi);
 			$m->set_no_seri($no_seri);
+			$m->set_passphrase($passphrase);
+			$m->set_show_passphrase('1');
 
 			if($jalur_pendaftaran!='5'){
 				$result = $dao->update($m,array('id_pendaftaran'=>$no_peserta));
@@ -636,8 +738,6 @@
 				$this->db->trans_rollback();
 				die('failed');
 			}
-
-
 
 
 			//insert pendaftaran_sekolah_pilihan
@@ -858,10 +958,12 @@
 			$data['tgl_pendaftaran'] = $x_wkt_pendaftaran[0];
 			$data['jam_pendaftaran'] = substr($x_wkt_pendaftaran[1],0,strlen($x_wkt_pendaftaran[1])-3);
 			$data['encoded_nopes'] = $encoded_nopes;
-
+			$data['show_passphrase'] = '1';
+			$data['passphrase'] = $passphrase;
+			
 			$this->load->view($this->active_controller.'/'.$this->tabs_view[8],$data);
 
-		}
+		}		
 
 		function upload_photo(){
 
@@ -942,7 +1044,7 @@
 			$dao = $this->global_model->get_dao();
 
 			$sql = "SELECT a.id_pendaftaran,a.nama,a.jk,a.sekolah_asal,
-					a.alamat,b.nama_kecamatan,c.nama_dt2,d.nama_jalur,
+					a.alamat,b.nama_kecamatan,c.nama_dt2,d.nama_jalur,a.passphrase,a.show_passphrase,
 					d.nama_tipe_sekolah,d.akronim,a.no_pendaftaran ,d.tipe_sekolah_id,
 					DATE_FORMAT(a.waktu_pendaftaran,'%Y-%m-%d') as tgl_pendaftaran,a.no_seri
 					FROM pendaftaran as a 
@@ -1002,6 +1104,8 @@
 			$data['tgl_pendaftaran'] = $registrasi_row['tgl_pendaftaran'];
 			$data['no_seri'] = $registrasi_row['no_seri'];
 			$data['encoded_nopes'] = $encoded_nopes;
+			$data['passphrase'] = $registrasi_row['passphrase'];
+			$data['show_passphrase'] = $registrasi_row['show_passphrase'];
 
 			return $data;
 		}
@@ -1026,7 +1130,7 @@
 			$decoded_nopes = base64_decode(urldecode($encoded_nopes));
 			
 			$data = $this->prepare_registration_data($decoded_nopes);			
-
+            $data['sys_params'] = $this->_SYS_PARAMS;
 			$this->load->view($this->active_controller.'/reg_data_print',$data);
 		}
 

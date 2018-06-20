@@ -29,8 +29,24 @@
 		<div class='col-lg-6 col-md-6'>
 			<table class='table table-bordered'>
 				<tbody>
-					<tr><td colspan='2'>Daya Tampung Jalur ".$nama_jalur."</td></tr>
-					<tr><td>".$kuota_jalur_row['persen_kuota']." % * TOTAL PENERIMAAN SISWA</td><td align='right'>".number_format($kuota_jalur)." Orang</td></tr>
+					<tr><td colspan='3'>Daya Tampung Jalur ".$nama_jalur." : 
+					<small>".$kuota_jalur_row['persen_kuota']." % * Total Penerimaan Siswa</small>
+					</td></tr>
+					<tr>";
+					foreach($tipe_sekolah_arr as $key=>$val){
+						echo "<td align='center'><b>".$val."</b></td>";
+					}					
+					echo "<td>Total</td></tr>
+					<tr>";
+					$total = 0;
+					foreach($tipe_sekolah_arr as $key=>$val){
+						$kuota = $kuota_jalur_row['persen_kuota']*$kuota_sekolah[$key]/100;
+						echo "<td align='right'>".number_format($kuota)." Orang</td>";
+						$total += $kuota;
+					}
+					echo "
+					<td align='right'>".number_format($total)." Orang</td>
+					</tr>					
 				</tbody>
 			</table>
 		</div>";
@@ -41,8 +57,12 @@
 			<table id="school-quota-table" class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
-						<td width="4%" align="center"><b>No.</b></td><td align="center"><b>Nama Sekolah</b></td><td align="center"><b>Alamat</b></td><td align="center"><b>Kab./Kota</b></td><td align="center"><b>Jml. Rombel</b></td>
-						<td align="center"><b>Jml. Diterima</b></td>
+						<td width="4%" align="center"><b>No.</b></td><td align="center"><b>Nama Sekolah</b></td>
+						<td align="center"><b>Alamat, Kab./Kota</b></td>						
+						<td align="center"><b>Rombel</b></td>
+						<td align="center"><b>Kapasitas</b></td>
+						<td align="center"><b>Kuota</b></td>
+						<td align="center"><b>Pendaftar</b></td>
 					</tr>
 				</thead>
 				<tbody>
@@ -50,13 +70,23 @@
 						$no = 0;
 						foreach($pengaturan_kuota_sekolah_rows as $row){
 							$no++;
+							$kuota = '';
+							switch($path){
+								case '1':$kuota = $row['kuota_domisili'];break;
+								case '2':$kuota = $row['kuota_afirmasi'];break;
+								case '3':$kuota = $row['kuota_akademik'];break;
+								case '4':$kuota = $row['kuota_prestasi'];break;
+								case '5':$kuota = $row['kuota_khusus'];break;
+							}
 							echo "<tr>
 							<td align='center'>".$no."</td>
 							<td>".$row['nama_sekolah']."</td>
-							<td>".$row['alamat']."</td>
-							<td>".$row['nama_dt2']."</td>
+							<td>".(empty($row['alamat'])?'-':'')."<br />
+							".$row['nama_dt2']."</td>							
 							<td align='right'>".number_format($row['jml_rombel'])."</td>
-							<td align='right'>".number_Format($row['jml_kuota'])."</td>
+							<td align='right'>".number_format($row['jml_kuota'])."</td>
+							<td align='right'>".number_format($kuota)."</td>
+							<td align='right'>".number_format($row['tot_pendaftar'])."</td>
 							</tr>";
 						}
 					?>
@@ -66,6 +96,7 @@
 	</div>
 
 </div>
+
 
 
 <script src="<?=$this->config->item("js_path");?>plugins/datatables/jquery.dataTables.min.js"></script>

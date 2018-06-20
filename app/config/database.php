@@ -74,15 +74,15 @@ $active_group = 'offline';
 $query_builder = TRUE;
 
 $db['offline'] = array(
-    'dsn'  => 'mysql:host=; dbname=ppdb_sulsel; charset=utf8;',
+    'dsn'  => 'mysql:host=localhost; dbname=ppdb_sulsel; charset=utf8;',
     'hostname' => 'localhost',
-    'username' => 'root',
-    'password' => 'headingtosuccess',
-    'database' => '',
+    'username' => 'u4201654_ppdb',
+    'password' => 'm4c800kpr0!!!',
+    'database' => 'ppdb_sulsel',
     'dbdriver' => 'pdo',
     'dbprefix' => '',
     'pconnect' => FALSE,
-    'db_debug' => FALSE,
+    'db_debug' => TRUE,
     'cache_on' => FALSE,
     'cachedir' => '' ,
     'char_set' => 'utf8',
@@ -97,9 +97,9 @@ $db['offline'] = array(
 
 $db['online'] = array(
     'dsn'  => 'mysql:host=; dbname=u4201654_ppdb; charset=utf8;',
-    'hostname' => '156.67.215.54',
+    'hostname' => 'localhost',
     'username' => 'u4201654_ppdb',
-    'password' => 'ppdbsulsel2018',
+    'password' => 'm4c800kpr0!!!',
     'database' => '',
     'dbdriver' => 'pdo',
     'dbprefix' => '',

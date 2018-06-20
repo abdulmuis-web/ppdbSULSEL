@@ -20,9 +20,24 @@
 		you can add as many as you like
 		-->
 		<div id="shortcut">
-			<ul>				
+
+			<ul>
 				<li>
-					<a href="<?=base_url()?>backoffice/account" class="jarvismetro-tile big-cubes selected bg-color-pinkDark"> <span class="iconbox"> <i class="fa fa-user fa-4x"></i> <span>My Account </span> </span> </a>
+					<a href="<?=base_url()?>config/account" class="jarvismetro-tile big-cubes selected bg-color-pinkDark" style="width:300px!important"> 
+						<span class="iconbox">
+							<?php
+							echo "
+							<table class='table'>
+							<tr><td align='left'>Username</td><td align='left'>: ".$this->session->userdata('username')."</td></tr>
+							<tr><td align='left'>Role</td><td align='left'>: ".$this->session->userdata('admin_type')."</td></tr>";
+							if($this->session->userdata('admin_type_id')=='3' or $this->session->userdata('admin_type_id')=='4'){
+								echo "<tr><td align='left'>Sekolah</td><td align='left'>: ".$this->session->userdata('nama_sekolah')."</td></tr>";
+							}
+							echo "</table>
+							";
+							?>
+						</span> 
+					</a>
 				</li>
 			</ul>
 		</div>

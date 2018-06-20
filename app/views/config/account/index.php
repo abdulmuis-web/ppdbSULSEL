@@ -67,24 +67,25 @@
 										<div class="form-group">
 											<label class="col-md-2 control-label">Username Baru</label>
 											<div class="col-md-4">
-												<input class="form-control" name="input_username" id="input_username" type="text">
-												<span class="help-block">Kosongkan jika tidak ingin mengganti</span>
+												<div class="input">
+													<input class="form-control" name="input_username" id="input_username" type="text">
+													<span class="help-block">Kosongkan jika tidak ingin mengganti</span>
+												</div>
 											</div>
 										</div>
 										
 										<div class="form-group">
 											<label class="col-md-2 control-label">Password Baru</label>
 											<div class="col-md-4">
-												<input class="form-control" type="password" name="input_password" id="input_password" required>												
+												<div class="input">
+													<input class="form-control" type="password" name="input_password" id="input_password" required>												
+												</div>
 											</div>
 										</div>
 
 										<div class="form-actions">
 											<div class="row">
-												<div class="col-md-6">
-													<div id="account-form-loader" align="left" style="display:none">
-														<img src="<?=$this->config->item('img_path');?>ajax-loaders/ajax-loader-1.gif"/> mohon tunggu sebentar ...														
-													</div>
+												<div class="col-md-6">													
 												</div>
 												<div class="col-md-6">													
 													<button class="btn btn-primary" type="submit">

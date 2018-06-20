@@ -1,4 +1,12 @@
-    
+    <style type="text/css">
+        .notify-message{
+            display:none;
+            color: red; 
+            font-weight: bold; 
+            font-size: 1.2em; 
+        }
+    </style>
+
     <!-- NAVIGATION -->
     
     <input type="hidden" id="baseUrl" value="<?=base_url();?>"/>
@@ -31,7 +39,15 @@
                     if(is_null($this->session->userdata('nopes')))
                         echo "<li><a href='#' data-toggle='modal' onclick=\"$('#login_nopes').val('-');$('#login_nopes').data('previousValue', null).valid();$('#login_nopes').val('')\" data-target='#loginModal'>Login</a></li>";
                     else
-                        echo "<li><a href='".base_url()."front/logout'>Logout</a></li>";
+                    {
+                        echo "
+                        <li><a href='#' class='highlighted'>
+                        ".$this->session->userdata('nopes')."
+                        </a></li>
+                        <li><a href='#' data-toggle='modal' data-target='#profilModal'><i class='fa fa-user' title='Lihat Profil'></i></a></li>
+                        <li><a href='".base_url()."front/logout' title='Logout'><i class='fa fa-sign-out'></i></a></li>
+                        ";
+                    }
                     ?>
 
     			</ul>
@@ -40,35 +56,33 @@
     </div>
     <!-- END NAVIGATIONS -->
 
-    <?php
-
-    
-    if(!is_null($this->session->userdata('nopes')) && $active_controller=='front')
-    {
-        if($this->session->userdata('gambar')==''){
-            $src = $this->config->item('img_path').'default_photo.png';
-        }else{
-            $src = $this->config->item('upload_path').'registration/'.$this->session->userdata('gambar');
-        }
-        echo "
-        <div class='login-info row'>
-            <div class='col-lg-3'>
-                <img src='".$src."' alt='Profil' width='80px'/>     
-
+    <!-- Detail Modal -->    
+   <div class="modal fade" id="profilModal" role="dialog">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Login</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <tbody>
+                            <?php
+                            echo "
+                            <tr><td>No. Peserta</td><td> : ".$this->session->userdata('nopes')."</td></tr>
+                            <tr><td>Nama</td><td> : ".$this->session->userdata('nama')."</td></tr>
+                            <tr><td>Alamat</td><td> : ".$this->session->userdata('alamat')."</td></tr>
+                            <tr><td>Kab./Kota</td><td> : ".$this->session->userdata('nm_dt2')."</td></tr>
+                            <tr><td>Sekolah Asal</td><td> : ".$this->session->userdata('sklh_asal')."</td></tr>";
+                            ?>
+                        </tbody>
+                    </table>
+                </div>            
             </div>
-            <div class='col-lg-9'>
-                <table border=0>
-                    <tr><td>Nama</td><td>: ".$this->session->userdata('nama')."</td></tr>
-                    <tr><td>Alamat</td><td>: ".$this->session->userdata('alamat')."</td></tr>
-                    <tr><td>Kota/Kab.</td><td>: ".$this->session->userdata('nm_dt2')."</td></tr>
-                    <tr><td>Sekolah Asal</td><td>: ".$this->session->userdata('sklh_asal')."</td></tr>
-                </table>                
-            </div>
-        </div>";
-    }
-    
+        </div>
+    </div>
 
-    ?>
     <!-- Login Modal -->
     <div class="modal fade" id="loginModal" role="dialog">
         <div class="modal-dialog modal-md">
@@ -87,11 +101,39 @@
                             </div>
                         </div>
                     </div>
+                    <!-- <div class="form-group">                        
+                        <div class="col-md-8 col-md-offset-4">
+                            <div class="input">                                
+                                <input type="checkbox" name="check_akses_pertama" onclick="control_input_password($(this).prop('checked'))" id="check_akses_pertama" value="1"/><label for="check_akses_pertama"><span></span> Akses Pertama</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" id="container_input_password">
+                        <label class="control-label col-md-4" for="login_password">Password</label>
+                        <div class="col-md-5">
+                            <div class="input">
+                                <input class="form-control" id="login_password" type="password" name="login_password" required>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="form-group">
+                        <label class="control-label col-md-4"></label>
+                        <div class="col-md-5">
+                            <?php                                 
+                                echo "<img id='captcha' src='".site_url()."front/securimage'/>                                
+                                <a href='#' onclick=\"document.getElementById('captcha').src = '".site_url()."front/securimage?'+Math.random();return false\">[ Different Image ]</a>
+                                <br />
+                                <input type='text' name='secure_code' id='secure_code' class='form-control'/>";
+                            ?>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <div class="row">
+
                         <div class="col-lg-6 col-md-6" align="left">
-                            <div id="login-notify" style="display:none"></div>
+                            <div id="login-notify" class="notify-message">
+                            </div>
                             <div id="login-loader" style="display:none">
                                 <img src="<?=$this->config->item('img_path');?>ajax-loaders/ajax-loader-1.gif"/> <b>Mohon tunggu ....</b>
                             </div>
@@ -195,14 +237,13 @@
                       url:$form.attr('action'),
                       data:$form.serialize(),
                       beforeSend:function(){    
+                        $loginNotify.html('');
+                        $loginNotify.hide();
                         $loginLoader.show();
                       },
                       success:function(data){
-                        
                         $loginLoader.hide();
-
                         error=/ERROR/;
-
                         if(data=='failed' || data.match(error))
                         {
                             if(data=='failed')
@@ -215,6 +256,7 @@
                             
                             $loginNotify.html(content_box);
                             $loginNotify.show();
+                            setTimeout("jQuery($loginNotify).fadeOut()", 10000);
                         }                        
 
                         if(data=='success')
@@ -225,4 +267,19 @@
                 }
             });
         });
+
+        function control_input_password(checked){
+            var $password = $('#login_password'),$container_password = $('#container_input_password');
+            if(checked){
+                $container_password.hide();
+                $password.attr('disabled',true);
+                $password.attr('required',false);
+            }else{
+                $container_password.show();
+                $password.attr('disabled',false);
+                $password.attr('required',true);
+            }
+
+        }
+
     </script>

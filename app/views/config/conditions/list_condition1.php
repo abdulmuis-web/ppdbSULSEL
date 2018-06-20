@@ -38,7 +38,7 @@
 	            	<i class='fa fa-edit'></i></a>&nbsp";
 
 	            	if($delete_access)
-	            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"if(confirm('Anda yakin?')){delete_record(this.id,'1')}\" id='delete2_".$no."'>";
+	            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"if(confirm('Anda yakin?')){delete_record(this.id,'1')}\" id='delete1_".$no."'>";
 	            	else
 	            		echo "<a href='#' title='Hapus' class='btn btn-xs btn-default' onclick=\"alert('anda tidak diijinkan untuk menghapus data!')\">";
 

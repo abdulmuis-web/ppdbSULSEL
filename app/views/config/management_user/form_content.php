@@ -8,6 +8,7 @@
 	<input type="hidden" name="id" value="<?=$id_value?>"/>
 	<input type="hidden" name="act" value="<?=$act?>"/>
 	<input type="hidden" id="baseUrl" value="<?=base_url()?>"/>
+	<input type="hidden" name="search_user_type" value="<?=$search_user_type;?>"/>
 <div class="modal-body">
 	<fieldset style="padding:15px;">
 		<div class="row">

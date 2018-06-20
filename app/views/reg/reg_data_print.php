@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>PPDB Online Prov. <?=$this->_SYS_PARAMS[2]." Tahun ".date('Y');?> | Data Registrasi</title>
+		<title>PPDB Online Prov. <?=$sys_params[2]." Tahun ".date('Y');?> | Data Registrasi</title>
 		<link rel="stylesheet" type="text/css" href="<?=$this->config->item('css_path');?>report-style.css"/>		
 		<style type="text/css">@import "<?=$this->config->item('css_path');?>report-table-style.css";</style>
 	</head>
